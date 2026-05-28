@@ -175,7 +175,7 @@ div.stButton > button {
 .white-footer-canvas {
     position: absolute;
     bottom: 0; left: 0; right: 0;
-    padding: 30px 0px;
+    padding: 150px 0px;
     display: flex;
     justify-content: center; 
     align-items: center;
