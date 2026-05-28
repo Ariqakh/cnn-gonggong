@@ -61,8 +61,9 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 }
 
 .app-logo-img {
-    width: 370px;  
-    height: 300px; 
+    width: 500px;
+    max-width: 100%;
+    height: auto;
 }
 .app-title-container {
     display: flex;
