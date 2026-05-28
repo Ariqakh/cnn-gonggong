@@ -199,20 +199,16 @@ def load_model():
     from keras.models import load_model
     from keras.layers import Dense, InputLayer
 
-    # PATCH Dense
     original_dense = Dense.from_config
 
-    @classmethod
     def custom_dense(cls, config):
         config.pop("quantization_config", None)
         return original_dense(config)
 
     Dense.from_config = custom_dense
 
-    # PATCH InputLayer
     original_input = InputLayer.from_config
 
-    @classmethod
     def custom_input(cls, config):
         config.pop("batch_shape", None)
         config.pop("optional", None)
@@ -226,6 +222,7 @@ def load_model():
     )
 
     return model
+
 model = load_model()
 
 classes = [
