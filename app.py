@@ -226,6 +226,7 @@ def load_model():
     )
 
     return model
+model = load_model()
 
 classes = [
     "Canarium Mutabile",
