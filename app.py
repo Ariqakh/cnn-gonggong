@@ -23,20 +23,15 @@ html, body, [data-testid="stAppViewContainer"] {
     height: 100%;
 }
 
-/* Memaksa kontainer dasar menggunakan tinggi penuh dan posisi relatif */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(180deg, #A7FFFF 0%, #D1FFFF 100%) !important;
     min-height: 100vh !important;
-    position: relative !important;
-    display: flex;
-    flex-direction: column;
 }
 
-/* Memberikan padding bawah yang cukup agar konten tidak tertimpa footer */
+/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
-    padding-bottom: 140px !important; 
-    flex: 1;
+    padding-bottom: 20px !important; 
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -137,7 +132,7 @@ div.stButton > button {
     width: 200px;
 }
 
-/* PERBAIKAN STRUKTUR HASIL PREDIKSI (DESKTOP) */
+/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -152,7 +147,7 @@ div.stButton > button {
     font-weight: 700;
     color: #0b1d3a;
     font-size: 18px;
-    min-width: 180px; /* Memastikan titik dua sejajar rapi */
+    min-width: 180px; 
     display: inline-block;
 }
 .result-value {
@@ -176,18 +171,15 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* PERBAIKAN TOTAL: FOOTER DIPAKSA DI PALING BAWAH MENTOK */
+/* PERBAIKAN POSISI FOOTER: Menggunakan pola flow relative + margin top agar berada stabil di paling bawah konten */
 .white-footer-canvas {
-    position: absolute !important;
-    bottom: 0 !important; 
-    left: 0 !important; 
-    right: 0 !important;
-    width: 100% !important;
-    padding: 40px 0px !important;
+    position: relative !important;
+    margin-top: 80px !important;
+    padding: 20px 0px !important;
     display: flex !important;
     justify-content: center !important; 
     align-items: center !important;
-    z-index: 99 !important;
+    width: 100% !important;
 }
 
 .footer-text {
@@ -287,7 +279,7 @@ div.stButton > button {
     }
     .result-label {
         font-size: 15px;
-        min-width: 135px; /* Menjaga teks label tetap sejajar rapi di mobile */
+        min-width: 135px; 
         margin-right: 0px;
     }
     .result-value {
@@ -297,7 +289,8 @@ div.stButton > button {
         margin-top: 25px; 
     }
     .white-footer-canvas { 
-        padding: 25px 0px !important;
+        margin-top: 50px !important;
+        padding: 15px 0px !important;
     }
     .footer-text {
         font-size: 11px;
