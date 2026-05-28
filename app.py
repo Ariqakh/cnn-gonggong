@@ -23,15 +23,20 @@ html, body, [data-testid="stAppViewContainer"] {
     height: 100%;
 }
 
+/* Memaksa kontainer dasar menggunakan tinggi penuh dan posisi relatif */
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(180deg, #A7FFFF 0%, #D1FFFF 100%) !important;
-    min-height: 100vh;
-    position: relative;
+    min-height: 100vh !important;
+    position: relative !important;
+    display: flex;
+    flex-direction: column;
 }
 
+/* Memberikan padding bawah yang cukup agar konten tidak tertimpa footer */
 [data-testid="stMain"] {
     background: transparent !important;
-    padding-bottom: 120px !important; /* Ruang agar konten tidak tertimpa footer */
+    padding-bottom: 140px !important; 
+    flex: 1;
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -171,14 +176,18 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* FOOTER PAS DI PALING BAWAH LAYAR */
+/* PERBAIKAN TOTAL: FOOTER DIPAKSA DI PALING BAWAH MENTOK */
 .white-footer-canvas {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    padding: 150px 0px;
-    display: flex;
-    justify-content: center; 
-    align-items: center;
+    position: absolute !important;
+    bottom: 0 !important; 
+    left: 0 !important; 
+    right: 0 !important;
+    width: 100% !important;
+    padding: 40px 0px !important;
+    display: flex !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    z-index: 99 !important;
 }
 
 .footer-text {
@@ -288,7 +297,7 @@ div.stButton > button {
         margin-top: 25px; 
     }
     .white-footer-canvas { 
-        padding: 20px 0px;
+        padding: 25px 0px !important;
     }
     .footer-text {
         font-size: 11px;
