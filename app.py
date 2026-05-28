@@ -25,18 +25,13 @@ html, body, [data-testid="stAppViewContainer"] {
 
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(180deg, #A7FFFF 0%, #D1FFFF 100%) !important;
+    min-height: 100vh;
+    position: relative;
 }
 
 [data-testid="stMain"] {
     background: transparent !important;
-    height: 100%;
-}
-
-/* Mengatur container utama agar footer mentok di bawah menggunakan flexbox */
-[data-testid="stMain"] > div {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+    padding-bottom: 120px !important; /* Memberikan ruang agar tidak tertimpa footer */
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -57,14 +52,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     color: #ffffff;
     font-size: 20px;
     font-weight: 600;
-}
-
-.page-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    margin-top: 100px;
-    padding-bottom: 40px;
 }
 
 .app-header {
@@ -124,11 +111,24 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
+/* KUSTOMISASI KOTAK UPLOAD FILE */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
     border-radius: 30px !important;
-    padding: 15px !important;
+    padding: 25px 15px !important;
+}
+[data-testid="stFileUploader"] section > input + div {
+    display: none !important; /* Sembunyikan teks default Streamlit */
+}
+[data-testid="stFileUploader"] section::after {
+    content: "Upload file JPG, PNG";
+    font-size: 16px;
+    font-weight: 600;
+    color: #555555;
+    display: block;
+    text-align: center;
+    cursor: pointer;
 }
 
 div.stButton > button {
@@ -144,22 +144,23 @@ div.stButton > button {
     width: 200px;
 }
 
-/* Desain baru tampilan hasil prediksi yang rapi */
-.result-container {
+/* PERBAIKAN TAMPILAN HASIL PREDIKSI AGAR RAPI SEJAJAR */
+.result-box {
     background-color: #87D4D4;
     border-radius: 20px;
-    padding: 25px;
-    margin-top: 30px;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    row-gap: 15px;
-    column-gap: 15px;
+    padding: 20px 25px;
+    margin-top: 20px;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
 }
 .result-label {
     font-weight: 700;
     color: #0b1d3a;
     font-size: 18px;
+    min-width: 160px; /* Mengunci lebar teks label agar tanda hubung/titik dua sejajar */
+    display: inline-block;
 }
 .result-value {
     font-weight: 700;
@@ -170,22 +171,30 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 15px;
+    padding: 10px;
     border-radius: 15px;
-    font-size: 14px;
-    margin-bottom: 15px;
+    font-size: 13px;
+    margin-bottom: 10px;
     font-weight: 600;
 }
 
-/* Footer dipaksa mentok ke batas paling bawah halaman */
+.page-wrapper {
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+/* FOOTER MENTOK PALING BAWAH HALAMAN */
 .white-footer-canvas {
-    margin-top: auto;
-    width: 100%;
-    padding: 40px 20px;
+    position: absolute;
+    bottom: 0; 
+    left: 0; 
+    right: 0;
+    padding: 30px 0px;
+    background: transparent;
     display: flex;
     justify-content: center; 
     align-items: center;
-    background: transparent;
+    z-index: 10;
 }
 
 .footer-text {
@@ -194,6 +203,7 @@ div.stButton > button {
     font-size: 14px;
     font-weight: 500;
     line-height: 1.5;
+    margin: 0 auto;
 }
 
 /* RESPONSIVE MOBILE OPTIMIZATION */
@@ -205,13 +215,11 @@ div.stButton > button {
     .navbar-title {
         font-size: 14px;
     }
-    .page-wrapper {
-        margin-top: 75px;
-    }
     .app-header {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+        margin-top: 40px;
     }
     .app-logo-img { 
         width: 180px; 
@@ -227,32 +235,35 @@ div.stButton > button {
         height: 220px; 
         margin: 20px auto;
     }
+    [data-testid="stFileUploader"] section {
+        padding: 20px 10px !important;
+    }
+    [data-testid="stFileUploader"] section::after {
+        font-size: 14px;
+    }
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
         padding: 15px 20px !important;
     }
-    .result-container {
-        grid-template-columns: 1fr;
-        row-gap: 8px;
-        padding: 20px;
-        margin-top: 20px;
+    .result-box {
+        padding: 15px;
+        margin-top: 15px;
+        flex-direction: row; /* Tetap horizontal di HP agar sejajar */
+        justify-content: flex-start;
     }
     .result-label {
         font-size: 15px;
-        margin-bottom: -4px;
+        min-width: 130px; /* Lebar label disesuaikan untuk layar HP */
     }
     .result-value {
-        font-size: 17px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid rgba(11, 29, 58, 0.15);
+        font-size: 15px;
     }
-    .result-value:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
+    .page-wrapper { 
+        margin-top: 25px; 
     }
     .white-footer-canvas { 
-        padding: 30px 15px;
+        padding: 20px 0px;
     }
     .footer-text {
         font-size: 11px;
@@ -344,6 +355,7 @@ st.markdown(f"""
     </div>
     <span class="navbar-title">Universitas Maritim Raja Ali Haji</span>
 </div>
+<div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
@@ -413,15 +425,16 @@ if analyze_clicked:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
 st.markdown(f"""
-<div class='result-container'>
-    <div class='result-label'>Jenis Gonggong :</div>
-    <div class='result-value'>{predicted_class}</div>
-    <div class='result-label'>Tingkat Akurasi :</div>
-    <div class='result-value'>{confidence_text}</div>
+<div class='result-box'>
+    <span class='result-label'>Jenis Gonggong :</span>
+    <span class='result-value'>{predicted_class}</span>
+</div>
+<div class='result-box'>
+    <span class='result-label'>Tingkat Akurasi :</span>
+    <span class='result-value'>{confidence_text}</span>
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True) 
 st.markdown("</div>", unsafe_allow_html=True) 
 
 st.markdown("""
@@ -432,3 +445,5 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+st.markdown("</div>", unsafe_allow_html=True)
