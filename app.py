@@ -20,6 +20,7 @@ html, body, [data-testid="stAppViewContainer"] {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
+    height: 100%;
 }
 
 [data-testid="stAppViewContainer"] {
@@ -28,6 +29,14 @@ html, body, [data-testid="stAppViewContainer"] {
 
 [data-testid="stMain"] {
     background: transparent !important;
+    height: 100%;
+}
+
+/* Mengatur container utama agar footer mentok di bawah menggunakan flexbox */
+[data-testid="stMain"] > div {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -50,6 +59,13 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 600;
 }
 
+.page-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    margin-top: 100px;
+    padding-bottom: 40px;
+}
 
 .app-header {
     display: flex;
@@ -128,21 +144,22 @@ div.stButton > button {
     width: 200px;
 }
 
-.result-box {
+/* Desain baru tampilan hasil prediksi yang rapi */
+.result-container {
     background-color: #87D4D4;
     border-radius: 20px;
-    padding: 20px 20px;
+    padding: 25px;
     margin-top: 30px;
-    text-align: left;
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    row-gap: 15px;
+    column-gap: 15px;
     align-items: center;
 }
 .result-label {
     font-weight: 700;
     color: #0b1d3a;
     font-size: 18px;
-    margin-right: 5px;
 }
 .result-value {
     font-weight: 700;
@@ -153,25 +170,22 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 10px;
+    padding: 15px;
     border-radius: 15px;
-    font-size: 13px;
-    margin-bottom: 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
     font-weight: 600;
 }
 
-.page-wrapper {
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-}
-
+/* Footer dipaksa mentok ke batas paling bawah halaman */
 .white-footer-canvas {
-    position: relative;
-    bottom: 0; left: 0; right: 0;
-    padding: 150px 0px;
+    margin-top: auto;
+    width: 100%;
+    padding: 40px 20px;
     display: flex;
     justify-content: center; 
     align-items: center;
+    background: transparent;
 }
 
 .footer-text {
@@ -180,7 +194,6 @@ div.stButton > button {
     font-size: 14px;
     font-weight: 500;
     line-height: 1.5;
-    margin: 0 auto;
 }
 
 /* RESPONSIVE MOBILE OPTIMIZATION */
@@ -192,11 +205,13 @@ div.stButton > button {
     .navbar-title {
         font-size: 14px;
     }
+    .page-wrapper {
+        margin-top: 75px;
+    }
     .app-header {
         flex-direction: column;
         gap: 15px;
         text-align: center;
-        margin-top: 40px;
     }
     .app-logo-img { 
         width: 180px; 
@@ -217,22 +232,27 @@ div.stButton > button {
         font-size: 18px !important;
         padding: 15px 20px !important;
     }
-    .result-box {
-        padding: 15px;
-        margin-top: 15px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
+    .result-container {
+        grid-template-columns: 1fr;
+        row-gap: 8px;
+        padding: 20px;
+        margin-top: 20px;
     }
-    .result-label, .result-value {
+    .result-label {
         font-size: 15px;
+        margin-bottom: -4px;
     }
-    .page-wrapper { 
-        margin-top: 25px; 
+    .result-value {
+        font-size: 17px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(11, 29, 58, 0.15);
+    }
+    .result-value:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
     }
     .white-footer-canvas { 
-        margin-top: 40px; 
-        padding: 60px 0px;
+        padding: 30px 15px;
     }
     .footer-text {
         font-size: 11px;
@@ -324,7 +344,6 @@ st.markdown(f"""
     </div>
     <span class="navbar-title">Universitas Maritim Raja Ali Haji</span>
 </div>
-<div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
@@ -394,16 +413,15 @@ if analyze_clicked:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
 st.markdown(f"""
-<div class='result-box'>
-    <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{predicted_class}</span>
-</div>
-<div class='result-box'>
-    <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{confidence_text}</span>
+<div class='result-container'>
+    <div class='result-label'>Jenis Gonggong :</div>
+    <div class='result-value'>{predicted_class}</div>
+    <div class='result-label'>Tingkat Akurasi :</div>
+    <div class='result-value'>{confidence_text}</div>
 </div>
 """, unsafe_allow_html=True)
 
+st.markdown("</div>", unsafe_allow_html=True) 
 st.markdown("</div>", unsafe_allow_html=True) 
 
 st.markdown("""
@@ -414,5 +432,3 @@ st.markdown("""
     </div>
 </div>
 """, unsafe_allow_html=True)
-
-st.markdown("</div>", unsafe_allow_html=True)
