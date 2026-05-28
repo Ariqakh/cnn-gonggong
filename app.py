@@ -194,9 +194,9 @@ div.stButton > button {
 """, unsafe_allow_html=True)
 
 @st.cache_resource
-def load_model():
+def load_my_model():
 
-    from keras.models import load_model
+    from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer
 
     original_dense = Dense.from_config
@@ -216,14 +216,14 @@ def load_model():
 
     InputLayer.from_config = custom_input
 
-    model = load_model(
+    model = keras_load_model(
         "model_gonggong.h5",
         compile=False
     )
 
     return model
 
-model = load_model()
+model = load_my_model()
 
 classes = [
     "Canarium Mutabile",
