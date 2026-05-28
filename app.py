@@ -225,7 +225,10 @@ def load_my_model():
         config.pop("batch_shape", None)
         config.pop("optional", None)
 
-        return original_input(config)
+        if "batch_input_shape" not in config:
+            config["batch_input_shape"] = [None, 224, 224, 3]
+
+        return cls(**config)
 
     InputLayer.from_config = custom_input
 
