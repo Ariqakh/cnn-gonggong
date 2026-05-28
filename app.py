@@ -183,12 +183,60 @@ div.stButton > button {
     margin: 0 auto;
 }
 
+/* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .app-title-main { font-size: 22px; }
-    .app-logo-img { width: 75px; height: 75px; }
-    .img-preview-container { height: 220px; }
-    .page-wrapper { margin-top: 25px; }
-    .white-footer-canvas { margin-top: 80px; }
+    .navbar {
+        padding: 15px 15px;
+        gap: 8px;
+    }
+    .navbar-title {
+        font-size: 14px;
+    }
+    .app-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        margin-top: 40px;
+    }
+    .app-logo-img { 
+        width: 180px; 
+        height: auto; 
+    }
+    .app-title-main { 
+        font-size: 32px; 
+    }
+    .app-subtitle-main {
+        font-size: 12px;
+    }
+    .img-preview-container { 
+        height: 220px; 
+        margin: 20px auto;
+    }
+    div.stButton > button {
+        width: 100% !important;
+        font-size: 18px !important;
+        padding: 15px 20px !important;
+    }
+    .result-box {
+        padding: 15px;
+        margin-top: 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    .result-label, .result-value {
+        font-size: 15px;
+    }
+    .page-wrapper { 
+        margin-top: 25px; 
+    }
+    .white-footer-canvas { 
+        margin-top: 40px; 
+        padding: 60px 0px;
+    }
+    .footer-text {
+        font-size: 11px;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -367,4 +415,4 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True) 
+st.markdown("</div>", unsafe_allow_html=True)
