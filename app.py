@@ -196,26 +196,56 @@ div.stButton > button {
 @st.cache_resource
 def load_my_model():
 
+    import tensorflow as tf
     from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer
+    from keras.layers import Dense, InputLayer, Dropout
 
+    # =========================
+    # PATCH Dense
+    # =========================
     original_dense = Dense.from_config
 
+    @classmethod
     def custom_dense(cls, config):
+
         config.pop("quantization_config", None)
+
         return original_dense(config)
 
     Dense.from_config = custom_dense
 
+    # =========================
+    # PATCH InputLayer
+    # =========================
     original_input = InputLayer.from_config
 
+    @classmethod
     def custom_input(cls, config):
+
         config.pop("batch_shape", None)
         config.pop("optional", None)
+
         return original_input(config)
 
     InputLayer.from_config = custom_input
 
+    # =========================
+    # PATCH Dropout
+    # =========================
+    original_dropout = Dropout.from_config
+
+    @classmethod
+    def custom_dropout(cls, config):
+
+        config.pop("seed_generator", None)
+
+        return original_dropout(config)
+
+    Dropout.from_config = custom_dropout
+
+    # =========================
+    # LOAD MODEL
+    # =========================
     model = keras_load_model(
         "model_gonggong.h5",
         compile=False
