@@ -31,7 +31,7 @@ html, body, [data-testid="stAppViewContainer"] {
 
 [data-testid="stMain"] {
     background: transparent !important;
-    padding-bottom: 120px !important; /* Memberikan ruang agar tidak tertimpa footer */
+    padding-bottom: 120px !important; /* Ruang agar konten tidak tertimpa footer */
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -111,24 +111,12 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* KUSTOMISASI KOTAK UPLOAD FILE */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
     border-radius: 30px !important;
-    padding: 25px 15px !important;
-}
-[data-testid="stFileUploader"] section > input + div {
-    display: none !important; /* Sembunyikan teks default Streamlit */
-}
-[data-testid="stFileUploader"] section::after {
-    content: "Upload file JPG, PNG";
-    font-size: 16px;
-    font-weight: 600;
-    color: #555555;
-    display: block;
-    text-align: center;
-    cursor: pointer;
+    padding: 15px !important;
 }
 
 div.stButton > button {
@@ -144,12 +132,12 @@ div.stButton > button {
     width: 200px;
 }
 
-/* PERBAIKAN TAMPILAN HASIL PREDIKSI AGAR RAPI SEJAJAR */
+/* PERBAIKAN STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
     padding: 20px 25px;
-    margin-top: 20px;
+    margin-top: 30px;
     text-align: left;
     display: flex;
     justify-content: flex-start;
@@ -159,7 +147,7 @@ div.stButton > button {
     font-weight: 700;
     color: #0b1d3a;
     font-size: 18px;
-    min-width: 160px; /* Mengunci lebar teks label agar tanda hubung/titik dua sejajar */
+    min-width: 180px; /* Memastikan titik dua sejajar rapi */
     display: inline-block;
 }
 .result-value {
@@ -183,18 +171,14 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* FOOTER MENTOK PALING BAWAH HALAMAN */
+/* FOOTER PAS DI PALING BAWAH LAYAR */
 .white-footer-canvas {
     position: absolute;
-    bottom: 0; 
-    left: 0; 
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     padding: 30px 0px;
-    background: transparent;
     display: flex;
     justify-content: center; 
     align-items: center;
-    z-index: 10;
 }
 
 .footer-text {
@@ -235,26 +219,67 @@ div.stButton > button {
         height: 220px; 
         margin: 20px auto;
     }
+
+    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
     [data-testid="stFileUploader"] section {
-        padding: 20px 10px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 15px !important;
+        padding: 12px 20px !important;
+        background-color: #EAEAEA !important;
+        border: none !important;
+        border-radius: 40px !important;
     }
+    /* Sembunyikan ikon seret bawaan drag&drop */
+    [data-testid="stFileUploader"] section svg {
+        display: none !important;
+    }
+    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
+    [data-testid="stFileUploader"] section button {
+        background-color: #FFFFFF !important;
+        color: #333333 !important;
+        border: 1px solid #CCCCCC !important;
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    /* Sembunyikan pesan teks seret bawaan browser */
+    [data-testid="stFileUploader"] section > input + div {
+        display: none !important;
+    }
+    /* Tampilkan label kustom di sebelah kanan tombol */
     [data-testid="stFileUploader"] section::after {
+        content: "200MB per file • JPG, PNG";
         font-size: 14px;
+        color: #777777;
+        font-weight: 400;
+        display: inline-block;
     }
+
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
         padding: 15px 20px !important;
     }
+    
+    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
-        padding: 15px;
+        padding: 15px 20px;
         margin-top: 15px;
-        flex-direction: row; /* Tetap horizontal di HP agar sejajar */
-        justify-content: flex-start;
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
     }
     .result-label {
         font-size: 15px;
-        min-width: 130px; /* Lebar label disesuaikan untuk layar HP */
+        min-width: 135px; /* Menjaga teks label tetap sejajar rapi di mobile */
+        margin-right: 0px;
     }
     .result-value {
         font-size: 15px;
