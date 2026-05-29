@@ -117,7 +117,22 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     padding: 15px !important;
 }
 
-/* ===== BUTTON STYLING ===== */
+/* ===== PERBAIKAN WARNA PERINGATAN STREAMLIT ===== */
+div[data-testid="stNotification"] {
+    background-color: #f8d7da !important;
+    border: 1px solid #f5c6cb !important;
+    border-radius: 15px !important;
+}
+div[data-testid="stNotification"] p {
+    color: #721c24 !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+}
+div[data-testid="stNotification"] svg {
+    fill: #721c24 !important;
+}
+
+/* ===== BUTTON STYLING (TANPA GRADASI) ===== */
 .button-group {
     display: flex;
     flex-direction: row;
@@ -142,30 +157,32 @@ div.stButton > button {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Tombol Hapus Latar Belakang diubah ke hijau tua menyesuaikan logo */
+/* Tombol Hapus Latar Belakang diubah ke warna solid hijau tua */
 div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
 div.stButton > button[kind="secondary"] {
-    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
+    background: #0a3d3c !important;
 }
 
-/* Fallback — tombol pertama hijau tua, tombol kedua hijau tua sedikit lebih terang */
+/* Fallback — tombol pertama hijau tua solid */
 div.stButton:nth-of-type(1) > button {
-    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
+    background: #0a3d3c !important;
 }
 
 div.stButton > button#btn_remove_bg,
 div.stButton > button[key="btn_remove_bg"] {
-    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
+    background: #0a3d3c !important;
 }
 
+/* Tombol Analisis Gambar dengan warna hijau solid sedikit lebih terang */
 div.stButton > button#btn_analyze,
 div.stButton > button[key="btn_analyze"] {
-    background: linear-gradient(135deg, #115c5a 0%, #1a8375 100%) !important;
+    background: #115c5a !important;
 }
 
 div.stButton > button:hover {
     opacity: 0.88 !important;
     transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
 }
 
 div.stButton > button:active {
@@ -199,7 +216,7 @@ div.stButton > button:active {
 
 .warning-box {
     background-color: #FFDADA;
-    color: #CC0000; /* Sudah diperbaiki menjadi 6 karakter */
+    color: #CC0000;
     padding: 10px;
     border-radius: 15px;
     font-size: 13px;
