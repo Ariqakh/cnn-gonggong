@@ -224,36 +224,51 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* PERBAIKAN CSS FILE UPLOADER BIAR TIDAK HILANG DI HP */
+    /* KUSTOMISASI SEJAJAR UNTUK MOBILE */
+    [data-testid="stFileUploader"] {
+        background-color: #EAEAEA !important;
+        border-radius: 40px !important;
+        padding: 5px 10px !important;
+    }
     [data-testid="stFileUploader"] section {
         display: flex !important;
-        flex-direction: row !important;
+        flex-direction: row-reverse !important; /* Membuat tombol + berada di sebelah kanan */
         align-items: center !important;
-        justify-content: flex-start !important;
+        justify-content: space-between !important;
         gap: 10px !important;
-        padding: 10px 15px !important;
-        background-color: #EAEAEA !important;
+        padding: 5px 10px !important;
+        background-color: transparent !important;
         border: none !important;
-        border-radius: 40px !important;
     }
     [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
+    
+    /* Tombol Tanda Tambah Bawaan Streamlit */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 12px !important;
         padding: 6px 14px !important;
-        font-size: 13px !important;
-        font-weight: 500 !important;
+        font-size: 16px !important;
+        font-weight: bold !important;
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
     
-    /* Memperbaiki selektor teks seret agar tombol upload tidak ikut tersembunyi */
+    /* Menyembunyikan text drop bawaan */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
         display: none !important;
+    }
+    
+    /* Menampilkan Tulisan Info dengan warna pekat */
+    [data-testid="stFileUploader"] section::after {
+        content: "200MB per file • JPG, PNG";
+        font-size: 13px !important;
+        color: #333333 !important; /* Diubah menjadi pekat */
+        font-weight: 600 !important;
+        display: inline-block !important;
     }
     
     div.stButton > button {
@@ -395,16 +410,19 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# Inisialisasi variabel status tracking di session state agar hasil bertahan saat layout mobile me-render ulang
+# Inisialisasi variabel status tracking di session state agar hasil bertahan
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
     st.session_state.confidence_text = "-"
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
+if "has_analyzed" not in st.session_state:
+    st.session_state.has_analyzed = False
 
 if analyze_clicked:
     if uploaded_file is not None:
+        st.session_state.has_analyzed = True
         img_resized = image.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -414,8 +432,8 @@ if analyze_clicked:
         
         if max_conf < 0.60:
             st.session_state.show_warning = True
-            st.session_state.predicted_class = "Bukan Gonggong / Tidak Dikenali"
-            st.session_state.confidence_text = f"{max_conf * 100:.2f}% (Terlalu Rendah)"
+            st.session_state.predicted_class = "-"
+            st.session_state.confidence_text = "-"
         else:
             st.session_state.show_warning = False
             predicted_index = np.argmax(prediction)
@@ -424,20 +442,21 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Tampilkan alert box jika terdeteksi bukan gonggong
-if st.session_state.show_warning:
-    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
-
-st.markdown(f"""
-<div class='result-box'>
-    <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{st.session_state.predicted_class}</span>
-</div>
-<div class='result-box'>
-    <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{st.session_state.confidence_text}</span>
-</div>
-""", unsafe_allow_html=True)
+# PENGKONDISIAN BOX: Jika bukan gonggong, hanya muncul kotak peringatan
+if st.session_state.has_analyzed:
+    if st.session_state.show_warning:
+        st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"""
+        <div class='result-box'>
+            <span class='result-label'>Jenis Gonggong :</span>
+            <span class='result-value'>{st.session_state.predicted_class}</span>
+        </div>
+        <div class='result-box'>
+            <span class='result-label'>Tingkat Akurasi :</span>
+            <span class='result-value'>{st.session_state.confidence_text}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True) 
 
