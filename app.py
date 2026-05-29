@@ -90,9 +90,9 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
-    margin: 35px auto;
+    margin: 15px auto;
     width: 100%;
-    height: 300px; 
+    height: 260px; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -106,7 +106,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     border-radius: 10px;
 }
 .img-placeholder-text {
-    font-size: 18px;
+    font-size: 16px;
     color: #666;
     font-weight: 500;
 }
@@ -119,26 +119,32 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     padding: 15px !important;
 }
 
+/* Flexbox utilitas untuk tombol agar sejajar rapi */
+.button-group {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px auto;
+    width: 100%;
+}
+
 div.stButton > button {
     background-color: #2D6A6A !important;
     color: white !important;
-    font-size: 20px !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
-    padding: 20px 40px !important;
+    padding: 15px 25px !important;
     border-radius: 30px !important;
     border: none !important;
-    margin: 10px auto !important;
+    margin: 0 !important;
     display: block !important;
-    width: 200px;
+    width: 100%;
 }
 
-/* KUSTOMISASI TOMBOL TOGGLE AGAR SELARAS DENGAN TEMA */
-[data-testid="stCheckbox"] {
-    background-color: rgba(255, 255, 255, 0.4);
-    padding: 10px 18px;
-    border-radius: 15px;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    margin: 10px 0;
+/* Membedakan warna tombol hapus background */
+div.stButton > button[key="btn_remove_bg"] {
+    background-color: #4A90E2 !important;
 }
 
 /* STRUKTUR HASIL PREDIKSI (DESKTOP) */
@@ -146,7 +152,7 @@ div.stButton > button {
     background-color: #87D4D4;
     border-radius: 20px;
     padding: 20px 25px;
-    margin-top: 30px;
+    margin-top: 20px;
     text-align: left;
     display: flex;
     justify-content: flex-start;
@@ -226,8 +232,13 @@ div.stButton > button {
         font-size: 12px;
     }
     .img-preview-container { 
-        height: 220px; 
-        margin: 20px auto;
+        height: 180px; 
+        margin: 10px auto;
+    }
+    
+    .button-group {
+        flex-direction: column !important;
+        gap: 10px;
     }
 
     /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
@@ -273,8 +284,8 @@ div.stButton > button {
 
     div.stButton > button {
         width: 100% !important;
-        font-size: 18px !important;
-        padding: 15px 20px !important;
+        font-size: 16px !important;
+        padding: 12px 20px !important;
     }
     
     /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
@@ -399,6 +410,8 @@ if "conf_text" not in st.session_state:
     st.session_state.conf_text = "-"
 if "warn_box_html" not in st.session_state:
     st.session_state.warn_box_html = ""
+if "is_bg_removed" not in st.session_state:
+    st.session_state.is_bg_removed = False
 
 # --- FILE UPLOADER COMPONENT ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
@@ -410,23 +423,20 @@ if uploaded_file is None:
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
     st.session_state.warn_box_html = ""
+    st.session_state.is_bg_removed = False
 else:
-    # JIKA FILE SUDAH BERHASIL DI-UPLOAD
     st.markdown("""
     <style>
-    /* Hilangkan teks pembatas ukuran file default */
     [data-testid="stFileUploader"] section::after { 
         content: "" !important; 
         display: none !important; 
     }
 
     @media (max-width: 480px) {
-        /* Sembunyikan tombol 'Browse files' ketika file sudah masuk */
         [data-testid="stFileUploader"] section button {
             display: none !important;
         }
 
-        /* Tata letak pembungkus nama file dipaksa rata kiri penuh */
         [data-testid="stFileUploader"] section {
             display: flex !important;
             flex-direction: row !important;
@@ -436,14 +446,12 @@ else:
             background-color: #EAEAEA !important;
         }
 
-        /* Sembunyikan elemen bawaan ikon berkas, svg, dan tanda tambah (+) liar */
         [data-testid="stFileUploader"] section data,
         [data-testid="stFileUploader"] section svg,
         [data-testid="stFileUploader"] section span {
             display: none !important;
         }
 
-        /* Paksa container penampung nama file asli muncul rapi di sisi kiri */
         [data-testid="stFileUploader"] section > input + div {
             display: flex !important;
             flex-direction: row !important;
@@ -453,20 +461,19 @@ else:
             margin: 0 !important;
         }
 
-        /* PAKSA TOMBOL SILANG BAWAAN (X) MENJADI AKTIF, SANGAT JELAS, DAN BISA DIKLIK */
         [data-testid="stFileUploader"] button[aria-label="Remove file"],
         [data-testid="stFileUploader"] button[data-testid="stFileUploaderDeleteBtn"] {
             display: inline-block !important;
             visibility: visible !important;
             opacity: 1 !important;
             position: relative !important;
-            background-color: #DCDCDC !important; /* Latar belakang tombol silang abu lingkaran */
+            background-color: #DCDCDC !important;
             color: #333333 !important;
             border-radius: 50% !important;
             width: 28px !important;
             height: 28px !important;
             border: none !important;
-            margin: 0 0 0 auto !important; /* Geser mentok kanan sesuai foto */
+            margin: 0 0 0 auto !important;
             padding: 0 !important;
             line-height: 26px !important;
             text-align: center !important;
@@ -474,7 +481,6 @@ else:
             z-index: 999 !important;
         }
 
-        /* Cetak karakter huruf X besar di dalam tombol lingkaran tersebut */
         [data-testid="stFileUploader"] button[aria-label="Remove file"]::after {
             content: "✕" !important;
             font-size: 14px !important;
@@ -487,33 +493,47 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# TOMBOL SAKELAR (TOGGLE) UNTUK MENGAKTIFKAN HAPUS LATAR BELAKANG
-remove_bg = st.checkbox("Aktifkan Hapus Latar Belakang (Kurangi Noise)", value=True)
-
 # --- IMAGE PREVIEW CONTROLLER ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     
-    # Jika tombol hapus background aktif, sistem langsung memproses preview gambarnya
-    if remove_bg:
-        img_np = np.array(image)
-        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        background_mask = gray_np > 200
-        segmented_np = img_np.copy()
-        segmented_np[background_mask] = [0, 0, 0]
-        display_image = Image.fromarray(segmented_np)
-    else:
-        display_image = image
+    # Logika Ekstraksi Pemotongan Background Ke Warna Putih
+    img_np = np.array(image)
+    gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
+    background_mask = gray_np > 200
+    segmented_np = img_np.copy()
+    segmented_np[background_mask] = [255, 255, 255] # Diubah ke PUTIH murni sesuai request
+    processed_image = Image.fromarray(segmented_np)
 
-    buffered = BytesIO()
-    display_image.save(buffered, format="JPEG")
-    img_str = base64.b64encode(buffered.getvalue()).decode()
+    # Tampilkan layout kolom pratinjau
+    col1, col2 = st.columns(2)
     
-    st.markdown(f"""
-    <div class='img-preview-container'>
-        <img src="data:image/jpeg;base64,{img_str}">
-    </div>
-    """, unsafe_allow_html=True)
+    with col1:
+        buffered1 = BytesIO()
+        image.save(buffered1, format="JPEG")
+        img_str1 = base64.b64encode(buffered1.getvalue()).decode()
+        st.markdown(f"""
+        <div class='img-preview-container'>
+            <img src="data:image/jpeg;base64,{img_str1}">
+        </div>
+        <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Gambar Asli</div>
+        """, unsafe_allow_html=True)
+        
+    with col2:
+        if st.session_state.is_bg_removed:
+            buffered2 = BytesIO()
+            processed_image.save(buffered2, format="JPEG")
+            img_str2 = base64.b64encode(buffered2.getvalue()).decode()
+            img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
+        else:
+            img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
+            
+        st.markdown(f"""
+        <div class='img-preview-container'>
+            {img_html}
+        </div>
+        <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
+        """, unsafe_allow_html=True)
 else:
     st.markdown("""
     <div class='img-preview-container'>
@@ -521,34 +541,44 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-analyze_clicked = st.button("Analisis Gambar")
+# --- GRUP TOMBOL (HAPUS BG & ANALISIS) ---
+st.markdown("<div class='button-group'>", unsafe_allow_html=True)
+col_btn1, col_btn2 = st.columns(2)
 
-# --- KONTROL LOGIKA DAN VALIDASI GAMBAR PERKETAT ---
+with col_btn1:
+    bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
+with col_btn2:
+    analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Aksi saat tombol Hapus Latar Belakang diklik
+if bg_clicked:
+    if uploaded_file is not None:
+        st.session_state.is_bg_removed = True
+        st.rerun()
+    else:
+        st.warning("Silakan upload gambar terlebih dahulu.")
+
+# --- KONTROL LOGIKA DAN VALIDASI MODEL ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # Eksekusi pemrosesan citra berdasarkan status tombol sakelar
-        if remove_bg:
-            img_np = np.array(image)
-            gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-            background_mask = gray_np > 200
-            segmented_np = img_np.copy()
-            segmented_np[background_mask] = [0, 0, 0]
-            processed_image = Image.fromarray(segmented_np)
-        else:
-            processed_image = image
+        # Gunakan gambar hasil olahan latar belakang jika tombol hapus bg aktif atau otomatis terpicu
+        img_np = np.array(image)
+        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
+        background_mask = gray_np > 200
+        segmented_np = img_np.copy()
+        segmented_np[background_mask] = [255, 255, 255]
+        final_processed = Image.fromarray(segmented_np)
 
-        # INPUT DATA KE MODEL
-        img_resized = processed_image.resize((224, 224))
+        img_resized = final_processed.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Ambang batas 0.65 (65%) + Filter Gambar Kosong Sembarang
-        img_original_np = np.array(image)
-        pure_white = np.sum(np.all(img_original_np >= 245, axis=-1))
-        total_pixels = img_original_np.shape[0] * img_original_np.shape[1]
+        pure_white = np.sum(np.all(img_np >= 245, axis=-1))
+        total_pixels = img_np.shape[0] * img_np.shape[1]
         
         if max_conf < 0.65 or (pure_white / total_pixels) > 0.40:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
@@ -562,7 +592,7 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Render pesan peringatan jika terdeteksi non-gonggong / akurasi rendah
+# Render pesan peringatan
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
 
