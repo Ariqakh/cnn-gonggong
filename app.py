@@ -490,7 +490,7 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNGSI ADAPTIF SEGMENTASI OBJEK GONGGONG ---
+# --- FUNGSI ADAPTIF SEGMENTASI OBJEK GONGGONG (PERBAIKAN BEBAS SCIPY) ---
 def extract_gonggong_object(pil_img):
     # 1. Ubah ke grayscale & kurangi noise background lewat Gaussian Blur
     gray_img = pil_img.convert("L")
@@ -499,12 +499,12 @@ def extract_gonggong_object(pil_img):
     img_np = np.array(pil_img)
     gray_np = np.array(blurred_gray)
     
-    # 2. Implementasi Otomatis Otsu Thresholding (Mencari pemisah latar belakang secara dinamis)
+    # 2. Implementasi Otomatis Otsu Thresholding (Mencari pemisah latar belakang acak)
     total_pixels = gray_np.size
     current_max = 0.0
     threshold_otsu = 127
     
-    hist, bins = np.histogram(gray_np, bins=256, range=(0, 256))
+    hist, _ = np.histogram(gray_np, bins=256, range=(0, 256))
     
     weight_bg = 0.0
     sum_bg = 0.0
@@ -522,35 +522,25 @@ def extract_gonggong_object(pil_img):
         mean_bg = sum_bg / weight_bg
         mean_fg = (total_mean - sum_bg) / weight_fg
         
-        # Hitung Variance Antar Kelas
         variance_between = weight_bg * weight_fg * (mean_bg - mean_fg) ** 2
         if variance_between > current_max:
             current_max = variance_between
             threshold_otsu = i
 
-    # 3. Buat Masking Dasar
-    # Untuk gambar beralas terang, objek biasanya lebih gelap. Untuk beralas gelap, objek lebih terang.
-    # Deteksi kecenderungan warna sudut gambar (pasti latar belakang)
+    # 3. Buat Masking Dasar berdasarkan sampel pojok gambar
     corner_sample = (int(gray_np[0,0]) + int(gray_np[0,-1]) + int(gray_np[-1,0]) + int(gray_np[-1,-1])) / 4.0
-    
     if corner_sample > threshold_otsu:
         initial_mask = gray_np < threshold_otsu
     else:
         initial_mask = gray_np > threshold_otsu
 
-    # 4. Filter Kontur Terbesar (Menghilangkan bercak background kecil-kecil)
-    from scipy.ndimage import label
-    labeled_mask, num_features = label(initial_mask)
-    
-    if num_features > 0:
-        feature_sizes = np.bincount(labeled_mask.ravel())
-        feature_sizes[0] = 0 # Jangan hitung background label 0
-        largest_feature_label = np.argmax(feature_sizes)
-        final_mask = (labeled_mask == largest_feature_label)
-    else:
-        final_mask = initial_mask
+    # 4. Filter Bercak Noise Menggunakan Operasi Morfologi Dasar PIL (Sebagai ganti scipy.ndimage)
+    mask_image = Image.fromarray((initial_mask * 255).astype(np.uint8))
+    # Membersihkan bintik kecil (Erode dilanjutkan Dilate)
+    cleaned_mask_img = mask_image.filter(ImageFilter.MinFilter(3)).filter(ImageFilter.MaxFilter(3))
+    final_mask = np.array(cleaned_mask_img) > 0
 
-    # 5. Transformasi Gambar Akhir: Isi luar daerah objek dengan warna putih murni [255, 255, 255]
+    # 5. Transformasi Gambar Akhir: Ubah area luar masker menjadi PUTIH MURNI
     output_np = img_np.copy()
     output_np[~final_mask] = [255, 255, 255]
     
@@ -618,7 +608,6 @@ if bg_clicked:
 # --- KONTROL LOGIKA DAN VALIDASI MODEL ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # Gunakan fungsi ekstraksi adaptif agar model mendeteksi objek gonggong murni
         final_processed = extract_gonggong_object(image)
 
         img_resized = final_processed.resize((224, 224))
@@ -632,7 +621,6 @@ if analyze_clicked:
         pure_white = np.sum(np.all(final_np >= 245, axis=-1))
         total_pixels = final_np.shape[0] * final_np.shape[1]
         
-        # Validasi keamanan input gambar kosong
         if max_conf < 0.45 or (pure_white / total_pixels) > 0.95:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
             st.session_state.pred_class = "-"
