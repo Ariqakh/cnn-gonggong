@@ -256,7 +256,7 @@ div.stButton > button {
     [data-testid="stFileUploader"] section > input + div {
         display: none !important;
     }
-    
+
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
@@ -355,12 +355,13 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
+logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
     logo_html = f"<img class='app-logo-img' src='data:image/png;base64,{encoded_logo}'>"
 except:
-    logo_html = ""
+    pass
 
 st.markdown(f"""
 <div class="app-header">
@@ -374,7 +375,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- INITIALIZE SESSION STATE FOR TRACKING ---
+# --- INITIALIZE SESSION STATE FOR RESET DATA ---
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
@@ -386,7 +387,7 @@ if "warning_msg" not in st.session_state:
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE FILE UPLOADER
+# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE UPLOAD FILE
 # ==========================================================================
 if uploaded_file is None:
     # JIKA BELUM UPLOAD: Tampilkan teks kustom "200MB per file..." di mobile
@@ -404,18 +405,18 @@ if uploaded_file is None:
     </style>
     """, unsafe_allow_html=True)
     
-    # Otomatis reset data hasil prediksi ke kondisi awal jika file kosong / disilang (X)
+    # Otomatis reset teks output jika tombol silang (X) ditekan atau file kosong
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.warning_msg = ""
 else:
-    # JIKA SUDAH UPLOAD: Sembunyikan teks "200MB..." & tampilkan nama file + silang (X) bawaan
+    # JIKA SUDAH UPLOAD: Matikan tulisan "200MB..." dan hidupkan kembali list nama file & tombol silang (X)
     st.markdown("""
     <style>
-    /* Hilangkan pseudo-element teks 200MB */
+    /* Sembunyikan pseudo-element teks 200MB */
     [data-testid="stFileUploader"] section::after { content: "" !important; display: none !important; }
     
-    /* Kembalikan container baris nama file bawaan Streamlit secara horizontal */
+    /* Tampilkan kembali container nama file bawaan Streamlit secara rapi horizontal */
     [data-testid="stFileUploader"] section > input + div {
         display: flex !important;
         flex-direction: row !important;
@@ -425,20 +426,20 @@ else:
         color: #333333 !important;
         font-size: 14px !important;
     }
-    /* Aktifkan kembali fungsionalitas visual tombol silang (X) */
+    /* Pastikan tombol silang (X) bawaan berfungsi dan terlihat jelas */
     [data-testid="stFileUploader"] button[aria-label="Remove file"] {
         display: inline-flex !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
-    /* Sembunyikan ikon berkas bawaan agar lebih clean */
+    /* Sembunyikan icon file bawaan yang mengganggu */
     [data-testid="stFileUploader"] section > input + div svg {
         display: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- PREVIEW GAMBAR ---
+# --- TAMPILAN PREVIEW GAMBAR ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
@@ -459,7 +460,7 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# --- PROSES KLASIFIKASI & PERKETAT VALIDASI ---
+# --- LOGIKA KLASIFIKASI & MEMPERKETAT DETEKSI ---
 if analyze_clicked:
     if uploaded_file is not None:
         img_resized = image.resize((224, 224))
@@ -469,14 +470,14 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # Ekstraksi piksel ekstrem (mendeteksi background putih polos / hitam dominan non-objek)
+        # Penambahan filter rasio warna ekstrem (mendeteksi background putih mutlak / hitam pekat non-objek)
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 248, axis=-1))
         pure_black = np.sum(np.all(img_np <= 8, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Pengetatan Ambang Batas Akurasi Validasi (Confidence Score < 0.65)
+        # Batasan diperketat: Jika confidence level di bawah 65% atau gambar dominan kosong latar belakangnya
         if max_conf < 0.65 or extreme_ratio > 0.25:
             st.session_state.warning_msg = "⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas."
             st.session_state.predicted_class = ""
@@ -489,7 +490,7 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Merender Kotak Peringatan jika validasi diperketat tidak lolos
+# Tampilkan pesan peringatan jika gambar tidak lolos validasi ketat
 if st.session_state.warning_msg:
     st.markdown(f"<div class='warning-box'>{st.session_state.warning_msg}</div>", unsafe_allow_html=True)
 
