@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -224,21 +224,22 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* MENERAPKAN TAMPILAN UPLOADER KOTAK DI KIRI KHUSUS HP */
+    /* TAMPILAN FILE UPLOADER DI HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 12px !important;
-        padding: 10px 15px !important;
+        gap: 10px !important;
+        padding: 8px 12px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
-        border-radius: 20px !important;
+        border-radius: 18px !important;
     }
     
-    /* Tombol internal asli "Browse files" berupa kotak di sebelah kiri */
-    [data-testid="stFileUploader"] section button {
+    /* Tombol internal asli "Browse files" */
+    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
+        display: inline-flex !important;
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
@@ -247,36 +248,40 @@ div.stButton > button {
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
-        display: inline-flex !important;
         width: auto !important;
     }
 
-    /* INJEKSI TEKS "200MB per file • JPG, PNG" DI SEBELAH KANAN TOMBOL BROWSE (SEBELUM UPLOAD) */
-    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"]::after {
+    /* INJEKSI PASTI TEKS MANDATORI DI HP TEPAT DI DALAM DROPZONE */
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
         content: "200MB per file • JPG, PNG" !important;
         color: #737373 !important;
         font-size: 13.5px !important;
+        font-family: 'Inter', sans-serif !important;
         font-weight: 400 !important;
         display: inline-block !important;
-        margin-left: 2px !important;
+        margin-left: 5px !important;
         white-space: nowrap !important;
     }
 
-    /* JIKA FILE SUDAH DIUPLOAD, SEMBUNYIKAN TEKS 200MB TERSEBUT */
-    [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileName"]) section [data-testid="stUploadDropzone"]::after {
+    /* SEMBUNYIKAN SEGERA JIKA FILE SUDAH BERHASIL DIUPLOAD */
+    [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileName"]) [data-testid="stUploadDropzone"]::after {
         display: none !important;
         content: "" !important;
     }
 
-    /* HILANGKAN TOTAL TANDA TAMBAH (+) YANG MENGGANGGU DI SEBELAH KANAN */
-    [data-testid="stFileUploader"] section button + div,
-    [data-testid="stFileUploader"] button[id*="upload-button"] + div,
-    [data-testid="stFileUploader"] .stBaseButton-secondary,
-    [data-testid="stFileUploader"] svg {
+    /* MATIKAN TOMBOL TAMBAH (+) BAWAAN MULTI UPLOADER YANG MENGGANGGU DI HP */
+    [data-testid="stFileUploader"] section + button,
+    [data-testid="stFileUploader"] section + div,
+    [data-testid="stFileUploader"] button:not([data-testid="stBaseButton-secondary"]):not([aria-label="Remove file"]) {
+        display: none !important;
+    }
+    
+    /* Blokir icon awan/svg internal agar layout sebaris rapi */
+    [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
 
-    /* Hilangkan teks bawaan streamlit yang ter-collapsed agar bersih */
+    /* Hilangkan teks seret bawaan desktop agar tidak menumpuk */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
         display: none !important;
     }
