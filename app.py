@@ -261,11 +261,11 @@ div.stButton > button:active {
         flex-direction: column;
         gap: 10px;
         text-align: center;
-        margin-top: 30px;
+        margin-top: -10px; /* Diubah dari 30px agar naik ke atas */
         margin-bottom: 6px;
     }
     .app-logo-img { 
-        width: 220px; /* Selesai diperbesar dari 150px agar lebih mantap */
+        width: 195px; /* Diubah dari 150px agar diperbesar sedikit lagi */
         height: auto; 
     }
     .app-title-main { 
