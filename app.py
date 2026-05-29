@@ -497,12 +497,15 @@ else:
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     
-    # Logika Ekstraksi Pemotongan Background Ke Warna Putih
+    # PERBAIKAN LOGIKA: Deteksi background terang, ubah background jadi PUTIH MURNI [255,255,255]
     img_np = np.array(image)
     gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-    background_mask = gray_np > 200
+    
+    # Nilai threshold > 185 mengisolasi warna background putih/abu terang di foto beralas kertas/lantai
+    background_mask = gray_np > 185 
+    
     segmented_np = img_np.copy()
-    segmented_np[background_mask] = [255, 255, 255] # Diubah ke PUTIH murni sesuai request
+    segmented_np[background_mask] = [255, 255, 255] # Mengubah background menjadi putih murni, menyisakan Gonggong asli
     processed_image = Image.fromarray(segmented_np)
 
     # Tampilkan layout kolom pratinjau
@@ -562,10 +565,10 @@ if bg_clicked:
 # --- KONTROL LOGIKA DAN VALIDASI MODEL ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # Gunakan gambar hasil olahan latar belakang jika tombol hapus bg aktif atau otomatis terpicu
+        # Gunakan gambar hasil olahan latar belakang putih agar performa model CNN tetap konsisten
         img_np = np.array(image)
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        background_mask = gray_np > 200
+        background_mask = gray_np > 185
         segmented_np = img_np.copy()
         segmented_np[background_mask] = [255, 255, 255]
         final_processed = Image.fromarray(segmented_np)
