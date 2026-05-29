@@ -166,7 +166,6 @@ div.stButton > button[key="btn_analyze"] {
 div.stButton > button:hover {
     opacity: 0.88 !important;
     transform: translateY(-1px) !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
 }
 
 div.stButton > button:active {
@@ -200,7 +199,7 @@ div.stButton > button:active {
 
 .warning-box {
     background-color: #FFDADA;
-    color: #CC0000;
+    color: #CC0000; /* Sudah diperbaiki menjadi 6 karakter */
     padding: 10px;
     border-radius: 15px;
     font-size: 13px;
