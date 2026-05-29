@@ -132,6 +132,15 @@ div.stButton > button {
     width: 200px;
 }
 
+/* KUSTOMISASI TOMBOL TOGGLE AGAR SELARAS DENGAN TEMA */
+[data-testid="stCheckbox"] {
+    background-color: rgba(255, 255, 255, 0.4);
+    padding: 10px 18px;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    margin: 10px 0;
+}
+
 /* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
@@ -478,11 +487,26 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
+# TOMBOL SAKELAR (TOGGLE) UNTUK MENGAKTIFKAN HAPUS LATAR BELAKANG
+remove_bg = st.checkbox("Aktifkan Hapus Latar Belakang (Kurangi Noise)", value=True)
+
 # --- IMAGE PREVIEW CONTROLLER ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
+    
+    # Jika tombol hapus background aktif, sistem langsung memproses preview gambarnya
+    if remove_bg:
+        img_np = np.array(image)
+        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
+        background_mask = gray_np > 200
+        segmented_np = img_np.copy()
+        segmented_np[background_mask] = [0, 0, 0]
+        display_image = Image.fromarray(segmented_np)
+    else:
+        display_image = image
+
     buffered = BytesIO()
-    image.save(buffered, format="JPEG")
+    display_image.save(buffered, format="JPEG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
     
     st.markdown(f"""
@@ -502,24 +526,18 @@ analyze_clicked = st.button("Analisis Gambar")
 # --- KONTROL LOGIKA DAN VALIDASI GAMBAR PERKETAT ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # 1. FITUR HAPUS BACKGROUND (SEGMENTASI INTENSITAS CITRA)
-        # Mengubah citra masukan menjadi format matriks NumPy
-        img_np = np.array(image)
-        
-        # Ekstraksi komponen nilai keabuan (Grayscale secara manual demi efisiensi)
-        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        
-        # Membuat masking threshold: piksel latar belakang terang (> 200) diisolasi
-        background_mask = gray_np > 200
-        
-        # Mengkloning gambar asli dan mengubah area terisolasi menjadi warna hitam murni [0, 0, 0]
-        segmented_np = img_np.copy()
-        segmented_np[background_mask] = [0, 0, 0]
-        
-        # Mengembalikan matriks prapemrosesan ke bentuk PIL Image objek
-        processed_image = Image.fromarray(segmented_np)
+        # Eksekusi pemrosesan citra berdasarkan status tombol sakelar
+        if remove_bg:
+            img_np = np.array(image)
+            gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
+            background_mask = gray_np > 200
+            segmented_np = img_np.copy()
+            segmented_np[background_mask] = [0, 0, 0]
+            processed_image = Image.fromarray(segmented_np)
+        else:
+            processed_image = image
 
-        # 2. INPUT GAMBAR HASIL PEMPROSESAN KE MODEL CNN MOBILENET
+        # INPUT DATA KE MODEL
         img_resized = processed_image.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -527,9 +545,10 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Naikkan ambang batas ke 0.65 (65%) + Filter Gambar Kosong Sembarang
-        pure_white = np.sum(np.all(img_np >= 245, axis=-1))
-        total_pixels = img_np.shape[0] * img_np.shape[1]
+        # MEMPERKETAT DETEKSI: Ambang batas 0.65 (65%) + Filter Gambar Kosong Sembarang
+        img_original_np = np.array(image)
+        pure_white = np.sum(np.all(img_original_np >= 245, axis=-1))
+        total_pixels = img_original_np.shape[0] * img_original_np.shape[1]
         
         if max_conf < 0.65 or (pure_white / total_pixels) > 0.40:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
