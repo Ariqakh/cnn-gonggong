@@ -253,7 +253,7 @@ div.stButton > button {
     [data-testid="stFileUploader"] section > input + div {
         display: none !important;
     }
-    /* Tampilkan label kustom di sebelah kanan tombol */
+    /* Tampilkan label kustom di sebelah kanan tombol saat awal kosong */
     [data-testid="stFileUploader"] section::after {
         content: "200MB per file • JPG, PNG";
         font-size: 14px;
@@ -268,7 +268,6 @@ div.stButton > button {
         padding: 15px 20px !important;
     }
     
-    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
@@ -394,52 +393,68 @@ if "warn_box_html" not in st.session_state:
 # --- FILE UPLOADER COMPONENT ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# ==========================================================================
-# MODIFIKASI DINAMIS UNTUK HANDLER TOMBOL SILANG (X) DAN TULISAN 200MB (MOBILE)
-# ==========================================================================
+# =========================================================================================
+# PERBAIKAN TOTAL CSS INJEKSI: PAKSA HAPUS TANDA (+) & RAPIKAN SILANG (X) KE KANAN DI HP
+# =========================================================================================
 if uploaded_file is None:
-    # Reset nilai output saat tombol silang (X) ditekan / halaman kosong
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
     st.session_state.warn_box_html = ""
 else:
-    # JIKA FILE SUDAH DI-UPLOAD (Merapi posisi nama file ke kiri, munculkan tombol silang X)
+    # Ketika file di-upload, sembunyikan info 200MB dan atur penempatan file & tombol X
     st.markdown("""
     <style>
-    /* Sembunyikan teks panduan 200MB agar tidak menumpuk */
+    /* 1. Hilangkan info 200MB bawaan awal */
     [data-testid="stFileUploader"] section::after { 
         content: "" !important; 
         display: none !important; 
     }
     
     @media (max-width: 480px) {
-        /* Memaksa kontainer nama file & tombol silang bergerak rapi ke kiri */
-        [data-testid="stFileUploader"] section > input + div {
+        /* 2. Paksa pembungkus utama file uploader agar rapi melebar horizontal */
+        [data-testid="stFileUploader"] section {
+            justify-content: space-between !important;
+            flex-direction: row !important;
+            width: 100% !important;
+        }
+
+        /* 3. Atur div penampung teks nama gambar agar rata kiri secara mutlak */
+        div[data-testid="stFileUploaderFileData"] {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
             justify-content: flex-start !important;
-            gap: 8px !important;
-            margin-left: 0 !important;
+            margin-left: 0px !important;
             margin-right: auto !important;
-            width: auto !important;
-            color: #333333 !important;
-            font-size: 14px !important;
-        }
-        
-        /* Pastikan tidak ada karakter/icon tambah (+) yang aneh */
-        [data-testid="stFileUploader"] section > input + div ::before,
-        [data-testid="stFileUploader"] section > input + div svg {
-            display: none !important;
+            gap: 5px !important;
         }
 
-        /* Tampilkan tombol silang (X) bawaan Streamlit secara eksplisit di kanan nama file */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"] {
+        /* 4. TOTAL WIPE OUT: Hapus paksa ikon berkas, ikon kertas, maupun tanda tambah (+) bawaan */
+        div[data-testid="stFileUploaderFileData"] svg,
+        div[data-testid="stFileUploaderFileData"] ::before,
+        [data-testid="stFileUploaderDeleteBtn"]::before {
+            display: none !important;
+            content: "" !important;
+        }
+
+        /* 5. Bangkitkan tombol silang (X) asli milik Streamlit agar muncul kokoh di sisi kanan */
+        button[data-testid="stFileUploaderDeleteBtn"] {
             display: inline-flex !important;
             visibility: visible !important;
             opacity: 1 !important;
-            margin-left: 5px !important;
-            padding: 2px !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            margin-left: auto !important;
+            padding: 0px 5px !important;
+        }
+        
+        /* Pastikan icon silang internal bawaan kelihatan jelas */
+        button[data-testid="stFileUploaderDeleteBtn"] svg {
+            display: inline-block !important;
+            fill: #333333 !important;
+            width: 16px !important;
+            height: 16px !important;
         }
     }
     </style>
@@ -476,7 +491,7 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Naikkan ambang batas ke 0.65 (65%) + Filter Gambar Kosong Sembarang
+        # MEMPERKETAT DETEKSI
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 245, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
@@ -493,7 +508,6 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Render pesan peringatan jika terdeteksi non-gonggong / akurasi rendah
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
 
