@@ -10,6 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- INJECT GLOBAL CSS ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -28,7 +29,6 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
-/* Hilangkan padding bawah bawaan streamlit block agar scroll tidak kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
+/* DESKTOP UPLOADER */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -132,7 +132,6 @@ div.stButton > button {
     width: 200px;
 }
 
-/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -166,12 +165,6 @@ div.stButton > button {
     font-weight: 600;
 }
 
-.page-wrapper {
-    margin-bottom: 0px;
-    padding-bottom: 0px;
-}
-
-/* PERBAIKAN POSISI FOOTER */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -191,113 +184,62 @@ div.stButton > button {
     margin: 0 auto;
 }
 
-/* RESPONSIVE MOBILE OPTIMIZATION */
+/* MOBILE RESPONSIVE OPTIMIZATION */
 @media (max-width: 480px) {
-    .navbar {
-        padding: 15px 15px;
-        gap: 8px;
-    }
-    .navbar-title {
-        font-size: 14px;
-    }
-    .app-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-        margin-top: 40px;
-    }
-    .app-logo-img { 
-        width: 180px; 
-        height: auto; 
-    }
-    .app-title-main { 
-        font-size: 32px; 
-    }
-    .app-subtitle-main {
-        font-size: 12px;
-    }
-    .img-preview-container { 
-        height: 220px; 
-        margin: 20px auto;
-    }
+    .navbar { padding: 15px 15px; gap: 8px; }
+    .navbar-title { font-size: 14px; }
+    .app-header { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
+    .app-logo-img { width: 180px; height: auto; }
+    .app-title-main { font-size: 32px; }
+    .app-subtitle-main { font-size: 12px; }
+    .img-preview-container { height: 220px; margin: 20px auto; }
 
-    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE */
+    /* BOX UTAMA UPLOADER DI HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 15px !important;
+        justify-content: space-between !important;
         padding: 12px 20px !important;
         background-color: #EAEAEA !important;
         border: none !important;
         border-radius: 40px !important;
     }
     
-    /* Sembunyikan ikon berkas/seret bawaan */
-    [data-testid="stFileUploader"] section svg {
-        display: none !important;
-    }
+    /* Hilangkan ikon berkas bawaan upload */
+    [data-testid="stFileUploader"] section svg { display: none !important; }
     
-    /* Tombol internal minimalis putih */
+    /* Tombol Pilih File (Putih) */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 12px !important;
-        padding: 6px 16px !important;
+        padding: 6px 14px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
-        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
     
-    /* Teks placeholder seret bawaan disembunyikan */
-    [data-testid="stFileUploader"] section > input + div {
-        display: none !important;
-    }
+    /* Sembunyikan teks seret bawaan browser */
+    [data-testid="stFileUploader"] section > input + div { display: none !important; }
     
-    /* Label spesifikasi ukuran berkas di sebelah kanan */
+    /* Tampilkan teks instruksi ukuran file */
     [data-testid="stFileUploader"] section::after {
         content: "200MB per file • JPG, PNG";
-        font-size: 14px;
+        font-size: 13px;
         color: #777777;
         font-weight: 400;
         display: inline-block;
     }
 
-    div.stButton > button {
-        width: 100% !important;
-        font-size: 18px !important;
-        padding: 15px 20px !important;
-    }
-    
-    .result-box {
-        padding: 15px 20px;
-        margin-top: 15px;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
-    }
-    .result-label {
-        font-size: 15px;
-        min-width: 135px; 
-        margin-right: 0px;
-    }
-    .result-value {
-        font-size: 15px;
-    }
-    .page-wrapper { 
-        margin-top: 25px; 
-    }
-    .white-footer-canvas { 
-        margin-top: 50px !important;
-        padding: 15px 0px !important;
-    }
-    .footer-text {
-        font-size: 11px;
-    }
+    div.stButton > button { width: 100% !important; font-size: 18px !important; padding: 15px 20px !important; }
+    .result-box { padding: 15px 20px; margin-top: 15px; display: flex !important; flex-direction: row !important; }
+    .result-label { font-size: 15px; min-width: 135px; }
+    .result-value { font-size: 15px; }
+    .page-wrapper { margin-top: 25px; }
+    .white-footer-canvas { margin-top: 50px !important; padding: 15px 0px !important; }
+    .footer-text { font-size: 11px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -306,8 +248,6 @@ div.stButton > button {
 def load_my_model():
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
-
-    # PATCH Dense
     original_dense = Dense.from_config
     @classmethod
     def custom_dense(cls, config):
@@ -315,7 +255,6 @@ def load_my_model():
         return original_dense(config)
     Dense.from_config = custom_dense
 
-    # PATCH InputLayer
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
@@ -326,7 +265,6 @@ def load_my_model():
         return cls(**config)
     InputLayer.from_config = custom_input
 
-    # PATCH Dropout
     original_dropout = Dropout.from_config
     @classmethod
     def custom_dropout(cls, config):
@@ -339,17 +277,11 @@ def load_my_model():
 
 model = load_my_model()
 
-classes = [
-    "Canarium Mutabile",
-    "Canarium Urseus",
-    "Laevistrombus Turturella",
-    "Pugilina Coclidium"
-]
+classes = ["Canarium Mutabile", "Canarium Urseus", "Laevistrombus Turturella", "Pugilina Coclidium"]
 
 try:
     with open("logo_umrah.png", "rb") as f:
-        nav_logo_bytes = f.read()
-    encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+        encoded_nav_logo = base64.b64encode(f.read()).decode()
 except:
     encoded_nav_logo = ""
 
@@ -368,8 +300,7 @@ st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
-        encoded_logo = base64.b64encode(f.read()).decode()
-    logo_html = f"<img class='app-logo-img' src='data:image/png;base64,{encoded_logo}'>"
+        logo_html = f"<img class='app-logo-img' src='data:image/png;base64,{base64.b64encode(f.read()).decode()}'>"
 except:
     pass
 
@@ -385,105 +316,69 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- MANAGING SESSION STATE FOR RESET OUTCOMES ---
+# --- STATE MANAGEMENT ---
 if "pred_class" not in st.session_state:
     st.session_state.pred_class = "-"
 if "conf_text" not in st.session_state:
     st.session_state.conf_text = "-"
 if "warn_box_html" not in st.session_state:
     st.session_state.warn_box_html = ""
+if "uploader_key" not in st.session_state:
+    st.session_state.uploader_key = 0
 
-# --- FILE UPLOADER COMPONENT ---
-uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+# --- FILE UPLOADER WIDGET ---
+uploaded_file = st.file_uploader(
+    "Upload", 
+    type=["jpg", "jpeg", "png"], 
+    label_visibility="collapsed",
+    key=f"file_uploader_{st.session_state.uploader_key}"
+)
 
 # ==========================================================================
-# FIX MUTLAK CSS: HAPUS TANDA TAMBAH (+), TAMPILKAN TOMBOL SILANG (X) RESET
+# MANIPULASI ELEMENT KETIKA FILE BERHASIL DI-UPLOAD (MOBILE & DESKTOP)
 # ==========================================================================
-if uploaded_file is None:
-    # Saat tombol silang (X) ditekan, file kembali kosong, reset state otomatis bekerja
-    st.session_state.pred_class = "-"
-    st.session_state.conf_text = "-"
-    st.session_state.warn_box_html = ""
-else:
-    # KETIKA FILE TERISI: Atur layout daftar file di HP agar rapi & memunculkan tombol silang
+if uploaded_file is not None:
+    # Sembunyikan panduan teks "200MB" & bersihkan sisa tanda tambah (+)
     st.markdown("""
     <style>
-    /* Sembunyikan label ukuran berkas default agar tidak menumpuk */
-    [data-testid="stFileUploader"] section::after { 
-        content: "" !important; 
-        display: none !important; 
-    }
+    [data-testid="stFileUploader"] section::after { content: "" !important; display: none !important; }
+    [data-testid="stFileUploader"] section div { text-shadow: none !important; }
     
-    /* HAPUS TOTAL: Karakter tanda tambah (+), ikon ekstra, dan div pengganggu di mobile */
-    [data-testid="stUploadedFile"] svg,
-    [data-testid="stFileUploader"] section div:empty,
-    [class*="st-emotion-cache"] div:contains("+") {
-        display: none !important;
-    }
-
     @media (max-width: 480px) {
-        /* Ubah section pembungkus file menjadi flex-row lebar penuh */
-        [data-testid="stFileUploader"] section {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 10px 18px !important;
-        }
-
-        /* Sembunyikan tombol "Browse files" bawaan saat file sudah terisi */
-        [data-testid="stFileUploader"] section button:not([aria-label="Remove file"]) {
-            display: none !important;
-        }
-
-        /* Set ulang penempatan widget baris file upload */
-        [data-testid="stFileUploader"] data-testid {
-            width: 100% !important;
-        }
-
-        /* Atur pembungkus nama file agar rata kiri penuh */
-        [data-testid="stUploadedFile"] {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            width: 100% !important;
-            gap: 10px !important;
-        }
-
-        /* PAKSA MUNCUL: Tombol Silang (X) / Remove File bawaan Streamlit */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"],
-        [data-testid="stFileUploaderDeleteBtn"] {
-            display: inline-flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            background: #E0E0E0 !important; /* Latar belakang abu lingkaran tipis */
-            border-radius: 50% !important;
-            border: none !important;
-            width: 28px !important;
-            height: 28px !important;
-            align-items: center !important;
-            justify-content: center !important;
-            margin-left: auto !important; /* Dorong penuh ke posisi paling kanan */
-            z-index: 999 !important;
-        }
-
-        /* Membuat tanda silang (X) terlihat solid, tebal, dan pas di tengah lingkaran */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"]::after {
-            content: "✕" !important;
-            font-size: 14px !important;
-            font-weight: 800 !important;
-            color: #333333 !important;
-            position: absolute !important;
-        }
+        /* Sembunyikan tombol 'Pilih File' bawaan saat terisi */
+        [data-testid="stFileUploader"] section button { display: none !important; }
         
-        /* Sembunyikan ikon bawaan tombol hapus agar diganti teks custom di atas */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"] svg {
-            display: none !important;
+        /* Modifikasi tempat teks nama berkas agar rapi ke kiri */
+        [data-testid="stFileUploader"] section > input + div {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 80% !important;
         }
     }
     </style>
     """, unsafe_allow_html=True)
+
+    # MEMBUAT TOMBOL SILANG (X) RESET MANUAL YANG DIJAMIN MUNCUL DI HP
+    # Menggunakan columns: kiri untuk nama file kustom, kanan untuk tombol reset silang merah (X)
+    col_file, col_reset = st.columns([6, 1])
+    with col_file:
+        st.markdown(f"📁 <span style='font-size:14px; color:#333; font-weight:500;'>{uploaded_file.name}</span>", unsafe_allow_html=True)
+    with col_reset:
+        # Tombol X Merah tebal transparan bertindak sebagai pemicu reset total aplikasi
+        if st.button("✕", help="Hapus gambar dan reset", key="clear_action_btn"):
+            st.session_state.pred_class = "-"
+            st.session_state.conf_text = "-"
+            st.session_state.warn_box_html = ""
+            st.session_state.uploader_key += 1  # Mengubah key otomatis membersihkan widget file_uploader
+            st.rerun()
+
+else:
+    # Jika kosong, reset state otomatis ke awal
+    st.session_state.pred_class = "-"
+    st.session_state.conf_text = "-"
+    st.session_state.warn_box_html = ""
 
 # --- IMAGE PREVIEW CONTROLLER ---
 if uploaded_file is not None:
@@ -506,7 +401,7 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# --- KONTROL LOGIKA DAN VALIDASI GAMBAR PERKETAT ---
+# --- PROSES MODEL & ANALISIS ---
 if analyze_clicked:
     if uploaded_file is not None:
         img_resized = image.resize((224, 224))
@@ -535,6 +430,7 @@ if analyze_clicked:
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
 
+# --- SHOW PREDICTION RESULT ---
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
