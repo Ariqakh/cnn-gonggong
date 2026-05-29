@@ -10,6 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- CSS STYLING UTAMA ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
@@ -111,37 +112,35 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 }
 
 /* ==========================================================================
-   STYLE STRUKTUR FILE UPLOADER (STRUKTUR HORIZONTAL KUNCI)
+   STYLE STRUKTUR FILE UPLOADER (DESKTOP & MOBILE JAJAR HORIZONTAL)
    ========================================================================== */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
     border-radius: 20px !important;
-    padding: 10px 16px !important;
+    padding: 10px 14px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
 }
 
-/* Memaksa area dropzone internal menjadi baris horizontal */
+/* Memaksa kontainer dropzone internal agar berjejer horizontal ke kanan */
 [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-    display: inline-flex !important;
+    display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    width: auto !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 0 !important;
+    width: 100% !important;
+    gap: 12px !important;
 }
 
-/* Matikan teks seret bawaan desktop agar tidak menumpuk */
+/* Sembunyikan teks seret/bawaan asli Streamlit */
 [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
     display: none !important;
 }
 
-/* Pengaturan Tombol "Browse files" bawaan */
+/* Tombol asli "Browse files" / "Upload" */
 [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
     background-color: #FFFFFF !important;
     color: #333333 !important;
@@ -149,32 +148,30 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     border-radius: 10px !important;
     padding: 8px 16px !important;
     font-size: 14px !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
     margin: 0 !important;
     display: inline-flex !important;
 }
 
-/* KUSTOM TEKS DI SAMPING BUTTON UPLOAD (KUNCI POSISI) */
+/* TEKS KUSTOM DI SAMPING TOMBOL (SANGAT JELAS & KONTRAS) */
 .custom-side-text {
-    display: inline-block !important;
-    color: #555555 !important;
+    color: #4A4A4A !important; /* Abu-abu gelap kontras tinggi */
     font-size: 14px !important;
-    font-weight: 400 !important;
-    margin-left: 14px !important;
-    white-space: nowrap !important; /* Mencegah teks turun ke bawah */
-    vertical-align: middle !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
     font-family: 'Inter', sans-serif !important;
 }
 
-/* MANAGEMENT FILE LIST SETELAH UPLOAD (PROTEKSI TOMBOL SILANG) */
+/* PENGATURAN AREA FILE SETELAH UPLOAD (Kunci Tombol Silang X) */
 [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div {
     display: none !important; 
 }
-/* Hilangkan icon tambah generic */
+/* Matikan icon plus tambahan bawaan uploader */
 [data-testid="stFileUploader"] button:has(svg path[d*="M19 "]) {
     display: none !important;
 }
-/* Tombol silang (X) wajib muncul di samping file name */
+/* Munculkan kembali tombol silang bawaan Streamlit secara absolut */
 [data-testid="stFileUploader"] button[aria-label="Remove file"] {
     display: inline-flex !important;
     visibility: visible !important;
@@ -266,8 +263,7 @@ div.stButton > button {
     .img-preview-container { height: 220px; margin: 20px auto; }
 
     .custom-side-text {
-        font-size: 12.5px !important;
-        margin-left: 8px !important;
+        font-size: 13px !important;
     }
 
     div.stButton > button {
@@ -289,7 +285,7 @@ div.stButton > button {
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD MODEL & DATA PREPARATION ---
+# --- LOAD MODEL ---
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
@@ -380,17 +376,21 @@ if "show_warning" not in st.session_state:
 # --- RENDER FILE UPLOADER ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# METODE INJEKSI JAVASCRIPT: Memaksa teks kustom masuk ke samping kanan tombol "Browse files" internal
+# MANIPULASI DOM JAVASCRIPT: Menambahkan teks kustom secara realtime tepat di dalam row horizontal samping tombol
 if uploaded_file is None:
     st.markdown("""
     <script>
     const dropzone = document.querySelector('[data-testid="stUploadDropzone"]');
-    if (dropzone && !document.getElementById("fixed-side-text")) {
-        const textSpan = document.createElement("span");
-        textSpan.id = "fixed-side-text";
-        textSpan.className = "custom-side-text";
-        textSpan.innerText = "200MB per file • JPG, PNG";
-        dropzone.appendChild(textSpan);
+    if (dropzone) {
+        // Cek agar tidak terjadi duplikasi teks
+        let existingText = document.getElementById("custom-side-txt-id");
+        if (!existingText) {
+            const spanTxt = document.createElement("span");
+            spanTxt.id = "custom-side-txt-id";
+            spanTxt.className = "custom-side-text";
+            spanTxt.innerText = "200MB per file • JPG, PNG";
+            dropzone.appendChild(spanTxt);
+        }
     }
     </script>
     """, unsafe_allow_html=True)
