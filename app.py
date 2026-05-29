@@ -10,6 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- CSS STYLING UTAMA ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
@@ -28,7 +29,6 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
-/* Hilangkan padding bawah bawaan streamlit block */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -111,14 +111,57 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER */
+/* ==========================================================================
+   STYLE UNTUK UPLOADER DESKTOP & MOBILE (FIXED)
+   ========================================================================== */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
-    border-radius: 30px !important;
-    padding: 15px !important;
+    border-radius: 25px !important;
+    padding: 12px !important;
 }
 
+/* Mematikan text default bawaan Streamlit agar tidak bentrok */
+[data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
+    display: none !important;
+}
+
+/* Menata tombol internal bawaan Streamlit (Browse files) */
+[data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
+    background-color: #FFFFFF !important;
+    color: #333333 !important;
+    border: 1px solid #CCCCCC !important;
+    border-radius: 12px !important;
+    padding: 8px 18px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+}
+
+/* KUSTOM TEKS INFORMASI FILE (Mencegah teks transparan di HP) */
+.custom-uploader-text {
+    display: inline-block;
+    color: #555555 !important; /* Warna abu-abu gelap tegas */
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    margin-left: 15px;
+    vertical-align: middle;
+}
+
+/* PROTEKSI TOMBOL SILANG (X) DAN MATIKAN TOMBOL TAMBAH (+) */
+[data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div {
+    display: none !important; /* Hilangkan container dropzone tambahan */
+}
+/* Hanya sembunyikan icon plus generic, biarkan tombol remove file tetap interaktif */
+[data-testid="stFileUploader"] button:has(svg path[d*="M19 "]) {
+    display: none !important;
+}
+[data-testid="stFileUploader"] button[aria-label="Remove file"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* BUTTON ANALISIS */
 div.stButton > button {
     background-color: #2D6A6A !important;
     color: white !important;
@@ -132,7 +175,6 @@ div.stButton > button {
     width: 200px;
 }
 
-/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -174,7 +216,6 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* PERBAIKAN POSISI FOOTER */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -194,107 +235,35 @@ div.stButton > button {
     margin: 0 auto;
 }
 
-/* TEKS KUSTOM SEMENTARA UNTUK MOBILE */
-.custom-mobile-text-container {
-    display: none;
-}
-
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .navbar {
-        padding: 15px 15px;
-        gap: 8px;
-    }
-    .navbar-title {
-        font-size: 14px;
-    }
-    .app-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-        margin-top: 40px;
-    }
-    .app-logo-img { 
-        width: 180px; 
-        height: auto; 
-    }
-    .app-title-main { 
-        font-size: 32px; 
-    }
-    .app-subtitle-main {
-        font-size: 12px;
-    }
-    .img-preview-container { 
-        height: 220px; 
-        margin: 20px auto;
-    }
+    .navbar { padding: 15px 15px; gap: 8px; }
+    .navbar-title { font-size: 14px; }
+    .app-header { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
+    .app-logo-img { width: 180px; height: auto; }
+    .app-title-main { font-size: 32px; }
+    .app-subtitle-main { font-size: 12px; }
+    .img-preview-container { height: 220px; margin: 20px auto; }
 
-    /* MENERAPKAN TAMPILAN UPLOADER KOTAK DI KIRI KHUSUS HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 8px !important;
-        padding: 8px 12px !important;
-        background-color: #F3F3F3 !important;
-        border: 1px solid #ccc !important;
-        border-radius: 20px !important;
+        border-radius: 15px !important;
+        padding: 8px !important;
     }
     
-    /* Menyelaraskan susunan flex pembungkus internal */
     [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
         display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
         width: auto !important;
     }
 
-    /* Tombol internal asli "Browse files" berupa kotak di sebelah kiri */
-    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
-        display: inline-flex !important;
-        background-color: #FFFFFF !important;
-        color: #333333 !important;
-        border: 1px solid #CCCCCC !important;
-        border-radius: 8px !important;
-        padding: 6px 14px !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        margin: 0 !important;
-        width: auto !important;
+    .custom-uploader-text {
+        font-size: 13px !important;
+        margin-left: 10px;
     }
 
-    /* MATIKAN TOTAL ICON TAMBAH (+) YANG DIHASILKAN OLEH MULTI-UPLOADER */
-    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div,
-    [data-testid="stFileUploader"] button:has(svg path[d*="M19 "]),
-    [data-testid="stFileUploader"] button:has(svg path[d*="M19,"]),
-    [data-testid="stFileUploader"] svg:not([data-testid="stFileUploaderDeleteIcon"]) {
-        display: none !important;
-    }
-    
-    /* Pastikan tombol silang bawaan Streamlit (Delete Icon) tidak tersembunyi */
-    [data-testid="stFileUploader"] button[aria-label="Remove file"] {
-        display: inline-flex !important;
-    }
-
-    /* Sembunyikan teks seret bawaan desktop agar tidak berantakan */
-    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-        display: none !important;
-    }
-    
-    /* Tampilkan teks kustom pendamping uploader di HP */
-    .custom-mobile-text-container {
-        display: inline-block !important;
-        color: #737373 !important;
-        font-size: 13.5px !important;
-        font-weight: 400 !important;
-        font-family: 'Inter', sans-serif !important;
-        margin-left: 4px !important;
-        vertical-align: middle !important;
-        line-height: 1 !important;
-    }
-    
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
@@ -304,36 +273,19 @@ div.stButton > button {
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
-        display: flex !important;
         flex-direction: row !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
     }
-    .result-label {
-        font-size: 15px;
-        min-width: 135px; 
-        margin-right: 0px;
-    }
-    .result-value {
-        font-size: 15px;
-    }
-    .page-wrapper { 
-        margin-top: 25px; 
-    }
-    .white-footer-canvas { 
-        margin-top: 50px !important;
-        padding: 15px 0px !important;
-    }
-    .footer-text {
-        font-size: 11px;
-    }
+    .result-label { font-size: 15px; min-width: 135px; }
+    .result-value { font-size: 15px; }
+    .white-footer-canvas { margin-top: 50px !important; padding: 15px 0px !important; }
+    .footer-text { font-size: 11px; }
 }
 </style>
 """, unsafe_allow_html=True)
 
+# --- LOAD MODEL & DATA PREPARATION ---
 @st.cache_resource
 def load_my_model():
-    import tensorflow as tf
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
@@ -419,27 +371,28 @@ if "confidence_text" not in st.session_state:
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
-# Render uploader utama
+# --- RENDER FILE UPLOADER UTAMA ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# TRIK PYTHON-CSS: Teks panduan 200MB murni dirender tepat di kanan tombol jika file kosong
+# TRIK INJEKSI STRUKTUR BARU JIKA FILE BELUM DIUPLOAD
 if uploaded_file is None:
     st.markdown("""
-    <style>
-    @media (max-width: 480px) {
-        [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-            content: "200MB per file • JPG, PNG" !important;
-            color: #737373 !important;
-            font-size: 13.5px !important;
-            font-weight: 400 !important;
-            font-family: 'Inter', sans-serif !important;
-            display: inline-block !important;
-            margin-left: 8px !important;
-            white-space: nowrap !important;
-        }
+    <script>
+    // Memasukkan teks pendamping kustom ke dalam DOM Uploader secara realtime
+    const dropzone = document.querySelector('[data-testid="stUploadDropzone"]');
+    if (dropzone && !document.getElementById("custom-text-id")) {
+        const spanTxt = document.createElement("span");
+        spanTxt.id = "custom-text-id";
+        spanTxt.className = "custom-uploader-text";
+        spanTxt.innerText = "200MB per file • JPG, PNG";
+        dropzone.appendChild(spanTxt);
     }
-    </style>
+    </script>
+    <div style="margin-top:-5px;"></div>
     """, unsafe_allow_html=True)
+    
+    # Fallback murni jika JS dinonaktifkan browser HP, teks dipaksa tampil di bawahnya bersih
+    st.markdown("<div class='custom-uploader-text' style='margin-left:5px; margin-top:2px; display:block;'>Limit: 200MB per file • JPG, PNG</div>", unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
