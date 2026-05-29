@@ -16,7 +16,7 @@ st.markdown("""
 
 *, *::before, *::after { box-sizing: border-box; }
 
-html, body, [data-testid="stAppViewContainer"] {
+html, body {
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
@@ -26,11 +26,23 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stAppViewContainer"] {
     background: linear-gradient(180deg, #A7FFFF 0%, #D1FFFF 100%) !important;
     min-height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
 }
 
 [data-testid="stMain"] {
     background: transparent !important;
-    padding-bottom: 20px !important; 
+    padding-bottom: 0px !important; 
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+}
+
+[data-testid="stMainBlockContainer"] {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    padding-bottom: 0px !important;
 }
 
 header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] { 
@@ -225,13 +237,18 @@ div.stButton > button:active {
 }
 
 .page-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    min-height: 100% !important;
     margin-bottom: 0px;
     padding-bottom: 0px;
 }
 
+/* STICKY FOOTER MENTOK BAWAH CANVAS */
 .white-footer-canvas {
     position: relative !important;
-    margin-top: 80px !important;
+    margin-top: auto !important; /* Memaksa footer berada di paling bawah kanvas */
     padding: 20px 0px !important;
     display: flex !important;
     justify-content: center !important; 
@@ -261,11 +278,11 @@ div.stButton > button:active {
         flex-direction: column;
         gap: 10px;
         text-align: center;
-        margin-top: -10px; /* Diubah dari 30px agar naik ke atas */
+        margin-top: -10px; 
         margin-bottom: 6px;
     }
     .app-logo-img { 
-        width: 195px; /* Diubah dari 150px agar diperbesar sedikit lagi */
+        width: 195px; 
         height: auto; 
     }
     .app-title-main { 
@@ -347,7 +364,7 @@ div.stButton > button:active {
         margin-top: 15px; 
     }
     .white-footer-canvas { 
-        margin-top: 40px !important;
+        margin-top: auto !important; /* Memaksa footer tetap di bawah kanvas saat di HP */
         padding: 15px 0px !important;
     }
     .footer-text {
