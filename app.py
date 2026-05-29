@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -222,56 +222,6 @@ div.stButton > button {
     .img-preview-container { 
         height: 220px; 
         margin: 20px auto;
-    }
-
-    /* FIX FILE UPLOADER - POSISI TOMBOL TAMBAH SEJAJAR DI KANAN DAN TEKS PEKAT */
-    [data-testid="stFileUploader"] section {
-        display: flex !important;
-        flex-direction: row-reverse !important; 
-        align-items: center !important;
-        justify-content: space-between !important;
-        gap: 12px !important;
-        padding: 12px 18px !important;
-        background-color: #EAEAEA !important;
-        border: none !important;
-        border-radius: 40px !important;
-    }
-    [data-testid="stFileUploader"] section svg {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] section button {
-        background-color: #FFFFFF !important;
-        color: #333333 !important;
-        border: 1px solid #CCCCCC !important;
-        border-radius: 50% !important;
-        width: 36px !important;
-        height: 36px !important;
-        min-width: 36px !important;
-        min-height: 36px !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        margin: 0 !important;
-        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
-    }
-    
-    /* Mematikan text drop default */
-    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-        display: none !important;
-    }
-
-    /* Custom Teks Info Ukuran File Jadi Sangat Pekat Jelas */
-    [data-testid="stFileUploader"] section::after {
-        content: "200MB per file • JPG, PNG";
-        font-size: 13px !important;
-        color: #111111 !important;
-        font-weight: 700 !important;
-        display: inline-block !important;
-        text-align: left !important;
-        flex-grow: 1 !important;
     }
     
     div.stButton > button {
@@ -415,9 +365,9 @@ analyze_clicked = st.button("Analisis Gambar")
 
 # Inisialisasi variabel status tracking di session state
 if "predicted_class" not in st.session_state:
-    st.session_state.predicted_class = "-"
+    st.session_state.predicted_class = ""
 if "confidence_text" not in st.session_state:
-    st.session_state.confidence_text = "-"
+    st.session_state.confidence_text = ""
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
@@ -434,8 +384,8 @@ if analyze_clicked:
         img_np = np.array(image)
         img_std = np.std(img_np)
         
-        # Proteksi super ketat: Jika latar belakang polos/logo atau akurasi di bawah batas aman, deteksi sebagai bukan gonggong
-        if max_conf < 0.75 or img_std < 38.0:
+        # Proteksi super ketat: Batas akurasi minimal dinaikkan hingga 0.98 (98%) untuk menyaring citra non-gonggong
+        if max_conf < 0.98 or img_std < 38.0:
             st.session_state.show_warning = True
             st.session_state.predicted_class = ""
             st.session_state.confidence_text = ""
@@ -451,7 +401,7 @@ if analyze_clicked:
 if st.session_state.show_warning:
     st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
-# Kolom tetap tampil namun isinya dikosongkan jika bukan gonggong sesuai instruksi Anda
+# Kolom tetap tampil namun isinya dikosongkan jika bukan gonggong
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
