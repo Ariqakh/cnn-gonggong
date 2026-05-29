@@ -122,39 +122,29 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* ===== CUSTOM STYLING FILE UPLOADER (DESKTOP) ===== */
+/* Custom Text Uploader Area untuk Desktop */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
-    border: 2px dashed #a4a4a4 !important;
+    border: 2px dashed #0b1d3a !important;
     border-radius: 30px !important;
-    padding: 25px !important;
+    padding: 25px !important; 
     text-align: center !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
 }
 
-/* Mengubah teks bawaan drag-drop di desktop */
-[data-testid="stFileUploader"] section [data-testid="stUploadDropzoneCardLines"] {
+/* Sembunyikan teks default streamlit */
+[data-testid="stFileUploader"] section > input + div {
     display: none !important;
 }
 
-[data-testid="stFileUploader"] section::before {
-    content: "Upload atau seret gambar di sini" !important;
-    font-size: 16px !important;
-    font-weight: 600 !important;
-    color: #0b1d3a !important;
-    margin-bottom: 5px !important;
-    display: block !important;
-}
-
+/* Buat teks petunjuk kustom buatan sendiri */
 [data-testid="stFileUploader"] section::after {
-    content: "Mendukung format JPG, JPEG, PNG (Maks. 200MB)" !important;
-    font-size: 13px !important;
-    color: #666666 !important;
-    font-weight: 400 !important;
+    content: "Upload atau seret (drag) gambar di sini\\A (JPG, JPEG, PNG maks 200MB)" !important;
+    white-space: pre-wrap !important;
+    font-size: 16px !important;
+    color: #0b1d3a !important;
+    font-weight: 600 !important;
     display: block !important;
+    margin-top: 10px !important;
 }
 
 /* ===== PERBAIKAN WARNA PERINGATAN STREAMLIT ===== */
@@ -336,16 +326,16 @@ div.stButton > button:active {
         margin: 10px auto !important;
     }
 
-    /* Modifikasi Khusus File Uploader di Mobile HP */
+    /* Penyesuaian Uploader untuk tampilan HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
-        padding: 18px 15px !important;
-        background-color: #F3F3F3 !important;
-        border: 2px dashed #a4a4a4 !important;
+        padding: 20px 15px !important;
+        background-color: #EAEAEA !important;
+        border: 2px dashed #0b1d3a !important;
         border-radius: 25px !important;
     }
     [data-testid="stFileUploader"] section svg {
@@ -355,29 +345,21 @@ div.stButton > button:active {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
-        border-radius: 12px !important;
-        padding: 6px 16px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        margin: 5px 0 0 0 !important;
-        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
-        width: auto !important;
-    }
-    [data-testid="stFileUploader"] section > input + div {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] section::before {
-        content: "Upload foto di sini" !important;
+        border-radius: 20px !important;
+        padding: 8px 20px !important;
         font-size: 14px !important;
         font-weight: 600 !important;
-        color: #0b1d3a !important;
+        margin: 0 !important;
+        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
+        order: 2 !important; /* Letakkan tombol setelah teks petunjuk */
     }
     [data-testid="stFileUploader"] section::after {
-        content: "JPG, JPEG, PNG (Maks. 200MB)" !important;
-        font-size: 11px !important;
-        color: #777777 !important;
-        font-weight: 400 !important;
-        display: inline-block !important;
+        content: "Ketuk untuk upload gambar" !important;
+        font-size: 14px !important;
+        color: #0b1d3a !important;
+        font-weight: 700 !important;
+        display: block !important;
+        order: 1 !important;
     }
 
     div.stButton > button {
@@ -403,7 +385,7 @@ div.stButton > button:active {
         font-size: 15px;
     }
     .result-box-spacer {
-        height: 100px; 
+        height: 100px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
     }
     .page-wrapper { 
         margin-top: 15px; 
@@ -472,7 +454,7 @@ st.markdown(f"""
     <div class="navbar-logo">
         <img src="data:image/png;base64,{encoded_nav_logo}" width="32" height="32" style="object-fit:cover;">
     </div>
-    <span class="navbar-title">Universitas Maritime Raja Ali Haji</span>
+    <span class="navbar-title">Universitas Maritim Raja Ali Haji</span>
 </div>
 <div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
@@ -524,10 +506,6 @@ else:
         content: "" !important; 
         display: none !important; 
     }
-    [data-testid="stFileUploader"] section::before { 
-        content: "" !important; 
-        display: none !important; 
-    }
 
     @media (max-width: 480px) {
         [data-testid="stFileUploader"] section button {
@@ -541,7 +519,6 @@ else:
             align-items: center !important;
             padding: 12px 20px !important;
             background-color: #EAEAEA !important;
-            border: none !important;
         }
 
         [data-testid="stFileUploader"] section data,
