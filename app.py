@@ -49,12 +49,13 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     visibility: hidden; display: none !important; 
 }
 
+/* --- TAMBAHAN GAYA PETUNJUK --- */
 .upload-instruction {
-    font-size: 14px;
+    text-align: center;
     color: #0b1d3a;
+    font-size: 14px;
     font-weight: 600;
     margin-bottom: 10px;
-    text-align: center;
 }
 
 .navbar {
@@ -174,6 +175,7 @@ div.stButton > button {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
+div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
 div.stButton > button[kind="secondary"] {
     background: #0a3d3c !important;
 }
@@ -182,7 +184,13 @@ div.stButton:nth-of-type(1) > button {
     background: #0a3d3c !important;
 }
 
-div.stButton > button#btn_analyze {
+div.stButton > button#btn_remove_bg,
+div.stButton > button[key="btn_remove_bg"] {
+    background: #0a3d3c !important;
+}
+
+div.stButton > button#btn_analyze,
+div.stButton > button[key="btn_analyze"] {
     background: #115c5a !important;
 }
 
@@ -190,6 +198,11 @@ div.stButton > button:hover {
     opacity: 0.88 !important;
     transform: translateY(-1px) !important;
     box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(0px) !important;
+    opacity: 1 !important;
 }
 
 .result-box {
@@ -225,10 +238,38 @@ div.stButton > button:hover {
     font-weight: 600;
 }
 
-.result-box-spacer { height: 100px; width: 100%; }
-.page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; margin-bottom: 0px; padding-bottom: 0px; }
-.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
-.footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
+.result-box-spacer {
+    height: 100px;
+    width: 100%;
+}
+
+.page-wrapper {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-grow: 1 !important;
+    min-height: 100% !important;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.white-footer-canvas {
+    position: relative !important;
+    margin-top: auto !important; 
+    padding: 20px 0px !important;
+    display: flex !important;
+    justify-content: center !important; 
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.footer-text {
+    text-align: center;
+    color: #1a364a;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.5;
+    margin: 0 auto;
+}
 
 @media (max-width: 480px) {
     .navbar { padding: 15px 15px; gap: 8px; }
@@ -239,71 +280,105 @@ div.stButton > button:hover {
     .app-subtitle-main { font-size: 12px; }
     .img-preview-container { height: 160px; margin: 8px auto; }
     .button-group { flex-direction: column !important; gap: 10px; margin: 10px auto !important; }
-    [data-testid="stFileUploader"] section { display: flex !important; flex-direction: row !important; align-items: center !important; justify-content: flex-start !important; gap: 15px !important; padding: 12px 20px !important; background-color: #EAEAEA !important; border: none !important; border-radius: 40px !important; }
+    
+    [data-testid="stFileUploader"] section {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 15px !important;
+        padding: 12px 20px !important;
+        background-color: #EAEAEA !important;
+        border: none !important;
+        border-radius: 40px !important;
+    }
     [data-testid="stFileUploader"] section svg { display: none !important; }
-    [data-testid="stFileUploader"] section button { background-color: #FFFFFF !important; color: #333333 !important; border: 1px solid #CCCCCC !important; border-radius: 12px !important; padding: 6px 16px !important; font-size: 14px !important; font-weight: 500 !important; margin: 0 !important; box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important; }
-    [data-testid="stFileUploader"] section::after { content: "JPG, PNG (Max 200MB)"; font-size: 11px; color: #777777; }
+    [data-testid="stFileUploader"] section button {
+        background-color: #FFFFFF !important;
+        color: #333333 !important;
+        border: 1px solid #CCCCCC !important;
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    [data-testid="stFileUploader"] section > input + div { display: none !important; }
+    [data-testid="stFileUploader"] section::after {
+        content: "200MB per file • JPG, PNG";
+        font-size: 14px;
+        color: #777777;
+        font-weight: 400;
+        display: inline-block;
+    }
     div.stButton > button { width: 100% !important; font-size: 15px !important; padding: 12px 20px !important; }
-    .result-label { font-size: 15px; min-width: 135px; }
+    .result-box { padding: 15px 20px; margin-top: 12px; display: flex !important; flex-direction: row !important; }
+    .result-label { font-size: 15px; min-width: 135px; margin-right: 0px; }
+    .result-value { font-size: 15px; }
+    .result-box-spacer { height: 100px; }
+    .page-wrapper { margin-top: 15px; }
+    .white-footer-canvas { margin-top: auto !important; padding: 15px 0px !important; }
     .footer-text { font-size: 11px; }
 }
 </style>
 """, unsafe_allow_html=True)
 
+# ... [load_my_model dan bagian lain tetap sama sampai File Uploader] ...
+
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
+
     original_dense = Dense.from_config
     @classmethod
     def custom_dense(cls, config):
         config.pop("quantization_config", None)
         return original_dense(config)
     Dense.from_config = custom_dense
+
+    original_input = InputLayer.from_config
+    @classmethod
+    def custom_input(cls, config):
+        config.pop("batch_shape", None)
+        config.pop("optional", None)
+        if "batch_input_shape" not in config:
+            config["batch_input_shape"] = [None, 224, 224, 3]
+        return cls(**config)
+    InputLayer.from_config = custom_input
+
+    original_dropout = Dropout.from_config
+    @classmethod
+    def custom_dropout(cls, config):
+        config.pop("seed_generator", None)
+        return original_dropout(config)
+    Dropout.from_config = custom_dropout
+
     model = keras_load_model("model_gonggong.h5", compile=False)
     return model
 
 model = load_my_model()
 classes = ["Canarium Mutabile", "Canarium Urseus", "Laevistrombus Turturella", "Pugilina Coclidium"]
 
-st.markdown("""
+# ... [Setup Navbar] ...
+
+st.markdown(f"""
 <div class="navbar">
+    <div class="navbar-logo">
+        <img src="data:image/png;base64,{encoded_nav_logo}" width="32" height="32" style="object-fit:cover;">
+    </div>
     <span class="navbar-title">Universitas Maritime Raja Ali Haji</span>
 </div>
+<div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
-st.markdown("<div class='app-header'><div class='app-title-container'><div class='app-title-main'>Klasifikasi Jenis Gonggong</div><div class='app-subtitle-main'>Berbasis CNN MobileNet</div></div></div>", unsafe_allow_html=True)
+# ... [Header Logo] ...
 
-# --- UPLOAD SECTION ---
-st.markdown("<div class='upload-instruction'>Silakan upload foto Gonggong untuk memulai klasifikasi:</div>", unsafe_allow_html=True)
+# --- FILE UPLOADER DENGAN PETUNJUK ---
+st.markdown("<div class='upload-instruction'>📂 Klik atau Tarik (Drag) gambar Gonggong ke sini</div>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# --- SESSION STATE ---
-if "pred_class" not in st.session_state: st.session_state.pred_class = "-"
-if "conf_text" not in st.session_state: st.session_state.conf_text = "-"
-if "is_bg_removed" not in st.session_state: st.session_state.is_bg_removed = False
-
-if uploaded_file is None:
-    st.session_state.pred_class = "-"
-    st.session_state.conf_text = "-"
-    st.session_state.is_bg_removed = False
-else:
-    # --- LOGIKA PREVIEW & MODEL ---
-    image = Image.open(uploaded_file).convert("RGB")
-    # ... (logika pengolahan gambar tetap sama) ...
-    col1, col2 = st.columns(2)
-    # Tampilan preview ...
-    # Tombol Analisis ...
-    # Hasil Prediksi ...
-
-# --- FOOTER ---
-st.markdown("""
-<div class='white-footer-canvas'>
-    <div class='footer-text'>
-        © 2026 Sistem Klasifikasi Jenis Gonggong<br>
-        Fakultas Teknik dan Teknologi Kemaritiman - UMRAH
-    </div>
-</div>
-""", unsafe_allow_html=True)
+# ... [Sisa kode tetap sama] ...
