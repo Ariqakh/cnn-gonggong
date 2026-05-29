@@ -425,7 +425,6 @@ if uploaded_file is None:
     st.session_state.warn_box_html = ""
     st.session_state.is_bg_removed = False
 else:
-    # JIKA FILE SUDAH BERHASIL DI-UPLOAD
     st.markdown("""
     <style>
     [data-testid="stFileUploader"] section::after { 
@@ -498,55 +497,15 @@ else:
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     
-    # PERBAIKAN LOGIKA: Segmentasi Thresholding Otsu untuk mengisolasi Gonggong di atas latar belakang PUTIH murni
+    # FIX LOGIKA UTAMA: Mengubah latar belakang hitam gelap menjadi putih murni
     img_np = np.array(image)
-    
-    # Preprocessing citra: ubah ke keabuan dan lakukan blurring untuk mengurangi noise kecil
-    from keras.utils import img_to_array, array_to_img
-    import cv2
-    
-    # OpenCV ops menggunakan implementasi numpy agar aman tanpa library cv2 berat di server
     gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-    gray_np = gray_np.astype(np.uint8)
     
-    # Blurring manual sederhana: konvolusi rata-rata
-    kernel = np.ones((5,5),np.float32)/25;
-    gray_blurred_np = np.zeros_like(gray_np, dtype=np.float32)
-    gray_blurred_np[2:-2, 2:-2] = np.sum([kernel[i,j]*gray_np[i:i+gray_np.shape[0]-4, j:j+gray_np.shape[1]-4] for i in range(5) for j in range(5)], axis=0)
-    gray_blurred_np = gray_blurred_np.astype(np.uint8)
-
-    # Threshold Otsu manual: adaptif memisahkan Gonggong (gelap) dari latar belakang beralas terang
-    hist = np.histogram(gray_blurred_np.ravel(), 256, [0, 256])[0]
-    total_pix = gray_blurred_np.shape[0] * gray_blurred_np.shape[1]
+    # Nilai < 40 digunakan untuk mendeteksi warna hitam/sangat gelap pada latar belakang
+    background_mask = gray_np < 40 
     
-    current_max, otsu_thresh = -1, 127
-    sum_b, sum_all, q1 = 0, np.sum(np.array([i*hist[i] for i in range(256)])), 0
-    
-    for i in range(256):
-        q1 += hist[i]
-        q2 = total_pix - q1
-        if q1 == 0 or q2 == 0: continue
-        
-        sum_b += (i * hist[i])
-        mean_b = sum_b / q1
-        mean_f = (sum_all - sum_b) / q2
-        
-        sigma_b_squared = q1 * q2 * (mean_b - mean_f) * (mean_b - mean_f)
-        if sigma_b_squared > current_max:
-            current_max = sigma_b_squared
-            otsu_thresh = i
-
-    # Nilai threshold final: piksel lebih gelap dari ini adalah Gonggong
-    background_mask = gray_blurred_np > otsu_thresh
-    
-    # Membuat latar belakang putih murni [255, 255, 255] seukuran gambar asli
-    white_bg_np = np.full_like(img_np, 255)
-    
-    # Menerapkan masking: Hanya menyalin piksel Gonggong asli di atas latar belakang putih
-    segmented_np = np.copy(white_bg_np)
-    segmented_np[~background_mask] = img_np[~background_mask] # Mempertahankan tekstur asli Gonggong
-    
-    # Mengembalikan array NumPy ke PIL Image objek
+    segmented_np = img_np.copy()
+    segmented_np[background_mask] = [255, 255, 255] # Ubah hitam menjadi PUTIH MURNI
     processed_image = Image.fromarray(segmented_np)
 
     # Tampilkan layout kolom pratinjau
@@ -606,33 +565,12 @@ if bg_clicked:
 # --- KONTROL LOGIKA DAN VALIDASI MODEL ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # Gunakan gambar hasil olahan latar belakang putih agar performa model CNN tetap konsisten
+        # Gunakan gambar hasil olahan latar belakang hitam ke putih untuk proses klasifikasi model
         img_np = np.array(image)
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        gray_np = gray_np.astype(np.uint8)
-        kernel = np.ones((5,5),np.float32)/25;
-        gray_blurred_np = np.zeros_like(gray_np, dtype=np.float32)
-        gray_blurred_np[2:-2, 2:-2] = np.sum([kernel[i,j]*gray_np[i:i+gray_np.shape[0]-4, j:j+gray_np.shape[1]-4] for i in range(5) for j in range(5)], axis=0)
-        gray_blurred_np = gray_blurred_np.astype(np.uint8)
-        hist = np.histogram(gray_blurred_np.ravel(), 256, [0, 256])[0]
-        total_pix = gray_blurred_np.shape[0] * gray_blurred_np.shape[1]
-        current_max, otsu_thresh = -1, 127
-        sum_b, sum_all, q1 = 0, np.sum(np.array([i*hist[i] for i in range(256)])), 0
-        for i in range(256):
-            q1 += hist[i]
-            q2 = total_pix - q1
-            if q1 == 0 or q2 == 0: continue
-            sum_b += (i * hist[i])
-            mean_b = sum_b / q1
-            mean_f = (sum_all - sum_b) / q2
-            sigma_b_squared = q1 * q2 * (mean_b - mean_f) * (mean_b - mean_f)
-            if sigma_b_squared > current_max:
-                current_max = sigma_b_squared
-                otsu_thresh = i
-        background_mask = gray_blurred_np > otsu_thresh
-        white_bg_np = np.full_like(img_np, 255)
-        segmented_np = np.copy(white_bg_np)
-        segmented_np[~background_mask] = img_np[~background_mask] 
+        background_mask = gray_np < 40
+        segmented_np = img_np.copy()
+        segmented_np[background_mask] = [255, 255, 255]
         final_processed = Image.fromarray(segmented_np)
 
         img_resized = final_processed.resize((224, 224))
@@ -642,10 +580,11 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        pure_white = np.sum(np.all(img_np >= 245, axis=-1))
-        total_pixels = img_np.shape[0] * img_np.shape[1]
+        pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
+        total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
         
-        if max_conf < 0.65 or (pure_white / total_pixels) > 0.40:
+        # Logika validasi disesuaikan setelah gambar diubah ke background putih
+        if max_conf < 0.50 or (pure_white / total_pixels) > 0.85:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
             st.session_state.pred_class = "-"
             st.session_state.conf_text = "-"
