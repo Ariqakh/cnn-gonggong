@@ -142,20 +142,20 @@ div.stButton > button {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Tombol Hapus Latar Belakang — biru teal */
+/* Mengubah semua tipe selektor tombol ke warna hijau tua gradasi logo */
 div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
 div.stButton > button[kind="secondary"] {
-    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
+    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
 }
 
-/* Fallback — tombol pertama biru, tombol kedua hijau */
+/* Fallback — tombol pertama dan kedua seragam menjadi warna hijau tua */
 div.stButton:nth-of-type(1) > button {
-    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
+    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
 }
 
 div.stButton > button#btn_remove_bg,
 div.stButton > button[key="btn_remove_bg"] {
-    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
+    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
 }
 
 div.stButton > button#btn_analyze,
@@ -555,20 +555,17 @@ else:
     """, unsafe_allow_html=True)
 
 # --- TOMBOL ---
-# Tombol Hapus Latar Belakang selalu tampil
 st.markdown("<div class='button-group'>", unsafe_allow_html=True)
 
 if not st.session_state.is_bg_removed:
-    # Hanya tampilkan tombol Hapus BG (full width sendirian)
-    bg_clicked = st.button("🖼️ Hapus Latar Belakang", key="btn_remove_bg")
+    bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
     analyze_clicked = False
 else:
-    # Setelah BG dihapus, tampilkan kedua tombol berdampingan
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        bg_clicked = st.button("🖼️ Hapus Latar Belakang", key="btn_remove_bg")
+        bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
     with col_btn2:
-        analyze_clicked = st.button("🔍 Analisis Gambar", key="btn_analyze")
+        analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
