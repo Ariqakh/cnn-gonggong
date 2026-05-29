@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE) */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE COOPERATIVE) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -222,6 +222,15 @@ div.stButton > button {
     .img-preview-container { 
         height: 220px; 
         margin: 20px auto;
+    }
+
+    /* MENYESUAIKAN TAMPILAN MOBILE BIAR SAMA PERSIS SEPERTI DI WEBSITE */
+    [data-testid="stFileUploader"] section {
+        display: block !important;
+        background-color: #F3F3F3 !important;
+        border: 1px solid #ccc !important;
+        border-radius: 15px !important;
+        padding: 12px !important;
     }
     
     div.stButton > button {
@@ -363,7 +372,6 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# Inisialisasi variabel status tracking di session state
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = ""
 if "confidence_text" not in st.session_state:
@@ -380,12 +388,16 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # Deteksi Gambar Non-Gonggong / Gambar Vektor Logo menggunakan Standar Deviasi Kontras Piksel
+        # FILTER KETAT BARU: Menganalisis Sebaran Piksel Ekstrem Digital Grafis (Logo & Brosur)
         img_np = np.array(image)
-        img_std = np.std(img_np)
+        # Menghitung persentase piksel yang murni putih (background logo) atau murni hitam (border/teks digital)
+        pure_white = np.sum(np.all(img_np >= 245, axis=-1))
+        pure_black = np.sum(np.all(img_np <= 10, axis=-1))
+        total_pixels = img_np.shape[0] * img_np.shape[1]
+        extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Proteksi super ketat: Batas akurasi minimal dinaikkan hingga 0.98 (98%) untuk menyaring citra non-gonggong
-        if max_conf < 0.98 or img_std < 38.0:
+        # Jika gambar terindikasi buatan/desain grafis komputer (extreme_ratio tinggi) atau nilai keyakinan sangat cacat rendah (di bawah 50%)
+        if extreme_ratio > 0.22 or max_conf < 0.50:
             st.session_state.show_warning = True
             st.session_state.predicted_class = ""
             st.session_state.confidence_text = ""
@@ -397,11 +409,9 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Tampilkan alert box jika gambar bukan gonggong
 if st.session_state.show_warning:
     st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
-# Kolom tetap tampil namun isinya dikosongkan jika bukan gonggong
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
