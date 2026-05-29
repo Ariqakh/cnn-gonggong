@@ -194,6 +194,24 @@ div.stButton > button {
     margin: 0 auto;
 }
 
+/* CUSTOM INJECTED LABELS FOR MOBILE FILE UPLOADER */
+.mobile-custom-uploader-container {
+    background-color: #F3F3F3;
+    border: 1px solid #cccccc;
+    border-radius: 14px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+.mobile-custom-text-hint {
+    color: #737373;
+    font-size: 13.5px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+}
+
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .navbar {
@@ -224,48 +242,44 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* KHUSUS DISPLAY FILE UPLOADER DI HP */
+    /* MENERAPKAN TAMPILAN UPLOADER DEFAULT SESUAI SCREENSHOT (TOMBOL KOTAK DI KIRI) */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 10px !important;
+        gap: 12px !important;
         padding: 10px 15px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
         border-radius: 20px !important;
     }
     
-    /* Tombol Browse Files Bentuk Kotak Sesuai Foto */
+    /* Memastikan tombol internal "Browse files" berupa kotak di sebelah kiri */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 8px !important;
-        padding: 6px 14px !important;
+        padding: 6px 12px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
         display: inline-flex !important;
         width: auto !important;
     }
+
+    /* MATIKAN TOTAL TANDA TAMBAH (+) BAWAAN STREAMLIT MULTI-UPLOADER */
+    [data-testid="stFileUploader"] section + button, 
+    [data-testid="stFileUploader"] button:has(svg path[d*="M19"]),
+    [data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"] {
+        display: none !important;
+    }
     
-    /* Menampilkan text limit file di sebelah kanan tombol */
-    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-    }
-
+    /* Hilangkan petunjuk text internal seret/bawaan agar tidak tumpang tindih */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-        display: inline !important;
-        color: #737373 !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
+        display: none !important;
     }
-
-    /* Sembunyikan icon awan drag & drop yang mengganggu */
     [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
@@ -396,6 +410,23 @@ if "show_warning" not in st.session_state:
 
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
+# MANIPULASI ELEMENT TEKS 200MB VIA PYTHON AGAR AKURAT DI HP
+if uploaded_file is None:
+    st.markdown("""
+    <script>
+    var elements = window.parent.document.querySelectorAll('[data-testid="stFileUploader"] section');
+    elements.forEach(function(el) {
+        // Cek apakah custom label sudah ada agar tidak duplikat
+        if(!el.querySelector('.mobile-custom-text-hint')) {
+            var textSpan = window.parent.document.createElement('span');
+            textSpan.className = 'mobile-custom-text-hint';
+            textSpan.innerText = '200MB per file • JPG, PNG';
+            el.appendChild(textSpan);
+        }
+    });
+    </script>
+    """, unsafe_allow_html=True)
+
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
@@ -408,7 +439,6 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # JIKA USER MENEKAN TOMBOL SILANG (X), MAKA SEMUA KEMBALI DI-RESET KE AWAL KOSONG
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.show_warning = False
