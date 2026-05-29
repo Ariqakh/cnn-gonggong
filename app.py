@@ -570,30 +570,27 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# --- TOMBOL ---
-st.markdown("<div class='button-group'>", unsafe_allow_html=True)
-
-if not st.session_state.is_bg_removed:
-    bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
-    analyze_clicked = False
-else:
-    col_btn1, col_btn2 = st.columns(2)
-    with col_btn1:
+# --- TOMBOL (HANYA MUNCUL JIKA GAMBAR SUDAH DIUPLOAD) ---
+if uploaded_file is not None:
+    st.markdown("<div class='button-group'>", unsafe_allow_html=True)
+    
+    if not st.session_state.is_bg_removed:
         bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
-    with col_btn2:
-        analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
+        analyze_clicked = False
+    else:
+        col_btn1, col_btn2 = st.columns(2)
+        with col_btn1:
+            bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
+        with col_btn2:
+            analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
+            
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown("</div>", unsafe_allow_html=True)
-
-if bg_clicked:
-    if uploaded_file is not None:
+    if bg_clicked:
         st.session_state.is_bg_removed = True
         st.rerun()
-    else:
-        st.warning("Silakan upload gambar terlebih dahulu.")
 
-if analyze_clicked:
-    if uploaded_file is not None:
+    if analyze_clicked:
         img_np = np.array(image)
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
         background_mask = gray_np < 40
@@ -620,8 +617,6 @@ if analyze_clicked:
             predicted_index = np.argmax(prediction)
             st.session_state.pred_class = classes[predicted_index]
             st.session_state.conf_text = f"{max_conf * 100:.2f}%"
-    else:
-        st.warning("Silakan upload gambar terlebih dahulu.")
 
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
