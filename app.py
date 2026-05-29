@@ -142,25 +142,25 @@ div.stButton > button {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Mengubah semua tipe selektor tombol ke warna hijau tua gradasi logo */
+/* Tombol Hapus Latar Belakang diubah ke hijau tua menyesuaikan logo */
 div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
 div.stButton > button[kind="secondary"] {
-    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
+    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
 }
 
-/* Fallback — tombol pertama dan kedua seragam menjadi warna hijau tua */
+/* Fallback — tombol pertama hijau tua, tombol kedua hijau tua sedikit lebih terang */
 div.stButton:nth-of-type(1) > button {
-    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
+    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
 }
 
 div.stButton > button#btn_remove_bg,
 div.stButton > button[key="btn_remove_bg"] {
-    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
+    background: linear-gradient(135deg, #0a3d3c 0%, #166d62 100%) !important;
 }
 
 div.stButton > button#btn_analyze,
 div.stButton > button[key="btn_analyze"] {
-    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
+    background: linear-gradient(135deg, #115c5a 0%, #1a8375 100%) !important;
 }
 
 div.stButton > button:hover {
@@ -394,7 +394,7 @@ st.markdown(f"""
     <div class="navbar-logo">
         <img src="data:image/png;base64,{encoded_nav_logo}" width="32" height="32" style="object-fit:cover;">
     </div>
-    <span class="navbar-title">Universitas Maritim Raja Ali Haji</span>
+    <span class="navbar-title">Universitas Maritime Raja Ali Haji</span>
 </div>
 <div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
@@ -569,7 +569,6 @@ else:
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Aksi tombol Hapus Latar Belakang
 if bg_clicked:
     if uploaded_file is not None:
         st.session_state.is_bg_removed = True
@@ -577,7 +576,6 @@ if bg_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Aksi tombol Analisis
 if analyze_clicked:
     if uploaded_file is not None:
         img_np = np.array(image)
@@ -609,7 +607,6 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Render warning
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
 
