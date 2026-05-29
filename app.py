@@ -10,10 +10,9 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS STYLING UTAMA ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -29,6 +28,7 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
+/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -111,72 +111,14 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* ==========================================================================
-   STYLE UNTUK UPLOADER DESKTOP & MOBILE (PENGUNCI HORIZONTAL)
-   ========================================================================== */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
-    border-radius: 25px !important;
-    padding: 12px 18px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
+    border-radius: 30px !important;
+    padding: 15px !important;
 }
 
-/* Mematikan text bawaan asli Streamlit agar bersih */
-[data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-    display: none !important;
-}
-
-/* Memaksa dropzone internal berjejer horizontal murni ke kanan */
-[data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 15px !important;
-    width: 100% !important;
-}
-
-/* Menata tombol bawaan Streamlit (Browse files) */
-[data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
-    background-color: #FFFFFF !important;
-    color: #333333 !important;
-    border: 1px solid #CCCCCC !important;
-    border-radius: 12px !important;
-    padding: 8px 18px !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-    display: inline-flex !important;
-}
-
-/* PROTEKSI DAN NORMALISASI BARIS SETELAH UPLOAD (KOLOM TIDAK LEBAR) */
-[data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    gap: 10px !important;
-    margin-left: 15px !important;
-    padding: 0 !important;
-}
-
-/* Sembunyikan khusus tombol plus (+) bawaan */
-[data-testid="stFileUploader"] button:has(svg path[d*="M19 "]) {
-    display: none !important;
-}
-
-/* Kembalikan fungsionalitas dan tampilan tombol silang (X) */
-[data-testid="stFileUploader"] button[aria-label="Remove file"] {
-    display: inline-flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-}
-
-/* BUTTON ANALISIS */
 div.stButton > button {
     background-color: #2D6A6A !important;
     color: white !important;
@@ -190,6 +132,7 @@ div.stButton > button {
     width: 200px;
 }
 
+/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -216,14 +159,11 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 15px;
+    padding: 10px;
     border-radius: 15px;
-    font-size: 14px;
-    margin-top: 20px;
+    font-size: 13px;
     margin-bottom: 10px;
     font-weight: 600;
-    text-align: center;
-    border: 1px solid #FFCCCC;
 }
 
 .page-wrapper {
@@ -231,6 +171,7 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
+/* PERBAIKAN POSISI FOOTER: Menggunakan pola flow relative + margin top agar berada stabil di paling bawah konten */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -250,45 +191,75 @@ div.stButton > button {
     margin: 0 auto;
 }
 
-/* ==========================================================================
-   PERBAIKAN TOTAL LAYOUT MOBILE (MAKSIMAL 480PX)
-   ========================================================================== */
+/* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .navbar { padding: 15px 15px; gap: 8px; }
-    .navbar-title { font-size: 14px; }
-    .app-header { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
-    .app-logo-img { width: 180px; height: auto; }
-    .app-title-main { font-size: 32px; }
-    .app-subtitle-main { font-size: 12px; }
-    .img-preview-container { height: 220px; margin: 20px auto; }
-
-    /* Memaksa box container luar tetap bulat elips sempurna di HP */
-    [data-testid="stFileUploader"] section {
-        display: flex !important;
-        flex-direction: row !important; 
-        align-items: center !important;
-        justify-content: flex-start !important;
-        border-radius: 25px !important;  /* Menjaga kelengkungan sudut elips */
-        padding: 12px 16px !important;
-        width: 100% !important;
+    .navbar {
+        padding: 15px 15px;
+        gap: 8px;
     }
-    
-    /* Memaksa area dropzone di dalam agar tidak wrap/patah ke bawah */
-    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
+    .navbar-title {
+        font-size: 14px;
+    }
+    .app-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        margin-top: 40px;
+    }
+    .app-logo-img { 
+        width: 180px; 
+        height: auto; 
+    }
+    .app-title-main { 
+        font-size: 32px; 
+    }
+    .app-subtitle-main {
+        font-size: 12px;
+    }
+    .img-preview-container { 
+        height: 220px; 
+        margin: 20px auto;
+    }
+
+    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
+    [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        flex-wrap: nowrap !important; /* Kunci baris agar tidak patah */
-        gap: 12px !important;
-        width: 100% !important;
+        gap: 15px !important;
+        padding: 12px 20px !important;
+        background-color: #EAEAEA !important;
+        border: none !important;
+        border-radius: 40px !important;
     }
-
-    /* Ukuran tombol di HP agar tetap proporsional */
-    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
-        padding: 8px 16px !important;
+    /* Sembunyikan ikon seret bawaan drag&drop */
+    [data-testid="stFileUploader"] section svg {
+        display: none !important;
+    }
+    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
+    [data-testid="stFileUploader"] section button {
+        background-color: #FFFFFF !important;
+        color: #333333 !important;
+        border: 1px solid #CCCCCC !important;
+        border-radius: 12px !important;
+        padding: 6px 16px !important;
         font-size: 14px !important;
-        flex-shrink: 0 !important; /* Tombol dilarang gepeng */
+        font-weight: 500 !important;
+        margin: 0 !important;
+        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
+    }
+    /* Sembunyikan pesan teks seret bawaan browser */
+    [data-testid="stFileUploader"] section > input + div {
+        display: none !important;
+    }
+    /* Tampilkan label kustom di sebelah kanan tombol */
+    [data-testid="stFileUploader"] section::after {
+        content: "200MB per file • JPG, PNG";
+        font-size: 14px;
+        color: #777777;
+        font-weight: 400;
+        display: inline-block;
     }
 
     div.stButton > button {
@@ -297,50 +268,98 @@ div.stButton > button {
         padding: 15px 20px !important;
     }
     
+    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
+        display: flex !important;
         flex-direction: row !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
     }
-    .result-label { font-size: 15px; min-width: 135px; }
-    .result-value { font-size: 15px; }
-    .white-footer-canvas { margin-top: 50px !important; padding: 15px 0px !important; }
-    .footer-text { font-size: 11px; }
+    .result-label {
+        font-size: 15px;
+        min-width: 135px; 
+        margin-right: 0px;
+    }
+    .result-value {
+        font-size: 15px;
+    }
+    .page-wrapper { 
+        margin-top: 25px; 
+    }
+    .white-footer-canvas { 
+        margin-top: 50px !important;
+        padding: 15px 0px !important;
+    }
+    .footer-text {
+        font-size: 11px;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD MODEL & DATA PREPARATION ---
 @st.cache_resource
 def load_my_model():
+
+    import tensorflow as tf
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
+    # =========================
+    # PATCH Dense
+    # =========================
     original_dense = Dense.from_config
+
     @classmethod
     def custom_dense(cls, config):
+
         config.pop("quantization_config", None)
+
         return original_dense(config)
+
     Dense.from_config = custom_dense
 
+    # =========================
+    # PATCH InputLayer
+    # =========================
     original_input = InputLayer.from_config
+
     @classmethod
     def custom_input(cls, config):
+
         config.pop("batch_shape", None)
         config.pop("optional", None)
+
         if "batch_input_shape" not in config:
             config["batch_input_shape"] = [None, 224, 224, 3]
+
         return cls(**config)
+
     InputLayer.from_config = custom_input
 
+    # =========================
+    # PATCH Dropout
+    # =========================
     original_dropout = Dropout.from_config
+
     @classmethod
     def custom_dropout(cls, config):
+
         config.pop("seed_generator", None)
+
         return original_dropout(config)
+
     Dropout.from_config = custom_dropout
 
-    model = keras_load_model("model_gonggong.h5", compile=False)
+    # =========================
+    # LOAD MODEL
+    # =========================
+    model = keras_load_model(
+        "model_gonggong.h5",
+        compile=False
+    )
+
     return model
 
 model = load_my_model()
@@ -352,12 +371,9 @@ classes = [
     "Pugilina Coclidium"
 ]
 
-try:
-    with open("logo_umrah.png", "rb") as f:
-        nav_logo_bytes = f.read()
-    encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
-except:
-    encoded_nav_logo = ""
+with open("logo_umrah.png", "rb") as f:
+    nav_logo_bytes = f.read()
+encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
 
 st.markdown(f"""
 <div class="navbar">
@@ -371,7 +387,6 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
-logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
@@ -391,39 +406,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-if "predicted_class" not in st.session_state:
-    st.session_state.predicted_class = "-"
-if "confidence_text" not in st.session_state:
-    st.session_state.confidence_text = "-"
-if "show_warning" not in st.session_state:
-    st.session_state.show_warning = False
-
-# --- RENDER FILE UPLOADER UTAMA ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
-
-# REKAYASA TEKS DISAMPING TOMBOL (DENGAN PROTEKSI WARNA DI MOBILE)
-if uploaded_file is None:
-    st.markdown("""
-    <style>
-    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-        content: "200MB per file • JPG, PNG" !important;
-        color: #555555 !important; /* Memaksa warna abu-abu gelap agar kontras di HP */
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        font-family: 'Inter', sans-serif !important;
-        white-space: nowrap !important;
-        display: inline-block !important;
-    }
-    @media (max-width: 480px) {
-        [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-            content: "200MB per file • JPG, PNG" !important;
-            color: #555555 !important; /* Proteksi warna dari bug hilangnya teks di HP */
-            font-size: 12px !important;  /* Sedikit dikecilkan agar pas dengan layar HP */
-            display: inline-block !important;
-        }
-    }
-    </style>
-    """, unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
@@ -437,10 +420,6 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
 else:
-    st.session_state.predicted_class = "-"
-    st.session_state.confidence_text = "-"
-    st.session_state.show_warning = False
-    
     st.markdown("""
     <div class='img-preview-container'>
         <span class='img-placeholder-text'>Gambar</span>
@@ -448,6 +427,10 @@ else:
     """, unsafe_allow_html=True)
 
 analyze_clicked = st.button("Analisis Gambar")
+
+predicted_class = "-"
+confidence_text = "-"
+is_gonggong = True
 
 if analyze_clicked:
     if uploaded_file is not None:
@@ -458,35 +441,24 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        img_np = np.array(image)
-        pure_white = np.sum(np.all(img_np >= 248, axis=-1))
-        pure_black = np.sum(np.all(img_np <= 8, axis=-1))
-        total_pixels = img_np.shape[0] * img_np.shape[1]
-        extreme_ratio = (pure_white + pure_black) / total_pixels
-        
-        if extreme_ratio > 0.22 or max_conf < 0.50:
-            st.session_state.show_warning = True
-            st.session_state.predicted_class = ""
-            st.session_state.confidence_text = ""
+        if max_conf < 0.60:
+            is_gonggong = False
+            st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
         else:
-            st.session_state.show_warning = False
             predicted_index = np.argmax(prediction)
-            st.session_state.predicted_class = classes[predicted_index]
-            st.session_state.confidence_text = f"{max_conf * 100:.2f}%"
+            predicted_class = classes[predicted_index]
+            confidence_text = f"{max_conf * 100:.2f}%"
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
-
-if st.session_state.show_warning:
-    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{st.session_state.predicted_class}</span>
+    <span class='result-value'>{predicted_class}</span>
 </div>
 <div class='result-box'>
     <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{st.session_state.confidence_text}</span>
+    <span class='result-value'>{confidence_text}</span>
 </div>
 """, unsafe_allow_html=True)
 
