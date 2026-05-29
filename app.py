@@ -236,6 +236,12 @@ div.stButton > button:active {
     font-weight: 600;
 }
 
+/* Jarak Tambahan Antara Hasil dan Footer */
+.result-box-spacer {
+    height: 45px;
+    width: 100%;
+}
+
 .page-wrapper {
     display: flex !important;
     flex-direction: column !important;
@@ -248,7 +254,7 @@ div.stButton > button:active {
 /* STICKY FOOTER MENTOK BAWAH CANVAS */
 .white-footer-canvas {
     position: relative !important;
-    margin-top: auto !important; /* Memaksa footer berada di paling bawah kanvas */
+    margin-top: auto !important; 
     padding: 20px 0px !important;
     display: flex !important;
     justify-content: center !important; 
@@ -360,11 +366,14 @@ div.stButton > button:active {
     .result-value {
         font-size: 15px;
     }
+    .result-box-spacer {
+        height: 30px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
+    }
     .page-wrapper { 
         margin-top: 15px; 
     }
     .white-footer-canvas { 
-        margin-top: auto !important; /* Memaksa footer tetap di bawah kanvas saat di HP */
+        margin-top: auto !important; 
         padding: 15px 0px !important;
     }
     .footer-text {
@@ -647,6 +656,7 @@ st.markdown(f"""
     <span class='result-label'>Tingkat Akurasi :</span>
     <span class='result-value'>{st.session_state.conf_text}</span>
 </div>
+<div class='result-box-spacer'></div>
 """, unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True) 
