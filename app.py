@@ -259,23 +259,30 @@ div.stButton > button {
     .app-subtitle-main { font-size: 12px; }
     .img-preview-container { height: 220px; margin: 20px auto; }
 
+    /* Penyelarasan kolom upload agar sama persis seperti versi website (tidak melebar) */
     [data-testid="stFileUploader"] section {
-        display: flex !important;
+        display: inline-flex !important;  /* Mencegah kolom melar memenuhi layar HP */
+        max-width: 100% !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        border-radius: 15px !important;
-        padding: 8px !important;
+        border-radius: 25px !important; /* Samakan kebulatan border dengan desktop */
+        padding: 10px !important;
     }
     
     [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-        display: flex !important;
+        display: inline-flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
         flex-wrap: nowrap !important;
-        gap: 8px !important;
+        gap: 10px !important;
         width: auto !important;
+    }
+
+    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
+        padding: 6px 14px !important;
+        font-size: 14px !important;
     }
 
     div.stButton > button {
@@ -404,8 +411,8 @@ if uploaded_file is None:
     }
     @media (max-width: 480px) {
         [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-            font-size: 11px !important;
-            margin-left: 3px !important;
+            font-size: 13px !important;
+            margin-left: 5px !important;
         }
     }
     </style>
