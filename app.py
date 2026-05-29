@@ -367,7 +367,7 @@ div.stButton > button:active {
         font-size: 15px;
     }
     .result-box-spacer {
-        height: 30px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
+        height: 60px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
     }
     .page-wrapper { 
         margin-top: 15px; 
