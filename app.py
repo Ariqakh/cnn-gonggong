@@ -112,66 +112,49 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 }
 
 /* ==========================================================================
-   STYLE STRUKTUR FILE UPLOADER (DESKTOP & MOBILE JAJAR HORIZONTAL)
+   STYLE UNTUK UPLOADER DESKTOP & MOBILE (FIXED)
    ========================================================================== */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
-    border-radius: 20px !important;
-    padding: 10px 14px !important;
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
+    border-radius: 25px !important;
+    padding: 12px !important;
 }
 
-/* Memaksa kontainer dropzone internal agar berjejer horizontal ke kanan */
-[data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-    display: flex !important;
-    flex-direction: row !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    width: 100% !important;
-    gap: 12px !important;
-}
-
-/* Sembunyikan teks seret/bawaan asli Streamlit */
+/* Mematikan text default bawaan Streamlit agar tidak bentrok */
 [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
     display: none !important;
 }
 
-/* Tombol asli "Browse files" / "Upload" */
+/* Menata tombol internal bawaan Streamlit (Browse files) */
 [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
     background-color: #FFFFFF !important;
     color: #333333 !important;
     border: 1px solid #CCCCCC !important;
-    border-radius: 10px !important;
-    padding: 8px 16px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    margin: 0 !important;
-    display: inline-flex !important;
+    border-radius: 12px !important;
+    padding: 8px 18px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
 }
 
-/* TEKS KUSTOM DI SAMPING TOMBOL (SANGAT JELAS & KONTRAS) */
-.custom-side-text {
-    color: #4A4A4A !important; /* Abu-abu gelap kontras tinggi */
+/* KUSTOM TEKS INFORMASI FILE (Mencegah teks transparan di HP) */
+.custom-uploader-text {
+    display: inline-block;
+    color: #555555 !important; /* Warna abu-abu gelap tegas */
     font-size: 14px !important;
     font-weight: 500 !important;
-    white-space: nowrap !important;
-    display: inline-block !important;
-    font-family: 'Inter', sans-serif !important;
+    margin-left: 15px;
+    vertical-align: middle;
 }
 
-/* PENGATURAN AREA FILE SETELAH UPLOAD (Kunci Tombol Silang X) */
+/* PROTEKSI TOMBOL SILANG (X) DAN MATIKAN TOMBOL TAMBAH (+) */
 [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div {
-    display: none !important; 
+    display: none !important; /* Hilangkan container dropzone tambahan */
 }
-/* Matikan icon plus tambahan bawaan uploader */
+/* Hanya sembunyikan icon plus generic, biarkan tombol remove file tetap interaktif */
 [data-testid="stFileUploader"] button:has(svg path[d*="M19 "]) {
     display: none !important;
 }
-/* Munculkan kembali tombol silang bawaan Streamlit secara absolut */
 [data-testid="stFileUploader"] button[aria-label="Remove file"] {
     display: inline-flex !important;
     visibility: visible !important;
@@ -262,8 +245,23 @@ div.stButton > button {
     .app-subtitle-main { font-size: 12px; }
     .img-preview-container { height: 220px; margin: 20px auto; }
 
-    .custom-side-text {
+    [data-testid="stFileUploader"] section {
+        display: flex !important;
+        flex-direction: row !important; 
+        align-items: center !important;
+        justify-content: flex-start !important;
+        border-radius: 15px !important;
+        padding: 8px !important;
+    }
+    
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
+        display: flex !important;
+        width: auto !important;
+    }
+
+    .custom-uploader-text {
         font-size: 13px !important;
+        margin-left: 10px;
     }
 
     div.stButton > button {
@@ -285,7 +283,7 @@ div.stButton > button {
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD MODEL ---
+# --- LOAD MODEL & DATA PREPARATION ---
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
@@ -373,27 +371,28 @@ if "confidence_text" not in st.session_state:
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
-# --- RENDER FILE UPLOADER ---
+# --- RENDER FILE UPLOADER UTAMA ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# MANIPULASI DOM JAVASCRIPT: Menambahkan teks kustom secara realtime tepat di dalam row horizontal samping tombol
+# TRIK INJEKSI STRUKTUR BARU JIKA FILE BELUM DIUPLOAD
 if uploaded_file is None:
     st.markdown("""
     <script>
+    // Memasukkan teks pendamping kustom ke dalam DOM Uploader secara realtime
     const dropzone = document.querySelector('[data-testid="stUploadDropzone"]');
-    if (dropzone) {
-        // Cek agar tidak terjadi duplikasi teks
-        let existingText = document.getElementById("custom-side-txt-id");
-        if (!existingText) {
-            const spanTxt = document.createElement("span");
-            spanTxt.id = "custom-side-txt-id";
-            spanTxt.className = "custom-side-text";
-            spanTxt.innerText = "200MB per file • JPG, PNG";
-            dropzone.appendChild(spanTxt);
-        }
+    if (dropzone && !document.getElementById("custom-text-id")) {
+        const spanTxt = document.createElement("span");
+        spanTxt.id = "custom-text-id";
+        spanTxt.className = "custom-uploader-text";
+        spanTxt.innerText = "200MB per file • JPG, PNG";
+        dropzone.appendChild(spanTxt);
     }
     </script>
+    <div style="margin-top:-5px;"></div>
     """, unsafe_allow_html=True)
+    
+    # Fallback murni jika JS dinonaktifkan browser HP, teks dipaksa tampil di bawahnya bersih
+    st.markdown("<div class='custom-uploader-text' style='margin-left:5px; margin-top:2px; display:block;'>200MB per file • JPG, PNG</div>", unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
