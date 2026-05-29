@@ -118,11 +118,12 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
     border-radius: 25px !important;
-    padding: 12px !important;
+    padding: 12px 18px !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
+    width: 100% !important;
 }
 
 /* Mematikan text bawaan asli Streamlit agar bersih */
@@ -136,8 +137,8 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: flex-start !important;
-    gap: 12px !important;
-    width: auto !important;
+    gap: 15px !important;
+    width: 100% !important;
 }
 
 /* Menata tombol bawaan Streamlit (Browse files) */
@@ -159,7 +160,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     flex-direction: row !important;
     align-items: center !important;
     gap: 10px !important;
-    margin-left: auto !important;
+    margin-left: 15px !important;
     padding: 0 !important;
 }
 
@@ -249,7 +250,9 @@ div.stButton > button {
     margin: 0 auto;
 }
 
-/* RESPONSIVE MOBILE OPTIMIZATION */
+/* ==========================================================================
+   PERBAIKAN TOTAL LAYOUT MOBILE (MAKSIMAL 480PX)
+   ========================================================================== */
 @media (max-width: 480px) {
     .navbar { padding: 15px 15px; gap: 8px; }
     .navbar-title { font-size: 14px; }
@@ -259,30 +262,33 @@ div.stButton > button {
     .app-subtitle-main { font-size: 12px; }
     .img-preview-container { height: 220px; margin: 20px auto; }
 
-    /* Penyelarasan kolom upload agar sama persis seperti versi website (tidak melebar) */
+    /* Memaksa box container luar tetap bulat elips sempurna di HP */
     [data-testid="stFileUploader"] section {
-        display: inline-flex !important;  /* Mencegah kolom melar memenuhi layar HP */
-        max-width: 100% !important;
+        display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        border-radius: 25px !important; /* Samakan kebulatan border dengan desktop */
-        padding: 10px !important;
+        border-radius: 25px !important;  /* Menjaga kelengkungan sudut elips */
+        padding: 12px 16px !important;
+        width: 100% !important;
     }
     
+    /* Memaksa area dropzone di dalam agar tidak wrap/patah ke bawah */
     [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-        display: inline-flex !important;
+        display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        flex-wrap: nowrap !important;
-        gap: 10px !important;
-        width: auto !important;
+        flex-wrap: nowrap !important; /* Kunci baris agar tidak patah */
+        gap: 12px !important;
+        width: 100% !important;
     }
 
+    /* Ukuran tombol di HP agar tetap proporsional */
     [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
-        padding: 6px 14px !important;
+        padding: 8px 16px !important;
         font-size: 14px !important;
+        flex-shrink: 0 !important; /* Tombol dilarang gepeng */
     }
 
     div.stButton > button {
@@ -395,24 +401,25 @@ if "show_warning" not in st.session_state:
 # --- RENDER FILE UPLOADER UTAMA ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# METODE PSEUDO-ELEMENT JIKA FILE BELUM DIUPLOAD (TEKS DI SAMPING BUTTON)
+# REKAYASA TEKS DISAMPING TOMBOL (DENGAN PROTEKSI WARNA DI MOBILE)
 if uploaded_file is None:
     st.markdown("""
     <style>
     [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
         content: "200MB per file • JPG, PNG" !important;
-        color: #555555 !important;
+        color: #555555 !important; /* Memaksa warna abu-abu gelap agar kontras di HP */
         font-size: 14px !important;
         font-weight: 500 !important;
         font-family: 'Inter', sans-serif !important;
         white-space: nowrap !important;
         display: inline-block !important;
-        margin-left: 5px !important;
     }
     @media (max-width: 480px) {
         [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-            font-size: 13px !important;
-            margin-left: 5px !important;
+            content: "200MB per file • JPG, PNG" !important;
+            color: #555555 !important; /* Proteksi warna dari bug hilangnya teks di HP */
+            font-size: 12px !important;  /* Sedikit dikecilkan agar pas dengan layar HP */
+            display: inline-block !important;
         }
     }
     </style>
