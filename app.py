@@ -240,6 +240,7 @@ div.stButton > button {
 }
 
 /* RESPONSIVE MOBILE OPTIMIZATION */
+/* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .navbar { padding: 15px 15px; gap: 8px; }
     .navbar-title { font-size: 14px; }
@@ -249,19 +250,33 @@ div.stButton > button {
     .app-subtitle-main { font-size: 12px; }
     .img-preview-container { height: 220px; margin: 20px auto; }
 
+    /* --- PERBAIKAN UTAMA UNTUK UPLOADER DI HP --- */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        border-radius: 20px !important;
-        padding: 8px !important;
+        border-radius: 15px !important;
+        padding: 8px 12px !important;
+    }
+    
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
+        display: flex !important;
+        flex-direction: row !important; /* Paksa baris horizontal */
+        align-items: center !important;
+        justify-content: flex-start !important;
+        flex-wrap: nowrap !important; /* Cegah teks turun ke bawah button */
+        width: 100% !important;
+        gap: 5px !important;
     }
 
-    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
-        padding: 6px 14px !important;
-        font-size: 14px !important;
+    .custom-uploader-text {
+        font-size: 11px !important; /* Perkecil sedikit ukuran font agar pas di layar HP */
+        margin-left: 8px !important;
+        white-space: nowrap !important; /* Cegah teks patah jadi 2 baris */
+        display: inline-block !important;
     }
+    /* ------------------------------------------- */
 
     div.stButton > button {
         width: 100% !important;
