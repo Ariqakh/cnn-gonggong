@@ -10,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS STYLING UTAMA (Sesuai Kode Sumber Anda) ---
+# --- CSS STYLING UTAMA ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
@@ -29,6 +29,7 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
+/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -132,6 +133,7 @@ div.stButton > button {
     width: 200px;
 }
 
+/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -172,6 +174,7 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
+/* PERBAIKAN POSISI FOOTER */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -193,14 +196,35 @@ div.stButton > button {
 
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .navbar { padding: 15px 15px; gap: 8px; }
-    .navbar-title { font-size: 14px; }
-    .app-header { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
-    .app-logo-img { width: 180px; height: auto; }
-    .app-title-main { font-size: 32px; }
-    .app-subtitle-main { font-size: 12px; }
-    .img-preview-container { height: 220px; margin: 20px auto; }
+    .navbar {
+        padding: 15px 15px;
+        gap: 8px;
+    }
+    .navbar-title {
+        font-size: 14px;
+    }
+    .app-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        margin-top: 40px;
+    }
+    .app-logo-img { 
+        width: 180px; 
+        height: auto; 
+    }
+    .app-title-main { 
+        font-size: 32px; 
+    }
+    .app-subtitle-main {
+        font-size: 12px;
+    }
+    .img-preview-container { 
+        height: 220px; 
+        margin: 20px auto;
+    }
 
+    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
@@ -212,7 +236,11 @@ div.stButton > button {
         border: none !important;
         border-radius: 40px !important;
     }
-    [data-testid="stFileUploader"] section svg { display: none !important; }
+    /* Sembunyikan ikon seret bawaan drag&drop */
+    [data-testid="stFileUploader"] section svg {
+        display: none !important;
+    }
+    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
@@ -224,7 +252,10 @@ div.stButton > button {
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
-    [data-testid="stFileUploader"] section > input + div { display: none !important; }
+    /* Sembunyikan pesan teks seret bawaan browser */
+    [data-testid="stFileUploader"] section > input + div {
+        display: none !important;
+    }
     
     div.stButton > button {
         width: 100% !important;
@@ -232,6 +263,7 @@ div.stButton > button {
         padding: 15px 20px !important;
     }
     
+    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
@@ -240,11 +272,24 @@ div.stButton > button {
         justify-content: flex-start !important;
         align-items: center !important;
     }
-    .result-label { font-size: 15px; min-width: 135px; }
-    .result-value { font-size: 15px; }
-    .page-wrapper { margin-top: 25px; }
-    .white-footer-canvas { margin-top: 50px !important; padding: 15px 0px !important; }
-    .footer-text { font-size: 11px; }
+    .result-label {
+        font-size: 15px;
+        min-width: 135px; 
+        margin-right: 0px;
+    }
+    .result-value {
+        font-size: 15px;
+    }
+    .page-wrapper { 
+        margin-top: 25px; 
+    }
+    .white-footer-canvas { 
+        margin-top: 50px !important;
+        padding: 15px 0px !important;
+    }
+    .footer-text {
+        font-size: 11px;
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -310,13 +355,12 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
-logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
     logo_html = f"<img class='app-logo-img' src='data:image/png;base64,{encoded_logo}'>"
 except:
-    pass
+    logo_html = ""
 
 st.markdown(f"""
 <div class="app-header">
@@ -330,7 +374,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- INITIALIZE SESSION STATE FOR RESET DATA ---
+# --- INITIALIZE SESSION STATE FOR TRACKING ---
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
@@ -342,7 +386,7 @@ if "warning_msg" not in st.session_state:
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE UPLOAD FILE
+# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE FILE UPLOADER
 # ==========================================================================
 if uploaded_file is None:
     # JIKA BELUM UPLOAD: Tampilkan teks kustom "200MB per file..." di mobile
@@ -360,18 +404,18 @@ if uploaded_file is None:
     </style>
     """, unsafe_allow_html=True)
     
-    # Otomatis reset teks output jika tombol silang (X) ditekan atau file kosong
+    # Otomatis reset data hasil prediksi ke kondisi awal jika file kosong / disilang (X)
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.warning_msg = ""
 else:
-    # JIKA SUDAH UPLOAD: Matikan tulisan "200MB..." dan hidupkan kembali list nama file & tombol silang (X)
+    # JIKA SUDAH UPLOAD: Sembunyikan teks "200MB..." & tampilkan nama file + silang (X) bawaan
     st.markdown("""
     <style>
-    /* Sembunyikan pseudo-element teks 200MB */
+    /* Hilangkan pseudo-element teks 200MB */
     [data-testid="stFileUploader"] section::after { content: "" !important; display: none !important; }
     
-    /* Tampilkan kembali container nama file bawaan Streamlit secara rapi horizontal */
+    /* Kembalikan container baris nama file bawaan Streamlit secara horizontal */
     [data-testid="stFileUploader"] section > input + div {
         display: flex !important;
         flex-direction: row !important;
@@ -381,20 +425,20 @@ else:
         color: #333333 !important;
         font-size: 14px !important;
     }
-    /* Pastikan tombol silang (X) bawaan berfungsi dan terlihat jelas */
+    /* Aktifkan kembali fungsionalitas visual tombol silang (X) */
     [data-testid="stFileUploader"] button[aria-label="Remove file"] {
         display: inline-flex !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
-    /* Sembunyikan icon file bawaan yang mengganggu */
+    /* Sembunyikan ikon berkas bawaan agar lebih clean */
     [data-testid="stFileUploader"] section > input + div svg {
         display: none !important;
     }
     </style>
-    """, unsafe_safe_allow_html=True)
+    """, unsafe_allow_html=True)
 
-# --- TAMPILAN PREVIEW GAMBAR ---
+# --- PREVIEW GAMBAR ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
@@ -415,7 +459,7 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# --- LOGIKA KLASIFIKASI & MEMPERKETAT DETEKSI ---
+# --- PROSES KLASIFIKASI & PERKETAT VALIDASI ---
 if analyze_clicked:
     if uploaded_file is not None:
         img_resized = image.resize((224, 224))
@@ -425,14 +469,14 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # Penambahan filter rasio warna ekstrem (mendeteksi background putih mutlak / hitam pekat non-objek)
+        # Ekstraksi piksel ekstrem (mendeteksi background putih polos / hitam dominan non-objek)
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 248, axis=-1))
         pure_black = np.sum(np.all(img_np <= 8, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Batasan diperketat: Jika confidence level di bawah 65% atau gambar dominan kosong latar belakangnya
+        # Pengetatan Ambang Batas Akurasi Validasi (Confidence Score < 0.65)
         if max_conf < 0.65 or extreme_ratio > 0.25:
             st.session_state.warning_msg = "⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas."
             st.session_state.predicted_class = ""
@@ -445,7 +489,7 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Tampilkan pesan peringatan jika gambar tidak lolos validasi ketat
+# Merender Kotak Peringatan jika validasi diperketat tidak lolos
 if st.session_state.warning_msg:
     st.markdown(f"<div class='warning-box'>{st.session_state.warning_msg}</div>", unsafe_allow_html=True)
 
