@@ -10,6 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# --- CSS STYLING UTAMA (Sesuai Kode Sumber Anda) ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
@@ -28,7 +29,6 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
-/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -132,7 +132,6 @@ div.stButton > button {
     width: 200px;
 }
 
-/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -159,11 +158,10 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 15px;
+    padding: 12px;
     border-radius: 15px;
     font-size: 14px;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-weight: 600;
     text-align: center;
     border: 1px solid #FFCCCC;
@@ -174,7 +172,6 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* PERBAIKAN POSISI FOOTER: Menggunakan pola flow relative + margin top agar berada stabil di paling bawah konten */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -196,35 +193,14 @@ div.stButton > button {
 
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
-    .navbar {
-        padding: 15px 15px;
-        gap: 8px;
-    }
-    .navbar-title {
-        font-size: 14px;
-    }
-    .app-header {
-        flex-direction: column;
-        gap: 15px;
-        text-align: center;
-        margin-top: 40px;
-    }
-    .app-logo-img { 
-        width: 180px; 
-        height: auto; 
-    }
-    .app-title-main { 
-        font-size: 32px; 
-    }
-    .app-subtitle-main {
-        font-size: 12px;
-    }
-    .img-preview-container { 
-        height: 220px; 
-        margin: 20px auto;
-    }
+    .navbar { padding: 15px 15px; gap: 8px; }
+    .navbar-title { font-size: 14px; }
+    .app-header { flex-direction: column; gap: 15px; text-align: center; margin-top: 40px; }
+    .app-logo-img { width: 180px; height: auto; }
+    .app-title-main { font-size: 32px; }
+    .app-subtitle-main { font-size: 12px; }
+    .img-preview-container { height: 220px; margin: 20px auto; }
 
-    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
@@ -236,11 +212,7 @@ div.stButton > button {
         border: none !important;
         border-radius: 40px !important;
     }
-    /* Sembunyikan ikon seret bawaan drag&drop */
-    [data-testid="stFileUploader"] section svg {
-        display: none !important;
-    }
-    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
+    [data-testid="stFileUploader"] section svg { display: none !important; }
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
@@ -252,26 +224,14 @@ div.stButton > button {
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
-    /* Sembunyikan pesan teks seret bawaan browser */
-    [data-testid="stFileUploader"] section > input + div {
-        display: none !important;
-    }
-    /* Tampilkan label kustom di sebelah kanan tombol */
-    [data-testid="stFileUploader"] section::after {
-        content: "200MB per file • JPG, PNG";
-        font-size: 14px;
-        color: #777777;
-        font-weight: 400;
-        display: inline-block;
-    }
-
+    [data-testid="stFileUploader"] section > input + div { display: none !important; }
+    
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
         padding: 15px 20px !important;
     }
     
-    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
@@ -280,31 +240,18 @@ div.stButton > button {
         justify-content: flex-start !important;
         align-items: center !important;
     }
-    .result-label {
-        font-size: 15px;
-        min-width: 135px; 
-        margin-right: 0px;
-    }
-    .result-value {
-        font-size: 15px;
-    }
-    .page-wrapper { 
-        margin-top: 25px; 
-    }
-    .white-footer-canvas { 
-        margin-top: 50px !important;
-        padding: 15px 0px !important;
-    }
-    .footer-text {
-        font-size: 11px;
-    }
+    .result-label { font-size: 15px; min-width: 135px; }
+    .result-value { font-size: 15px; }
+    .page-wrapper { margin-top: 25px; }
+    .white-footer-canvas { margin-top: 50px !important; padding: 15px 0px !important; }
+    .footer-text { font-size: 11px; }
 }
 </style>
 """, unsafe_allow_html=True)
 
+# --- LOAD MODEL & DATA PREPARATION ---
 @st.cache_resource
 def load_my_model():
-    import tensorflow as tf
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
@@ -383,29 +330,72 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- SISTEM MANAGEMEN STATE DATA UNTUK TOMBOL RESET/SILANG (X) ---
+# --- INITIALIZE SESSION STATE FOR RESET DATA ---
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
     st.session_state.confidence_text = "-"
-if "show_warning" not in st.session_state:
-    st.session_state.show_warning = False
+if "warning_msg" not in st.session_state:
+    st.session_state.warning_msg = ""
 
+# --- RENDER FILE UPLOADER UTAMA ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# LOGIKA KETIKA USER KLIK TANDA SILANG (X) / FILE DIKOSONGKAN
+# ==========================================================================
+# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE UPLOAD FILE
+# ==========================================================================
 if uploaded_file is None:
+    # JIKA BELUM UPLOAD: Tampilkan teks kustom "200MB per file..." di mobile
+    st.markdown("""
+    <style>
+    @media (max-width: 480px) {
+        [data-testid="stFileUploader"] section::after {
+            content: "200MB per file • JPG, PNG" !important;
+            font-size: 14px !important;
+            color: #777777 !important;
+            font-weight: 400 !important;
+            display: inline-block !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Otomatis reset teks output jika tombol silang (X) ditekan atau file kosong
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
-    st.session_state.show_warning = False
-    
-    st.markdown("""
-    <div class='img-preview-container'>
-        <span class='img-placeholder-text'>Gambar</span>
-    </div>
-    """, unsafe_allow_html=True)
+    st.session_state.warning_msg = ""
 else:
-    # JIKA FILE ADA, TAMPILKAN PREVIEW NYA
+    # JIKA SUDAH UPLOAD: Matikan tulisan "200MB..." dan hidupkan kembali list nama file & tombol silang (X)
+    st.markdown("""
+    <style>
+    /* Sembunyikan pseudo-element teks 200MB */
+    [data-testid="stFileUploader"] section::after { content: "" !important; display: none !important; }
+    
+    /* Tampilkan kembali container nama file bawaan Streamlit secara rapi horizontal */
+    [data-testid="stFileUploader"] section > input + div {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin-left: auto !important;
+        color: #333333 !important;
+        font-size: 14px !important;
+    }
+    /* Pastikan tombol silang (X) bawaan berfungsi dan terlihat jelas */
+    [data-testid="stFileUploader"] button[aria-label="Remove file"] {
+        display: inline-flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    /* Sembunyikan icon file bawaan yang mengganggu */
+    [data-testid="stFileUploader"] section > input + div svg {
+        display: none !important;
+    }
+    </style>
+    """, unsafe_safe_allow_html=True)
+
+# --- TAMPILAN PREVIEW GAMBAR ---
+if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
     image.save(buffered, format="JPEG")
@@ -416,9 +406,16 @@ else:
         <img src="data:image/jpeg;base64,{img_str}">
     </div>
     """, unsafe_allow_html=True)
+else:
+    st.markdown("""
+    <div class='img-preview-container'>
+        <span class='img-placeholder-text'>Gambar</span>
+    </div>
+    """, unsafe_allow_html=True)
 
 analyze_clicked = st.button("Analisis Gambar")
 
+# --- LOGIKA KLASIFIKASI & MEMPERKETAT DETEKSI ---
 if analyze_clicked:
     if uploaded_file is not None:
         img_resized = image.resize((224, 224))
@@ -428,29 +425,29 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # --- PERKETAT LOGIKA DETEKSI GONGGONG ---
+        # Penambahan filter rasio warna ekstrem (mendeteksi background putih mutlak / hitam pekat non-objek)
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 248, axis=-1))
         pure_black = np.sum(np.all(img_np <= 8, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Jika akurasi rendah ATAU gambar terdeteksi background kosong berlebih (bukan gonggong)
-        if extreme_ratio > 0.22 or max_conf < 0.50:
-            st.session_state.show_warning = True
+        # Batasan diperketat: Jika confidence level di bawah 65% atau gambar dominan kosong latar belakangnya
+        if max_conf < 0.65 or extreme_ratio > 0.25:
+            st.session_state.warning_msg = "⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas."
             st.session_state.predicted_class = ""
             st.session_state.confidence_text = ""
         else:
-            st.session_state.show_warning = False
+            st.session_state.warning_msg = ""
             predicted_index = np.argmax(prediction)
             st.session_state.predicted_class = classes[predicted_index]
             st.session_state.confidence_text = f"{max_conf * 100:.2f}%"
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# TAMPILKAN LOGIKA PERINGATAN REKAYASA KONDISI TERBARU
-if st.session_state.show_warning:
-    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
+# Tampilkan pesan peringatan jika gambar tidak lolos validasi ketat
+if st.session_state.warning_msg:
+    st.markdown(f"<div class='warning-box'>{st.session_state.warning_msg}</div>", unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class='result-box'>
