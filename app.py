@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE DEFAULT UNTUK TOMBOL UPLOAD DI KIRI) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -224,49 +224,50 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* FIX TOTAL CONTAINER UPLOAD HP */
+    /* KHUSUS DISPLAY FILE UPLOADER DI HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
         gap: 10px !important;
-        padding: 10px 14px !important;
+        padding: 10px 15px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
-        border-radius: 15px !important;
+        border-radius: 20px !important;
     }
     
-    /* Tombol Upload Kotak Putih di Kiri */
+    /* Tombol Browse Files Bentuk Kotak Sesuai Foto */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 8px !important;
-        padding: 8px 14px !important;
+        padding: 6px 14px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
         display: inline-flex !important;
         width: auto !important;
-        order: 1 !important;
     }
     
-    /* Sembunyikan icon & teks bawaan yang berantakan di mobile */
-    [data-testid="stFileUploader"] section svg,
-    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-        display: none !important;
+    /* Menampilkan text limit file di sebelah kanan tombol */
+    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
     }
 
-    /* MEMAKSA TULISAN KETERANGAN FILE MUNCUL DI SEBELAH KANAN TOMBOL */
-    [data-testid="stFileUploader"] section::after {
-        content: "200MB per file • JPG, PNG";
-        font-size: 14px !important;
-        color: #666666 !important;
-        font-weight: 500 !important;
-        display: inline-block !important;
-        order: 2 !important;
-        white-space: nowrap !important;
+    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
+        display: inline !important;
+        color: #737373 !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+    }
+
+    /* Sembunyikan icon awan drag & drop yang mengganggu */
+    [data-testid="stFileUploader"] section svg {
+        display: none !important;
     }
     
     div.stButton > button {
@@ -407,6 +408,7 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
 else:
+    # JIKA USER MENEKAN TOMBOL SILANG (X), MAKA SEMUA KEMBALI DI-RESET KE AWAL KOSONG
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.show_warning = False
