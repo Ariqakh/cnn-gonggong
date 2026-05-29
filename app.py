@@ -159,11 +159,14 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 10px;
+    padding: 15px;
     border-radius: 15px;
-    font-size: 13px;
+    font-size: 14px;
+    margin-top: 20px;
     margin-bottom: 10px;
     font-weight: 600;
+    text-align: center;
+    border: 1px solid #FFCCCC;
 }
 
 .page-wrapper {
@@ -171,7 +174,7 @@ div.stButton > button {
     padding-bottom: 0px;
 }
 
-/* PERBAIKAN POSISI FOOTER: Menggunakan pola flow relative + margin top agar berada stabil di paling bawah konten */
+/* PERBAIKAN POSISI FOOTER */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -221,54 +224,44 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
+    /* PERBAIKAN CSS FILE UPLOADER BIAR TIDAK HILANG DI HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 15px !important;
-        padding: 12px 20px !important;
+        gap: 10px !important;
+        padding: 10px 15px !important;
         background-color: #EAEAEA !important;
         border: none !important;
         border-radius: 40px !important;
     }
-    /* Sembunyikan ikon seret bawaan drag&drop */
     [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
-    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 12px !important;
-        padding: 6px 16px !important;
-        font-size: 14px !important;
+        padding: 6px 14px !important;
+        font-size: 13px !important;
         font-weight: 500 !important;
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
-    /* Sembunyikan pesan teks seret bawaan browser */
-    [data-testid="stFileUploader"] section > input + div {
+    
+    /* Memperbaiki selektor teks seret agar tombol upload tidak ikut tersembunyi */
+    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
         display: none !important;
     }
-    /* Tampilkan label kustom di sebelah kanan tombol */
-    [data-testid="stFileUploader"] section::after {
-        content: "200MB per file • JPG, PNG";
-        font-size: 14px;
-        color: #777777;
-        font-weight: 400;
-        display: inline-block;
-    }
-
+    
     div.stButton > button {
         width: 100% !important;
         font-size: 18px !important;
         padding: 15px 20px !important;
     }
     
-    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 15px;
@@ -301,65 +294,35 @@ div.stButton > button {
 
 @st.cache_resource
 def load_my_model():
-
     import tensorflow as tf
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
-    # =========================
-    # PATCH Dense
-    # =========================
     original_dense = Dense.from_config
-
     @classmethod
     def custom_dense(cls, config):
-
         config.pop("quantization_config", None)
-
         return original_dense(config)
-
     Dense.from_config = custom_dense
 
-    # =========================
-    # PATCH InputLayer
-    # =========================
     original_input = InputLayer.from_config
-
     @classmethod
     def custom_input(cls, config):
-
         config.pop("batch_shape", None)
         config.pop("optional", None)
-
         if "batch_input_shape" not in config:
             config["batch_input_shape"] = [None, 224, 224, 3]
-
         return cls(**config)
-
     InputLayer.from_config = custom_input
 
-    # =========================
-    # PATCH Dropout
-    # =========================
     original_dropout = Dropout.from_config
-
     @classmethod
     def custom_dropout(cls, config):
-
         config.pop("seed_generator", None)
-
         return original_dropout(config)
-
     Dropout.from_config = custom_dropout
 
-    # =========================
-    # LOAD MODEL
-    # =========================
-    model = keras_load_model(
-        "model_gonggong.h5",
-        compile=False
-    )
-
+    model = keras_load_model("model_gonggong.h5", compile=False)
     return model
 
 model = load_my_model()
@@ -371,9 +334,12 @@ classes = [
     "Pugilina Coclidium"
 ]
 
-with open("logo_umrah.png", "rb") as f:
-    nav_logo_bytes = f.read()
-encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+try:
+    with open("logo_umrah.png", "rb") as f:
+        nav_logo_bytes = f.read()
+    encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+except:
+    encoded_nav_logo = ""
 
 st.markdown(f"""
 <div class="navbar">
@@ -387,6 +353,7 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
+logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
@@ -428,9 +395,13 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-predicted_class = "-"
-confidence_text = "-"
-is_gonggong = True
+# Inisialisasi variabel status tracking di session state agar hasil bertahan saat layout mobile me-render ulang
+if "predicted_class" not in st.session_state:
+    st.session_state.predicted_class = "-"
+if "confidence_text" not in st.session_state:
+    st.session_state.confidence_text = "-"
+if "show_warning" not in st.session_state:
+    st.session_state.show_warning = False
 
 if analyze_clicked:
     if uploaded_file is not None:
@@ -442,23 +413,29 @@ if analyze_clicked:
         max_conf = np.max(prediction)
         
         if max_conf < 0.60:
-            is_gonggong = False
-            st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
+            st.session_state.show_warning = True
+            st.session_state.predicted_class = "Bukan Gonggong / Tidak Dikenali"
+            st.session_state.confidence_text = f"{max_conf * 100:.2f}% (Terlalu Rendah)"
         else:
+            st.session_state.show_warning = False
             predicted_index = np.argmax(prediction)
-            predicted_class = classes[predicted_index]
-            confidence_text = f"{max_conf * 100:.2f}%"
+            st.session_state.predicted_class = classes[predicted_index]
+            st.session_state.confidence_text = f"{max_conf * 100:.2f}%"
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
+
+# Tampilkan alert box jika terdeteksi bukan gonggong
+if st.session_state.show_warning:
+    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{predicted_class}</span>
+    <span class='result-value'>{st.session_state.predicted_class}</span>
 </div>
 <div class='result-box'>
     <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{confidence_text}</span>
+    <span class='result-value'>{st.session_state.confidence_text}</span>
 </div>
 """, unsafe_allow_html=True)
 
