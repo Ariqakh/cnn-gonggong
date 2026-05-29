@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -395,40 +395,54 @@ if "warn_box_html" not in st.session_state:
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# MODIFIKASI DINAMIS UNTUK HANDLER TOMBOL SILANG (X) DAN TULISAN 200MB (MOBILE)
+# MODIFIKASI DINAMIS BERDASARKAN PRESENTASE UPLOAD GAMBAR (FIX TAMPILAN KIRI & SILANG)
 # ==========================================================================
 if uploaded_file is None:
-    # Reset nilai output saat tombol silang (X) ditekan / halaman kosong
+    # Reset nilai output saat tombol silang (X) ditekan / halaman kosong kembali ke awal
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
     st.session_state.warn_box_html = ""
 else:
-    # JIKA FILE SUDAH DI-UPLOAD (Khusus Mobile & Web): 
-    # Sembunyikan tulisan 200MB, munculkan nama file + silang (X) bawaan secara estetik.
+    # JIKA FILE SUDAH DI-UPLOAD:
+    # Matikan teks panduan 200MB, singkirkan tombol tambah, rapikan nama file ke kiri, munculkan silang (X)
     st.markdown("""
     <style>
-    /* Hilangkan teks panduan 200MB agar tidak menumpuk */
+    /* 1. Paksa matikan teks pseudo-element 200MB di mobile */
     [data-testid="stFileUploader"] section::after { 
         content: "" !important; 
         display: none !important; 
     }
-    /* Kembalikan container nama file dan tombol X bawaan di mobile */
+    
+    /* 2. Overwrite setelan mobile agar kontainer nama file & tombol silang (X) kembali aktif */
     @media (max-width: 480px) {
+        /* Buka kembali area penampung nama gambar bawaan Streamlit */
         [data-testid="stFileUploader"] section > input + div {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
-            gap: 10px !important;
-            margin-left: auto !important;
+            justify-content: flex-start !important;
+            gap: 12px !important;
+            width: 100% !important;
+            margin-left: 0 !important;
             color: #333333 !important;
             font-size: 14px !important;
         }
+        
+        /* Matikan icon upload/plus tambahan yang mengganggu */
+        [data-testid="stFileUploader"] section > input + div svg {
+            display: none !important;
+        }
+        
+        /* Tampilkan tombol silang (X) bawaan dengan jelas di posisi kanan teks file */
         [data-testid="stFileUploader"] button[aria-label="Remove file"] {
             display: inline-flex !important;
             visibility: visible !important;
             opacity: 1 !important;
+            margin-left: auto !important; /* Dorong tombol X ke ujung kanan */
         }
-        [data-testid="stFileUploader"] section > input + div svg {
+        
+        /* Sembunyikan tombol upload putih utama agar berganti fokus ke nama file */
+        [data-testid="stFileUploader"] section button:not([aria-label="Remove file"]) {
             display: none !important;
         }
     }
@@ -466,7 +480,7 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Naikkan ambang batas ke 0.65 (65%) + Filter Gambar Kosong Sembarang
+        # MEMPERKETAT DETEKSI: Ambang batas 0.65 (65%) + Filter Gambar Kosong Sembarang
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 245, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
