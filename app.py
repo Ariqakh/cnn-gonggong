@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE DEFAULT UNTUK TOMBOL UPLOAD DI KIRI) */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -224,31 +224,49 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* MENERAPKAN TAMPILAN UPLOADER DEFAULT SESUAI SCREENSHOT (TOMBOL KOTAK DI KIRI) */
+    /* FIX TOTAL CONTAINER UPLOAD HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 12px !important;
-        padding: 10px 15px !important;
+        gap: 10px !important;
+        padding: 10px 14px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
-        border-radius: 20px !important;
+        border-radius: 15px !important;
     }
     
-    /* Memastikan tombol internal "Browse files" berupa kotak di sebelah kiri */
+    /* Tombol Upload Kotak Putih di Kiri */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 8px !important;
-        padding: 6px 12px !important;
+        padding: 8px 14px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
         display: inline-flex !important;
         width: auto !important;
+        order: 1 !important;
+    }
+    
+    /* Sembunyikan icon & teks bawaan yang berantakan di mobile */
+    [data-testid="stFileUploader"] section svg,
+    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
+        display: none !important;
+    }
+
+    /* MEMAKSA TULISAN KETERANGAN FILE MUNCUL DI SEBELAH KANAN TOMBOL */
+    [data-testid="stFileUploader"] section::after {
+        content: "200MB per file • JPG, PNG";
+        font-size: 14px !important;
+        color: #666666 !important;
+        font-weight: 500 !important;
+        display: inline-block !important;
+        order: 2 !important;
+        white-space: nowrap !important;
     }
     
     div.stButton > button {
