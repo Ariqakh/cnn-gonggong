@@ -395,80 +395,65 @@ if "warn_box_html" not in st.session_state:
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# PERBAIKAN MUTLAK CSS: MENGHAPUS TANDA TAMBAH (+) DAN MEMUNCULKAN SILANG (X)
+# SOLUSI JITU HP: INJEKSI TOMBOL SILANG (X) KUSTOM DAN BERSIHKAN TANDA TAMBAH
 # ==========================================================================
 if uploaded_file is None:
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
     st.session_state.warn_box_html = ""
 else:
-    # JIKA FILE SUDAH DI-UPLOAD (Modifikasi container & widget agar match 100% dengan foto mobile)
+    # JIKA FILE SUDAH DI-UPLOAD (CSS mutlak untuk memaksa tampilan di HP)
     st.markdown("""
     <style>
-    /* 1. Matikan label panduan ukuran di desktop/mobile agar tidak bertumpuk */
+    /* Hilangkan teks pembatas bawaan */
     [data-testid="stFileUploader"] section::after { 
         content: "" !important; 
         display: none !important; 
     }
-    
-    /* 2. Bersihkan total karakter teks "+" atau tombol tambah bawaan yang lolos */
-    [data-testid="stFileUploader"] section div:contains("+"),
-    [data-testid="stFileUploader"] section + div,
-    [data-testid="stFileUploader"] drop-ui-file-list-item + button {
-        display: none !important;
-    }
 
     @media (max-width: 480px) {
-        /* 3. Paksa baris upload file menjadi sejajar kesamping & berjejer rapi di kiri */
+        /* Susun ulang section agar memanjang rata kiri */
         [data-testid="stFileUploader"] section {
             display: flex !important;
             flex-direction: row !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important;
             align-items: center !important;
-            padding: 10px 16px !important;
+            padding: 12px 20px !important;
         }
 
-        /* 4. Sembunyikan tombol upload putih saat file sudah terisi */
+        /* Sembunyikan paksa tombol upload putih bawaan saat file terisi */
         [data-testid="stFileUploader"] section button {
             display: none !important;
         }
 
-        /* 5. Bangun ulang struktur teks file & tombol silang */
+        /* Tampilkan block nama file bawaan */
         [data-testid="stFileUploader"] section > input + div {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
-            justify-content: space-between !important;
+            justify-content: flex-start !important;
             width: 100% !important;
             margin: 0 !important;
-            padding: 0 !important;
         }
 
-        /* Hilangkan sisa ikon bawaan streamlit */
-        [data-testid="stFileUploader"] section > input + div svg {
+        /* Sembunyikan ikon berkas bawaan dan seluruh tanda tambah (+) */
+        [data-testid="stFileUploader"] section > input + div svg,
+        [data-testid="stFileUploader"] section div:contains("+"),
+        [data-testid="stFileUploader"] span:contains("+") {
             display: none !important;
+            visibility: hidden !important;
         }
 
-        /* 6. TARGET UTAMA: Mengembalikan & Memaksa Tombol Silang (X) Muncul Eksplisit */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"],
-        [data-testid="stFileUploader"] button[data-testid="stFileUploaderDeleteBtn"] {
-            display: inline-flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-            padding: 4px !important;
-            margin: 0 0 0 auto !important; /* Dorong mentok ke kanan */
-            cursor: pointer !important;
-        }
-
-        /* Custom karakter tombol X warna abu gelap melingkar atau teks merah agar mudah ditekan */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"]::after {
+        /* BUAT TOMBOL SILANG (X) KUSTOM TEPAT DI SEBELAH KANAN NAMA FILE */
+        [data-testid="stFileUploader"] section > input + div::after {
             content: "✕" !important;
-            font-size: 16px !important;
-            font-weight: bold !important;
-            color: #666666 !important;
+            display: inline-block !important;
+            margin-left: auto !important; /* Dorong mentok ke sisi kanan */
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: #ff4b4b !important; /* Warna merah cerah agar jelas terlihat */
+            padding: 2px 8px !important;
+            cursor: pointer !important;
         }
     }
     </style>
