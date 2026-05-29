@@ -367,7 +367,7 @@ div.stButton > button:active {
         font-size: 15px;
     }
     .result-box-spacer {
-        height: 100px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
+        height: 100px;
     }
     .page-wrapper { 
         margin-top: 15px; 
@@ -474,7 +474,9 @@ if "is_bg_removed" not in st.session_state:
     st.session_state.is_bg_removed = False
 
 # --- FILE UPLOADER ---
-uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+# Penambahan teks instruksi upload
+st.markdown("<p style='text-align: center; color: #43647d; font-weight: 500; margin-bottom: 10px;'>Pilih atau drag file foto gonggong Anda di bawah ini:</p>", unsafe_allow_html=True)
+uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed", help="Pastikan foto gonggong terlihat jelas dengan latar belakang yang kontras.")
 
 if uploaded_file is None:
     st.session_state.pred_class = "-"
@@ -581,7 +583,7 @@ if uploaded_file is not None:
             img_str2 = base64.b64encode(buffered2.getvalue()).decode()
             img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
         else:
-            img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
+            img_html = "<span class='img-preview-container' style='display:flex; align-items:center; justify-content:center; color:#666; font-size:14px;'>Belum Diproses</span>"
             
         st.markdown(f"""
         <div class='img-preview-container'>
@@ -592,7 +594,7 @@ if uploaded_file is not None:
 else:
     st.markdown("""
     <div class='img-preview-container'>
-        <span class='img-placeholder-text'>Gambar</span>
+        <span class='img-placeholder-text'>Pratinjau Gambar</span>
     </div>
     """, unsafe_allow_html=True)
 
