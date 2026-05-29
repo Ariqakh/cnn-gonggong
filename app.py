@@ -194,6 +194,11 @@ div.stButton > button {
     margin: 0 auto;
 }
 
+/* TEKS KUSTOM SEMENTARA UNTUK MOBILE */
+.custom-mobile-text-container {
+    display: none;
+}
+
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .navbar {
@@ -224,20 +229,29 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* TAMPILAN FILE UPLOADER DI HP */
+    /* MENERAPKAN TAMPILAN UPLOADER KOTAK DI KIRI KHUSUS HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        gap: 10px !important;
+        gap: 8px !important;
         padding: 8px 12px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
-        border-radius: 18px !important;
+        border-radius: 20px !important;
     }
     
-    /* Tombol internal asli "Browse files" */
+    /* Menyelaraskan susunan flex pembungkus internal */
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        width: auto !important;
+    }
+
+    /* Tombol internal asli "Browse files" berupa kotak di sebelah kiri */
     [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
         display: inline-flex !important;
         background-color: #FFFFFF !important;
@@ -251,39 +265,34 @@ div.stButton > button {
         width: auto !important;
     }
 
-    /* INJEKSI PASTI TEKS MANDATORI DI HP TEPAT DI DALAM DROPZONE */
-    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
-        content: "200MB per file • JPG, PNG" !important;
-        color: #737373 !important;
-        font-size: 13.5px !important;
-        font-family: 'Inter', sans-serif !important;
-        font-weight: 400 !important;
-        display: inline-block !important;
-        margin-left: 5px !important;
-        white-space: nowrap !important;
-    }
-
-    /* SEMBUNYIKAN SEGERA JIKA FILE SUDAH BERHASIL DIUPLOAD */
-    [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileName"]) [data-testid="stUploadDropzone"]::after {
-        display: none !important;
-        content: "" !important;
-    }
-
-    /* MATIKAN TOMBOL TAMBAH (+) BAWAAN MULTI UPLOADER YANG MENGGANGGU DI HP */
-    [data-testid="stFileUploader"] section + button,
-    [data-testid="stFileUploader"] section + div,
-    [data-testid="stFileUploader"] button:not([data-testid="stBaseButton-secondary"]):not([aria-label="Remove file"]) {
+    /* MATIKAN TOTAL ICON TAMBAH (+) YANG DIHASILKAN OLEH MULTI-UPLOADER */
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div,
+    [data-testid="stFileUploader"] button:has(svg path[d*="M19 "]),
+    [data-testid="stFileUploader"] button:has(svg path[d*="M19,"]),
+    [data-testid="stFileUploader"] svg:not([data-testid="stFileUploaderDeleteIcon"]) {
         display: none !important;
     }
     
-    /* Blokir icon awan/svg internal agar layout sebaris rapi */
-    [data-testid="stFileUploader"] section svg {
-        display: none !important;
+    /* Pastikan tombol silang bawaan Streamlit (Delete Icon) tidak tersembunyi */
+    [data-testid="stFileUploader"] button[aria-label="Remove file"] {
+        display: inline-flex !important;
     }
 
-    /* Hilangkan teks seret bawaan desktop agar tidak menumpuk */
+    /* Sembunyikan teks seret bawaan desktop agar tidak berantakan */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
         display: none !important;
+    }
+    
+    /* Tampilkan teks kustom pendamping uploader di HP */
+    .custom-mobile-text-container {
+        display: inline-block !important;
+        color: #737373 !important;
+        font-size: 13.5px !important;
+        font-weight: 400 !important;
+        font-family: 'Inter', sans-serif !important;
+        margin-left: 4px !important;
+        vertical-align: middle !important;
+        line-height: 1 !important;
     }
     
     div.stButton > button {
@@ -410,7 +419,27 @@ if "confidence_text" not in st.session_state:
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
+# Render uploader utama
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+
+# TRIK PYTHON-CSS: Teks panduan 200MB murni dirender tepat di kanan tombol jika file kosong
+if uploaded_file is None:
+    st.markdown("""
+    <style>
+    @media (max-width: 480px) {
+        [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
+            content: "200MB per file • JPG, PNG" !important;
+            color: #737373 !important;
+            font-size: 13.5px !important;
+            font-weight: 400 !important;
+            font-family: 'Inter', sans-serif !important;
+            display: inline-block !important;
+            margin-left: 8px !important;
+            white-space: nowrap !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
