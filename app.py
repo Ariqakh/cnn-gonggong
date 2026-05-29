@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -159,11 +159,14 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 10px;
+    padding: 15px;
     border-radius: 15px;
-    font-size: 13px;
-    margin-bottom: 10px;
+    font-size: 14px;
+    margin-top: 10px;
+    margin-bottom: 20px;
     font-weight: 600;
+    text-align: center;
+    border: 1px solid #FFCCCC;
 }
 
 .page-wrapper {
@@ -301,65 +304,35 @@ div.stButton > button {
 
 @st.cache_resource
 def load_my_model():
-
     import tensorflow as tf
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
-    # =========================
-    # PATCH Dense
-    # =========================
     original_dense = Dense.from_config
-
     @classmethod
     def custom_dense(cls, config):
-
         config.pop("quantization_config", None)
-
         return original_dense(config)
-
     Dense.from_config = custom_dense
 
-    # =========================
-    # PATCH InputLayer
-    # =========================
     original_input = InputLayer.from_config
-
     @classmethod
     def custom_input(cls, config):
-
         config.pop("batch_shape", None)
         config.pop("optional", None)
-
         if "batch_input_shape" not in config:
             config["batch_input_shape"] = [None, 224, 224, 3]
-
         return cls(**config)
-
     InputLayer.from_config = custom_input
 
-    # =========================
-    # PATCH Dropout
-    # =========================
     original_dropout = Dropout.from_config
-
     @classmethod
     def custom_dropout(cls, config):
-
         config.pop("seed_generator", None)
-
         return original_dropout(config)
-
     Dropout.from_config = custom_dropout
 
-    # =========================
-    # LOAD MODEL
-    # =========================
-    model = keras_load_model(
-        "model_gonggong.h5",
-        compile=False
-    )
-
+    model = keras_load_model("model_gonggong.h5", compile=False)
     return model
 
 model = load_my_model()
@@ -371,9 +344,12 @@ classes = [
     "Pugilina Coclidium"
 ]
 
-with open("logo_umrah.png", "rb") as f:
-    nav_logo_bytes = f.read()
-encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+try:
+    with open("logo_umrah.png", "rb") as f:
+        nav_logo_bytes = f.read()
+    encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+except:
+    encoded_nav_logo = ""
 
 st.markdown(f"""
 <div class="navbar">
@@ -387,6 +363,7 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
+logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
         encoded_logo = base64.b64encode(f.read()).decode()
@@ -406,9 +383,29 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
+# --- SISTEM MANAGEMEN STATE DATA UNTUK TOMBOL RESET/SILANG (X) ---
+if "predicted_class" not in st.session_state:
+    st.session_state.predicted_class = "-"
+if "confidence_text" not in st.session_state:
+    st.session_state.confidence_text = "-"
+if "show_warning" not in st.session_state:
+    st.session_state.show_warning = False
+
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-if uploaded_file is not None:
+# LOGIKA KETIKA USER KLIK TANDA SILANG (X) / FILE DIKOSONGKAN
+if uploaded_file is None:
+    st.session_state.predicted_class = "-"
+    st.session_state.confidence_text = "-"
+    st.session_state.show_warning = False
+    
+    st.markdown("""
+    <div class='img-preview-container'>
+        <span class='img-placeholder-text'>Gambar</span>
+    </div>
+    """, unsafe_allow_html=True)
+else:
+    # JIKA FILE ADA, TAMPILKAN PREVIEW NYA
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
     image.save(buffered, format="JPEG")
@@ -419,18 +416,8 @@ if uploaded_file is not None:
         <img src="data:image/jpeg;base64,{img_str}">
     </div>
     """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <div class='img-preview-container'>
-        <span class='img-placeholder-text'>Gambar</span>
-    </div>
-    """, unsafe_allow_html=True)
 
 analyze_clicked = st.button("Analisis Gambar")
-
-predicted_class = "-"
-confidence_text = "-"
-is_gonggong = True
 
 if analyze_clicked:
     if uploaded_file is not None:
@@ -441,24 +428,38 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        if max_conf < 0.60:
-            is_gonggong = False
-            st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
+        # --- PERKETAT LOGIKA DETEKSI GONGGONG ---
+        img_np = np.array(image)
+        pure_white = np.sum(np.all(img_np >= 248, axis=-1))
+        pure_black = np.sum(np.all(img_np <= 8, axis=-1))
+        total_pixels = img_np.shape[0] * img_np.shape[1]
+        extreme_ratio = (pure_white + pure_black) / total_pixels
+        
+        # Jika akurasi rendah ATAU gambar terdeteksi background kosong berlebih (bukan gonggong)
+        if extreme_ratio > 0.22 or max_conf < 0.50:
+            st.session_state.show_warning = True
+            st.session_state.predicted_class = ""
+            st.session_state.confidence_text = ""
         else:
+            st.session_state.show_warning = False
             predicted_index = np.argmax(prediction)
-            predicted_class = classes[predicted_index]
-            confidence_text = f"{max_conf * 100:.2f}%"
+            st.session_state.predicted_class = classes[predicted_index]
+            st.session_state.confidence_text = f"{max_conf * 100:.2f}%"
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
+
+# TAMPILKAN LOGIKA PERINGATAN REKAYASA KONDISI TERBARU
+if st.session_state.show_warning:
+    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
 st.markdown(f"""
 <div class='result-box'>
     <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{predicted_class}</span>
+    <span class='result-value'>{st.session_state.predicted_class}</span>
 </div>
 <div class='result-box'>
     <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{confidence_text}</span>
+    <span class='result-value'>{st.session_state.confidence_text}</span>
 </div>
 """, unsafe_allow_html=True)
 
