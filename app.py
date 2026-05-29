@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -28,7 +28,6 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
-/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -111,7 +110,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -119,7 +117,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     padding: 15px !important;
 }
 
-/* Flexbox utilitas untuk tombol agar sejajar rapi */
+/* ===== BUTTON STYLING ===== */
 .button-group {
     display: flex;
     flex-direction: row;
@@ -129,43 +127,54 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     width: 100%;
 }
 
-/* DESAIN TOMBOL BARU LEBIH ELEGAN DAN SELARAS DENGAN HALAMAN */
+/* Default semua tombol */
 div.stButton > button {
     color: white !important;
     font-size: 16px !important;
     font-weight: 700 !important;
-    padding: 14px 28px !important;
+    padding: 15px 25px !important;
     border-radius: 30px !important;
     border: none !important;
     margin: 0 !important;
     display: block !important;
     width: 100%;
-    cursor: pointer !important;
-    box-shadow: 0 4px 15px rgba(11, 29, 58, 0.15) !important;
-    transition: all 0.3s ease !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Style Tombol Hapus Latar Belakang (Biru Segar Bahari) */
+/* Tombol Hapus Latar Belakang — biru teal */
+div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
+div.stButton > button[kind="secondary"] {
+    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
+}
+
+/* Fallback — tombol pertama biru, tombol kedua hijau */
+div.stButton:nth-of-type(1) > button {
+    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
+}
+
+div.stButton > button#btn_remove_bg,
 div.stButton > button[key="btn_remove_bg"] {
-    background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%) !important;
-}
-div.stButton > button[key="btn_remove_bg"]:hover {
-    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%) !important;
-    box-shadow: 0 6px 20px rgba(21, 101, 192, 0.3) !important;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #1a7abf 0%, #2D9CDB 100%) !important;
 }
 
-/* Style Tombol Analisis Gambar (Hijau Toska Deep) */
+div.stButton > button#btn_analyze,
 div.stButton > button[key="btn_analyze"] {
-    background: linear-gradient(135deg, #00897B 0%, #00695C 100%) !important;
-}
-div.stButton > button[key="btn_analyze"]:hover {
-    background: linear-gradient(135deg, #00695C 0%, #004D40 100%) !important;
-    box-shadow: 0 6px 20px rgba(0, 105, 92, 0.3) !important;
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #1a8a5a 0%, #27AE60 100%) !important;
 }
 
-/* STRUKTUR HASIL PREDIKSI (DESKTOP) */
+div.stButton > button:hover {
+    opacity: 0.88 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
+}
+
+div.stButton > button:active {
+    transform: translateY(0px) !important;
+    opacity: 1 !important;
+}
+
+/* ===== HASIL PREDIKSI ===== */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -202,10 +211,8 @@ div.stButton > button[key="btn_analyze"]:hover {
 .page-wrapper {
     margin-bottom: 0px;
     padding-bottom: 0px;
-    margin-top: 100px; /* Jarak aman di bawah navbar desktop */
 }
 
-/* PERBAIKAN POSISI FOOTER */
 .white-footer-canvas {
     position: relative !important;
     margin-top: 80px !important;
@@ -225,7 +232,7 @@ div.stButton > button[key="btn_analyze"]:hover {
     margin: 0 auto;
 }
 
-/* RESPONSIVE MOBILE OPTIMIZATION */
+/* ===== RESPONSIVE MOBILE ===== */
 @media (max-width: 480px) {
     .navbar {
         padding: 15px 15px;
@@ -234,41 +241,34 @@ div.stButton > button[key="btn_analyze"]:hover {
     .navbar-title {
         font-size: 14px;
     }
-    
-    /* MENAIKKAN POSISI KONTEN UTAMA DI HP SUPAYA AGAK KE ATAS */
-    .page-wrapper { 
-        margin-top: 45px !important; /* Menaikkan space pembungkus utama */
-    }
     .app-header {
         flex-direction: column;
-        gap: 8px; /* Diperkecil agar lebih padat naik ke atas */
+        gap: 10px;
         text-align: center;
-        margin-top: 15px !important; /* Memotong margin kosong atas */
-        margin-bottom: 5px !important;
+        margin-top: 30px;
+        margin-bottom: 6px;
     }
     .app-logo-img { 
-        width: 150px; /* Sedikit diperkecil agar struktur naik ke atas */
+        width: 150px; 
         height: auto; 
     }
     .app-title-main { 
-        font-size: 28px; 
+        font-size: 32px; 
     }
     .app-subtitle-main {
-        font-size: 11px;
-        margin-top: 2px;
+        font-size: 12px;
     }
     .img-preview-container { 
-        height: 170px; 
+        height: 160px; 
         margin: 8px auto;
     }
     
     .button-group {
         flex-direction: column !important;
         gap: 10px;
-        margin: 12px auto;
+        margin: 10px auto !important;
     }
 
-    /* KUSTOMISASI TOMBOL UPLOAD DI MOBILE SESUAI GAMBAR REFERENSI */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important;
@@ -280,11 +280,9 @@ div.stButton > button[key="btn_analyze"]:hover {
         border: none !important;
         border-radius: 40px !important;
     }
-    /* Sembunyikan ikon seret bawaan drag&drop */
     [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
-    /* Mengubah tombol internal Streamlit menjadi style minimalis putih */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
@@ -296,11 +294,9 @@ div.stButton > button[key="btn_analyze"]:hover {
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
-    /* Sembunyikan pesan teks seret bawaan browser */
     [data-testid="stFileUploader"] section > input + div {
         display: none !important;
     }
-    /* Tampilkan label kustom di sebelah kanan tombol */
     [data-testid="stFileUploader"] section::after {
         content: "200MB per file • JPG, PNG";
         font-size: 14px;
@@ -312,10 +308,9 @@ div.stButton > button[key="btn_analyze"]:hover {
     div.stButton > button {
         width: 100% !important;
         font-size: 15px !important;
-        padding: 11px 20px !important;
+        padding: 12px 20px !important;
     }
     
-    /* MENYELARASKAN TANDA HUBUNG / TITIK DUA HASIL PREDIKSI DI HP */
     .result-box {
         padding: 15px 20px;
         margin-top: 12px;
@@ -325,15 +320,18 @@ div.stButton > button[key="btn_analyze"]:hover {
         align-items: center !important;
     }
     .result-label {
-        font-size: 14px;
-        min-width: 120px; 
+        font-size: 15px;
+        min-width: 135px; 
         margin-right: 0px;
     }
     .result-value {
-        font-size: 14px;
+        font-size: 15px;
+    }
+    .page-wrapper { 
+        margin-top: 15px; 
     }
     .white-footer-canvas { 
-        margin-top: 35px !important;
+        margin-top: 40px !important;
         padding: 15px 0px !important;
     }
     .footer-text {
@@ -348,7 +346,6 @@ def load_my_model():
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
-    # PATCH Dense
     original_dense = Dense.from_config
     @classmethod
     def custom_dense(cls, config):
@@ -356,7 +353,6 @@ def load_my_model():
         return original_dense(config)
     Dense.from_config = custom_dense
 
-    # PATCH InputLayer
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
@@ -367,7 +363,6 @@ def load_my_model():
         return cls(**config)
     InputLayer.from_config = custom_input
 
-    # PATCH Dropout
     original_dropout = Dropout.from_config
     @classmethod
     def custom_dropout(cls, config):
@@ -375,7 +370,6 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    # LOAD MODEL
     model = keras_load_model("model_gonggong.h5", compile=False)
     return model
 
@@ -427,7 +421,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- MANAGING SESSION STATE FOR RESET OUTCOMES ---
+# --- SESSION STATE ---
 if "pred_class" not in st.session_state:
     st.session_state.pred_class = "-"
 if "conf_text" not in st.session_state:
@@ -437,12 +431,9 @@ if "warn_box_html" not in st.session_state:
 if "is_bg_removed" not in st.session_state:
     st.session_state.is_bg_removed = False
 
-# --- FILE UPLOADER COMPONENT ---
+# --- FILE UPLOADER ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# ==========================================================================
-# PERBAIKAN TOTAL ELEMEN FILE UPLOADER (MENAMPILKAN SILANG & FIX RESET HP)
-# ==========================================================================
 if uploaded_file is None:
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
@@ -517,22 +508,17 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# --- IMAGE PREVIEW CONTROLLER ---
+# --- IMAGE PREVIEW ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     
-    # FIX LOGIKA UTAMA: Mengubah latar belakang hitam gelap menjadi putih murni
     img_np = np.array(image)
     gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-    
-    # Nilai < 40 digunakan untuk mendeteksi warna hitam/sangat gelap pada latar belakang
     background_mask = gray_np < 40 
-    
     segmented_np = img_np.copy()
-    segmented_np[background_mask] = [255, 255, 255] # Ubah hitam menjadi PUTIH MURNI
+    segmented_np[background_mask] = [255, 255, 255]
     processed_image = Image.fromarray(segmented_np)
 
-    # Tampilkan layout kolom pratinjau
     col1, col2 = st.columns(2)
     
     with col1:
@@ -568,24 +554,25 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-# --- GRUP TOMBOL KONDISIONAL (LOGIKA BARU) ---
+# --- TOMBOL ---
+# Tombol Hapus Latar Belakang selalu tampil
 st.markdown("<div class='button-group'>", unsafe_allow_html=True)
 
-# Menentukan pembagian kolom berdasarkan status hapus background
-if st.session_state.is_bg_removed:
+if not st.session_state.is_bg_removed:
+    # Hanya tampilkan tombol Hapus BG (full width sendirian)
+    bg_clicked = st.button("🖼️ Hapus Latar Belakang", key="btn_remove_bg")
+    analyze_clicked = False
+else:
+    # Setelah BG dihapus, tampilkan kedua tombol berdampingan
     col_btn1, col_btn2 = st.columns(2)
     with col_btn1:
-        bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
+        bg_clicked = st.button("🖼️ Hapus Latar Belakang", key="btn_remove_bg")
     with col_btn2:
-        analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
-else:
-    # Jika background belum dihapus, tombol Analisis tidak dimunculkan (Hanya tombol Hapus BG memenuhi baris)
-    bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
-    analyze_clicked = False
+        analyze_clicked = st.button("🔍 Analisis Gambar", key="btn_analyze")
 
 st.markdown("</div>", unsafe_allow_html=True)
 
-# Aksi saat tombol Hapus Latar Belakang diklik
+# Aksi tombol Hapus Latar Belakang
 if bg_clicked:
     if uploaded_file is not None:
         st.session_state.is_bg_removed = True
@@ -593,10 +580,9 @@ if bg_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# --- KONTROL LOGIKA DAN VALIDASI MODEL ---
+# Aksi tombol Analisis
 if analyze_clicked:
     if uploaded_file is not None:
-        # Gunakan gambar hasil olahan latar belakang hitam ke putih untuk proses klasifikasi model
         img_np = np.array(image)
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
         background_mask = gray_np < 40
@@ -614,7 +600,6 @@ if analyze_clicked:
         pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
         total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
         
-        # Logika validasi disesuaikan setelah gambar diubah ke background putih
         if max_conf < 0.50 or (pure_white / total_pixels) > 0.85:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
             st.session_state.pred_class = "-"
@@ -627,7 +612,7 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Render pesan peringatan
+# Render warning
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
 
