@@ -112,7 +112,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 }
 
 /* ==========================================================================
-   STYLE UNTUK UPLOADER DESKTOP & MOBILE (FIXED)
+   STYLE STRUKTUR FILE UPLOADER (HORIZONTAL CO-EXISTENCE)
    ========================================================================== */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
@@ -121,12 +121,22 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     padding: 12px !important;
 }
 
-/* Mematikan text default bawaan Streamlit agar tidak bentrok */
+/* Atur container dropzone internal agar berjejer horizontal murni */
+[data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    width: 100% !important;
+}
+
+/* Matikan teks seret/bawaan asli Streamlit */
 [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
     display: none !important;
 }
 
-/* Menata tombol internal bawaan Streamlit (Browse files) */
+/* Desain tombol internal "Browse files" */
 [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
     background-color: #FFFFFF !important;
     color: #333333 !important;
@@ -134,31 +144,25 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     border-radius: 12px !important;
     padding: 8px 18px !important;
     font-size: 15px !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    display: inline-flex !important;
 }
 
-/* KUSTOM TEKS INFORMASI FILE (Mencegah teks transparan di HP) */
-.custom-uploader-text {
-    display: inline-block;
-    color: #555555 !important; /* Warna abu-abu gelap tegas */
-    font-size: 14px !important;
-    font-weight: 500 !important;
-    margin-left: 15px;
-    vertical-align: middle;
-}
-
-/* PROTEKSI TOMBOL SILANG (X) DAN MATIKAN TOMBOL TAMBAH (+) */
+/* ISOLASI PROTEKSI TOMBOL SILANG (X) DAN MATIKAN ICON TAMBAH (+) */
 [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] + div {
-    display: none !important; /* Hilangkan container dropzone tambahan */
+    display: none !important; 
 }
-/* Hanya sembunyikan icon plus generic, biarkan tombol remove file tetap interaktif */
+/* Sembunyikan khusus tombol plus pembungkus eksternal */
 [data-testid="stFileUploader"] button:has(svg path[d*="M19 "]) {
     display: none !important;
 }
+/* Pastikan tombol hapus file (X) bawaan terlihat jelas dan bisa diklik */
 [data-testid="stFileUploader"] button[aria-label="Remove file"] {
     display: inline-flex !important;
     visibility: visible !important;
     opacity: 1 !important;
+    z-index: 10 !important;
 }
 
 /* BUTTON ANALISIS */
@@ -250,18 +254,13 @@ div.stButton > button {
         flex-direction: row !important; 
         align-items: center !important;
         justify-content: flex-start !important;
-        border-radius: 15px !important;
+        border-radius: 20px !important;
         padding: 8px !important;
     }
-    
-    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"] {
-        display: flex !important;
-        width: auto !important;
-    }
 
-    .custom-uploader-text {
-        font-size: 13px !important;
-        margin-left: 10px;
+    [data-testid="stFileUploader"] section button[data-testid="stBaseButton-secondary"] {
+        padding: 6px 14px !important;
+        font-size: 14px !important;
     }
 
     div.stButton > button {
@@ -283,7 +282,7 @@ div.stButton > button {
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD MODEL & DATA PREPARATION ---
+# --- LOAD MODEL ---
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
@@ -371,28 +370,29 @@ if "confidence_text" not in st.session_state:
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
-# --- RENDER FILE UPLOADER UTAMA ---
+# --- FILE UPLOADER DENGAN KONDISI PYTHON TEKS DI SAMPING ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# TRIK INJEKSI STRUKTUR BARU JIKA FILE BELUM DIUPLOAD
 if uploaded_file is None:
+    # Mengunci teks kustom murni di samping tombol upload dengan Pseudo CSS ber-kontras tinggi
     st.markdown("""
-    <script>
-    // Memasukkan teks pendamping kustom ke dalam DOM Uploader secara realtime
-    const dropzone = document.querySelector('[data-testid="stUploadDropzone"]');
-    if (dropzone && !document.getElementById("custom-text-id")) {
-        const spanTxt = document.createElement("span");
-        spanTxt.id = "custom-text-id";
-        spanTxt.className = "custom-uploader-text";
-        spanTxt.innerText = "200MB per file • JPG, PNG";
-        dropzone.appendChild(spanTxt);
+    <style>
+    [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
+        content: "200MB per file • JPG, PNG" !important;
+        color: #333333 !important; /* Warna abu-abu gelap sangat kontras */
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        font-family: 'Inter', sans-serif !important;
+        white-space: nowrap !important;
+        display: inline-block !important;
     }
-    </script>
-    <div style="margin-top:-5px;"></div>
+    @media (max-width: 480px) {
+        [data-testid="stFileUploader"] [data-testid="stUploadDropzone"]::after {
+            font-size: 12px !important;
+        }
+    }
+    </style>
     """, unsafe_allow_html=True)
-    
-    # Fallback murni jika JS dinonaktifkan browser HP, teks dipaksa tampil di bawahnya bersih
-    st.markdown("<div class='custom-uploader-text' style='margin-left:5px; margin-top:2px; display:block;'>200MB per file • JPG, PNG</div>", unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
