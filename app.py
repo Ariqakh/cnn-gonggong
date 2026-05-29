@@ -502,22 +502,22 @@ analyze_clicked = st.button("Analisis Gambar")
 # --- KONTROL LOGIKA DAN VALIDASI GAMBAR PERKETAT ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # 1. PREPROCESSING: SEGMENTASI HAPUS BACKGROUND MENGGUNAKAN NUMPY & PIL (ANTI-ERROR SERVER)
+        # 1. TAHAP PRAPEMROSESAN (PREPROCESSING): HAPUS BACKGROUND BERBASIS INTENSITAS WARNA DENGAN NUMPY
         img_np = np.array(image)
         
-        # Hitung nilai intensitas rata-rata saluran warna (Grayscale secara manual)
+        # Konversi citra RGB ke Grayscale secara manual memanfaatkan matriks luminansia
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
         
-        # Buat Masking: Tandai piksel yang bernilai terang/putih (misal di atas intensitas 200) sebagai background
-        # Piksel background diubah menjadi hitam pekat (0, 0, 0) agar model hanya fokus ke cangkang gonggong
-        background_mask = gray_np > 200
+        # Segmentasi Latar Belakang: Menyeleksi noise/background berskala terang (nilai intensitas > 195)
+        # Piksel background dipaksa bermutasi menjadi warna hitam legam [0, 0, 0] agar tidak terbaca sebagai fitur pengganggu
+        background_mask = gray_np > 195
         segmented_np = img_np.copy()
         segmented_np[background_mask] = [0, 0, 0]
         
-        # Kembalikan array NumPy ke bentuk PIL Image kembali
+        # Konversi kembali dari representasi matriks NumPy ke objek Gambar PIL
         processed_image = Image.fromarray(segmented_np)
 
-        # 2. PROSES KLASIFIKASI DENGAN MODEL CNN MOBILENET
+        # 2. PROSES MASUKKAN KE MODEL DEEP LEARNING MOBILENET
         img_resized = processed_image.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -525,7 +525,7 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Filter Gambar Kosong Sembarang
+        # MEMPERKETAT DETEKSI: Mengukur rasio sebaran piksel putih/kosong murni
         pure_white = np.sum(np.all(img_np >= 245, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         
