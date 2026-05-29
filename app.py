@@ -224,51 +224,54 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* KUSTOMISASI SEJAJAR UNTUK MOBILE */
-    [data-testid="stFileUploader"] {
-        background-color: #EAEAEA !important;
-        border-radius: 40px !important;
-        padding: 5px 10px !important;
-    }
+    /* FIX FILE UPLOADER - POSISI TOMBOL TAMBAH SEJAJAR DI KANAN DAN TEKS PEKAT */
     [data-testid="stFileUploader"] section {
         display: flex !important;
-        flex-direction: row-reverse !important; /* Membuat tombol + berada di sebelah kanan */
+        flex-direction: row-reverse !important; 
         align-items: center !important;
         justify-content: space-between !important;
-        gap: 10px !important;
-        padding: 5px 10px !important;
-        background-color: transparent !important;
+        gap: 12px !important;
+        padding: 12px 18px !important;
+        background-color: #EAEAEA !important;
         border: none !important;
+        border-radius: 40px !important;
     }
     [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
-    
-    /* Tombol Tanda Tambah Bawaan Streamlit */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
-        border-radius: 12px !important;
-        padding: 6px 14px !important;
-        font-size: 16px !important;
-        font-weight: bold !important;
+        border-radius: 50% !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        font-weight: 700 !important;
         margin: 0 !important;
         box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
     }
     
-    /* Menyembunyikan text drop bawaan */
+    /* Mematikan text drop default */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
         display: none !important;
     }
-    
-    /* Menampilkan Tulisan Info dengan warna pekat */
+
+    /* Custom Teks Info Ukuran File Jadi Sangat Pekat Jelas */
     [data-testid="stFileUploader"] section::after {
         content: "200MB per file • JPG, PNG";
         font-size: 13px !important;
-        color: #333333 !important; /* Diubah menjadi pekat */
-        font-weight: 600 !important;
+        color: #111111 !important;
+        font-weight: 700 !important;
         display: inline-block !important;
+        text-align: left !important;
+        flex-grow: 1 !important;
     }
     
     div.stButton > button {
@@ -410,19 +413,16 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# Inisialisasi variabel status tracking di session state agar hasil bertahan
+# Inisialisasi variabel status tracking di session state
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
     st.session_state.confidence_text = "-"
 if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
-if "has_analyzed" not in st.session_state:
-    st.session_state.has_analyzed = False
 
 if analyze_clicked:
     if uploaded_file is not None:
-        st.session_state.has_analyzed = True
         img_resized = image.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -430,10 +430,15 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        if max_conf < 0.60:
+        # Deteksi Gambar Non-Gonggong / Gambar Vektor Logo menggunakan Standar Deviasi Kontras Piksel
+        img_np = np.array(image)
+        img_std = np.std(img_np)
+        
+        # Proteksi super ketat: Jika latar belakang polos/logo atau akurasi di bawah batas aman, deteksi sebagai bukan gonggong
+        if max_conf < 0.75 or img_std < 38.0:
             st.session_state.show_warning = True
-            st.session_state.predicted_class = "-"
-            st.session_state.confidence_text = "-"
+            st.session_state.predicted_class = ""
+            st.session_state.confidence_text = ""
         else:
             st.session_state.show_warning = False
             predicted_index = np.argmax(prediction)
@@ -442,21 +447,21 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# PENGKONDISIAN BOX: Jika bukan gonggong, hanya muncul kotak peringatan
-if st.session_state.has_analyzed:
-    if st.session_state.show_warning:
-        st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class='result-box'>
-            <span class='result-label'>Jenis Gonggong :</span>
-            <span class='result-value'>{st.session_state.predicted_class}</span>
-        </div>
-        <div class='result-box'>
-            <span class='result-label'>Tingkat Akurasi :</span>
-            <span class='result-value'>{st.session_state.confidence_text}</span>
-        </div>
-        """, unsafe_allow_html=True)
+# Tampilkan alert box jika gambar bukan gonggong
+if st.session_state.show_warning:
+    st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
+
+# Kolom tetap tampil namun isinya dikosongkan jika bukan gonggong sesuai instruksi Anda
+st.markdown(f"""
+<div class='result-box'>
+    <span class='result-label'>Jenis Gonggong :</span>
+    <span class='result-value'>{st.session_state.predicted_class}</span>
+</div>
+<div class='result-box'>
+    <span class='result-label'>Tingkat Akurasi :</span>
+    <span class='result-value'>{st.session_state.confidence_text}</span>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("</div>", unsafe_allow_html=True) 
 
