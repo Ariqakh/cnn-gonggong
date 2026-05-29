@@ -502,22 +502,24 @@ analyze_clicked = st.button("Analisis Gambar")
 # --- KONTROL LOGIKA DAN VALIDASI GAMBAR PERKETAT ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # 1. TAHAP PRAPEMROSESAN (PREPROCESSING): HAPUS BACKGROUND BERBASIS INTENSITAS WARNA DENGAN NUMPY
+        # 1. FITUR HAPUS BACKGROUND (SEGMENTASI INTENSITAS CITRA)
+        # Mengubah citra masukan menjadi format matriks NumPy
         img_np = np.array(image)
         
-        # Konversi citra RGB ke Grayscale secara manual memanfaatkan matriks luminansia
+        # Ekstraksi komponen nilai keabuan (Grayscale secara manual demi efisiensi)
         gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
         
-        # Segmentasi Latar Belakang: Menyeleksi noise/background berskala terang (nilai intensitas > 195)
-        # Piksel background dipaksa bermutasi menjadi warna hitam legam [0, 0, 0] agar tidak terbaca sebagai fitur pengganggu
-        background_mask = gray_np > 195
+        # Membuat masking threshold: piksel latar belakang terang (> 200) diisolasi
+        background_mask = gray_np > 200
+        
+        # Mengkloning gambar asli dan mengubah area terisolasi menjadi warna hitam murni [0, 0, 0]
         segmented_np = img_np.copy()
         segmented_np[background_mask] = [0, 0, 0]
         
-        # Konversi kembali dari representasi matriks NumPy ke objek Gambar PIL
+        # Mengembalikan matriks prapemrosesan ke bentuk PIL Image objek
         processed_image = Image.fromarray(segmented_np)
 
-        # 2. PROSES MASUKKAN KE MODEL DEEP LEARNING MOBILENET
+        # 2. INPUT GAMBAR HASIL PEMPROSESAN KE MODEL CNN MOBILENET
         img_resized = processed_image.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -525,7 +527,7 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Mengukur rasio sebaran piksel putih/kosong murni
+        # MEMPERKETAT DETEKSI: Naikkan ambang batas ke 0.65 (65%) + Filter Gambar Kosong Sembarang
         pure_white = np.sum(np.all(img_np >= 245, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         
