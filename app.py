@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP) */
+/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE DEFAULT UNTUK TOMBOL UPLOAD DI KIRI) */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -224,13 +224,31 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* MENYESUAIKAN TAMPILAN MOBILE SUPAYA COMPATIBLE SEPERTI DI DESKTOP WEBSITE */
+    /* MENERAPKAN TAMPILAN UPLOADER DEFAULT SESUAI SCREENSHOT (TOMBOL KOTAK DI KIRI) */
     [data-testid="stFileUploader"] section {
-        display: block !important;
+        display: flex !important;
+        flex-direction: row !important; 
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        padding: 10px 15px !important;
         background-color: #F3F3F3 !important;
         border: 1px solid #ccc !important;
-        border-radius: 15px !important;
-        padding: 12px !important;
+        border-radius: 20px !important;
+    }
+    
+    /* Memastikan tombol internal "Browse files" berupa kotak di sebelah kiri */
+    [data-testid="stFileUploader"] section button {
+        background-color: #FFFFFF !important;
+        color: #333333 !important;
+        border: 1px solid #CCCCCC !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        display: inline-flex !important;
+        width: auto !important;
     }
     
     div.stButton > button {
@@ -350,7 +368,6 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# Inisialisasi variabel status tracking di session state sebelum pemanggilan widget berkas
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
@@ -372,7 +389,6 @@ if uploaded_file is not None:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # JIKA USER MENEKAN TOMBOL SILANG (X), SET SEMUA VARIABEL KEMBALI KE KEADAAN AWAL
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.show_warning = False
@@ -394,16 +410,12 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # DETEKSI NON-GONGGONG MODERN (Analisis Distribusi Piksel Grafis/Vektor)
         img_np = np.array(image)
-        # Menghitung keberadaan piksel warna seragam ekstrim (biasanya mendominasi di logo/brosur buatan komputer)
         pure_white = np.sum(np.all(img_np >= 248, axis=-1))
         pure_black = np.sum(np.all(img_np <= 8, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Gambar alamiah asli jarang sekali memiliki rasio warna tunggal pekat di atas 22% luas gambar.
-        # Batas minimal akurasi dasar diturunkan ke 50% agar gambar gonggong buram/kurang pencahayaan di bawah 80% tidak terblokir.
         if extreme_ratio > 0.22 or max_conf < 0.50:
             st.session_state.show_warning = True
             st.session_state.predicted_class = ""
@@ -416,7 +428,6 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Tampilkan alert box jika gambar bukan gonggong
 if st.session_state.show_warning:
     st.markdown("<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>", unsafe_allow_html=True)
 
