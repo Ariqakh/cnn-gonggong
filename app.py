@@ -395,68 +395,71 @@ if "warn_box_html" not in st.session_state:
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# FIX TOTAL: INJEKSI CSS DINAMIS KHUSUS SAAT ADA FILE DI-UPLOAD (MOBILE HP)
+# MODIFIKASI SELEKTOR UTAMA: TAMPILAN NAMA FILE DAN TOMBOL SILANG (X) MOBILE
 # ==========================================================================
 if uploaded_file is None:
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
     st.session_state.warn_box_html = ""
 else:
+    # KETIKA SUDAH UPLOAD: Bersihkan 200MB, bersihkan ikon (+), rapikan teks ke kiri, paksa tombol X muncul
     st.markdown("""
     <style>
-    /* 1. Hilangkan teks deskripsi awal 200MB agar tidak bertabrakan */
+    /* Hilangkan teks limit 200MB bawaan awal */
     [data-testid="stFileUploader"] section::after { 
         content: "" !important; 
         display: none !important; 
     }
     
     @media (max-width: 480px) {
-        /* 2. Sembunyikan total ikon widget file bawaan & ikon tambah (+) browser */
-        [data-testid="stFileUploader"] section svg,
-        [data-testid="stFileUploader"] data-testid,
-        [data-testid="stFileUploaderIcon"] {
-            display: none !important;
-        }
-
-        /* 3. Paksa kontainer nama file bergeser rapi di sebelah kiri */
-        div[data-testid="stFileUploaderFileData"] {
+        /* Atur kontainer baris file agar rata ke kiri */
+        [data-testid="stFileUploader"] section > input + div {
             display: flex !important;
             flex-direction: row !important;
             align-items: center !important;
-            justify-content: space-between !important; /* Dorong nama ke kiri, X ke kanan */
+            justify-content: flex-start !important;
             width: 100% !important;
-            padding: 0px 5px !important;
             margin-left: 0px !important;
+            margin-right: auto !important;
+            gap: 10px !important;
         }
 
-        /* Nama file dipaksa rata kiri */
-        div[data-testid="stFileUploaderFileData"] > div:first-child {
+        /* HAPUS TOTAL IKON TAMBAH (+) DAN IKON LAYER BAWAAN */
+        [data-testid="stFileUploader"] section > input + div svg,
+        [data-testid="stFileUploader"] section > input + div i,
+        [data-testid="stFileUploader"] [data-testid="stIconMaterial"] {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* FORMAT TEKS NAMA FILE AGAR RAPI DI SEBELAH KIRI */
+        [data-testid="stFileUploader"] section > input + div div {
             color: #333333 !important;
             font-size: 14px !important;
             font-weight: 500 !important;
             text-align: left !important;
-            margin-right: auto !important;
         }
 
-        /* 4. TAMPILKAN TOMBOL SILANG (X) ASLI STREAMLIT DI HP */
+        /* PAKSA TOMBOL SILANG (X) BAWAAN STREAMLIT MUNCUL DI HP */
+        [data-testid="stFileUploaderDeleteBtn"],
         [data-testid="stFileUploader"] button[aria-label="Remove file"] {
             display: inline-flex !important;
             visibility: visible !important;
             opacity: 1 !important;
+            margin-left: auto !important; /* Dorong tombol silang ke ujung kanan */
             background: transparent !important;
             border: none !important;
             box-shadow: none !important;
-            color: #ff4b4b !important; /* Beri warna merah estetik pada tombol silang */
-            padding: 5px !important;
-            margin: 0 !important;
         }
         
-        /* Pastikan ikon silang (X) di dalam tombol tetap terlihat jelas */
-        [data-testid="stFileUploader"] button[aria-label="Remove file"] svg {
+        /* Modifikasi bentuk silang (X) agar jelas terlihat di mobile */
+        [data-testid="stFileUploaderDeleteBtn"]::after,
+        [data-testid="stFileUploader"] button[aria-label="Remove file"]::after {
+            content: "✕" !important;
+            font-size: 16px !important;
+            color: #ff4b4b !important;
+            font-weight: 700 !important;
             display: inline-block !important;
-            fill: currentColor !important;
-            width: 16px !important;
-            height: 16px !important;
         }
     }
     </style>
@@ -493,7 +496,7 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # MEMPERKETAT DETEKSI: Ambang batas 0.65 (65%) + Filter Gambar Kosong Sembarang
+        # MEMPERKETAT DETEKSI: Ambang batas ke 0.65 (65%) + Filter Gambar Kosong Sembarang
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 245, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
