@@ -238,7 +238,7 @@ div.stButton > button:active {
 
 /* Jarak Tambahan Antara Hasil dan Footer */
 .result-box-spacer {
-    height: 45px;
+    height: 60px;
     width: 100%;
 }
 
