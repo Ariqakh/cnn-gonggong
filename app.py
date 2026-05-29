@@ -1,6 +1,6 @@
 import streamlit as st
 import tensorflow as tf
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 import base64
 from io import BytesIO
@@ -416,9 +416,6 @@ if "is_bg_removed" not in st.session_state:
 # --- FILE UPLOADER COMPONENT ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-# ==========================================================================
-# PERBAIKAN TOTAL ELEMEN FILE UPLOADER (MENAMPILKAN SILANG & FIX RESET HP)
-# ==========================================================================
 if uploaded_file is None:
     st.session_state.pred_class = "-"
     st.session_state.conf_text = "-"
@@ -493,20 +490,76 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
+# --- FUNGSI ADAPTIF SEGMENTASI OBJEK GONGGONG ---
+def extract_gonggong_object(pil_img):
+    # 1. Ubah ke grayscale & kurangi noise background lewat Gaussian Blur
+    gray_img = pil_img.convert("L")
+    blurred_gray = gray_img.filter(ImageFilter.GaussianBlur(radius=3))
+    
+    img_np = np.array(pil_img)
+    gray_np = np.array(blurred_gray)
+    
+    # 2. Implementasi Otomatis Otsu Thresholding (Mencari pemisah latar belakang secara dinamis)
+    total_pixels = gray_np.size
+    current_max = 0.0
+    threshold_otsu = 127
+    
+    hist, bins = np.histogram(gray_np, bins=256, range=(0, 256))
+    
+    weight_bg = 0.0
+    sum_bg = 0.0
+    total_mean = np.sum(np.arange(256) * hist)
+    
+    for i in range(256):
+        weight_bg += hist[i]
+        if weight_bg == 0:
+            continue
+        weight_fg = total_pixels - weight_bg
+        if weight_fg == 0:
+            break
+            
+        sum_bg += float(i) * hist[i]
+        mean_bg = sum_bg / weight_bg
+        mean_fg = (total_mean - sum_bg) / weight_fg
+        
+        # Hitung Variance Antar Kelas
+        variance_between = weight_bg * weight_fg * (mean_bg - mean_fg) ** 2
+        if variance_between > current_max:
+            current_max = variance_between
+            threshold_otsu = i
+
+    # 3. Buat Masking Dasar
+    # Untuk gambar beralas terang, objek biasanya lebih gelap. Untuk beralas gelap, objek lebih terang.
+    # Deteksi kecenderungan warna sudut gambar (pasti latar belakang)
+    corner_sample = (int(gray_np[0,0]) + int(gray_np[0,-1]) + int(gray_np[-1,0]) + int(gray_np[-1,-1])) / 4.0
+    
+    if corner_sample > threshold_otsu:
+        initial_mask = gray_np < threshold_otsu
+    else:
+        initial_mask = gray_np > threshold_otsu
+
+    # 4. Filter Kontur Terbesar (Menghilangkan bercak background kecil-kecil)
+    from scipy.ndimage import label
+    labeled_mask, num_features = label(initial_mask)
+    
+    if num_features > 0:
+        feature_sizes = np.bincount(labeled_mask.ravel())
+        feature_sizes[0] = 0 # Jangan hitung background label 0
+        largest_feature_label = np.argmax(feature_sizes)
+        final_mask = (labeled_mask == largest_feature_label)
+    else:
+        final_mask = initial_mask
+
+    # 5. Transformasi Gambar Akhir: Isi luar daerah objek dengan warna putih murni [255, 255, 255]
+    output_np = img_np.copy()
+    output_np[~final_mask] = [255, 255, 255]
+    
+    return Image.fromarray(output_np)
+
 # --- IMAGE PREVIEW CONTROLLER ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
-    
-    # FIX LOGIKA UTAMA: Mengubah latar belakang hitam gelap menjadi putih murni
-    img_np = np.array(image)
-    gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-    
-    # Nilai < 40 digunakan untuk mendeteksi warna hitam/sangat gelap pada latar belakang
-    background_mask = gray_np < 40 
-    
-    segmented_np = img_np.copy()
-    segmented_np[background_mask] = [255, 255, 255] # Ubah hitam menjadi PUTIH MURNI
-    processed_image = Image.fromarray(segmented_np)
+    processed_image = extract_gonggong_object(image)
 
     # Tampilkan layout kolom pratinjau
     col1, col2 = st.columns(2)
@@ -565,13 +618,8 @@ if bg_clicked:
 # --- KONTROL LOGIKA DAN VALIDASI MODEL ---
 if analyze_clicked:
     if uploaded_file is not None:
-        # Gunakan gambar hasil olahan latar belakang hitam ke putih untuk proses klasifikasi model
-        img_np = np.array(image)
-        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        background_mask = gray_np < 40
-        segmented_np = img_np.copy()
-        segmented_np[background_mask] = [255, 255, 255]
-        final_processed = Image.fromarray(segmented_np)
+        # Gunakan fungsi ekstraksi adaptif agar model mendeteksi objek gonggong murni
+        final_processed = extract_gonggong_object(image)
 
         img_resized = final_processed.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
@@ -580,11 +628,12 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
-        total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+        final_np = np.array(final_processed)
+        pure_white = np.sum(np.all(final_np >= 245, axis=-1))
+        total_pixels = final_np.shape[0] * final_np.shape[1]
         
-        # Logika validasi disesuaikan setelah gambar diubah ke background putih
-        if max_conf < 0.50 or (pure_white / total_pixels) > 0.85:
+        # Validasi keamanan input gambar kosong
+        if max_conf < 0.45 or (pure_white / total_pixels) > 0.95:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
             st.session_state.pred_class = "-"
             st.session_state.conf_text = "-"
