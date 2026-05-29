@@ -265,7 +265,7 @@ div.stButton > button:active {
         margin-bottom: 6px;
     }
     .app-logo-img { 
-        width: 150px; 
+        width: 220px; /* Selesai diperbesar dari 150px agar lebih mantap */
         height: auto; 
     }
     .app-title-main { 
