@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -28,7 +28,7 @@ html, body, [data-testid="stAppViewContainer"] {
     min-height: 100vh !important;
 }
 
-/* Hilangkan padding bawah bawaan streamlit block yang bikin scroll kosong kepanjangan */
+/* Hilangkan padding bawah bawaan streamlit block */
 [data-testid="stMain"] {
     background: transparent !important;
     padding-bottom: 20px !important; 
@@ -111,7 +111,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 500;
 }
 
-/* BASE STYLING FOR FILE UPLOADER (DESKTOP & MOBILE DEFAULT UNTUK TOMBOL UPLOAD DI KIRI) */
+/* BASE STYLING FOR FILE UPLOADER */
 [data-testid="stFileUploader"] section {
     background-color: #F3F3F3 !important;
     border: 1px solid #ccc !important;
@@ -194,24 +194,6 @@ div.stButton > button {
     margin: 0 auto;
 }
 
-/* CUSTOM INJECTED LABELS FOR MOBILE FILE UPLOADER */
-.mobile-custom-uploader-container {
-    background-color: #F3F3F3;
-    border: 1px solid #cccccc;
-    border-radius: 14px;
-    padding: 8px 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-}
-.mobile-custom-text-hint {
-    color: #737373;
-    font-size: 13.5px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 400;
-}
-
 /* RESPONSIVE MOBILE OPTIMIZATION */
 @media (max-width: 480px) {
     .navbar {
@@ -242,7 +224,7 @@ div.stButton > button {
         margin: 20px auto;
     }
 
-    /* MENERAPKAN TAMPILAN UPLOADER DEFAULT SESUAI SCREENSHOT (TOMBOL KOTAK DI KIRI) */
+    /* MENERAPKAN TAMPILAN UPLOADER KOTAK DI KIRI KHUSUS HP */
     [data-testid="stFileUploader"] section {
         display: flex !important;
         flex-direction: row !important; 
@@ -255,13 +237,13 @@ div.stButton > button {
         border-radius: 20px !important;
     }
     
-    /* Memastikan tombol internal "Browse files" berupa kotak di sebelah kiri */
+    /* Tombol internal asli "Browse files" berupa kotak di sebelah kiri */
     [data-testid="stFileUploader"] section button {
         background-color: #FFFFFF !important;
         color: #333333 !important;
         border: 1px solid #CCCCCC !important;
         border-radius: 8px !important;
-        padding: 6px 12px !important;
+        padding: 6px 14px !important;
         font-size: 14px !important;
         font-weight: 500 !important;
         margin: 0 !important;
@@ -269,18 +251,33 @@ div.stButton > button {
         width: auto !important;
     }
 
-    /* MATIKAN TOTAL TANDA TAMBAH (+) BAWAAN STREAMLIT MULTI-UPLOADER */
-    [data-testid="stFileUploader"] section + button, 
-    [data-testid="stFileUploader"] button:has(svg path[d*="M19"]),
-    [data-testid="stFileUploader"] [data-testid="stBaseButton-secondary"] {
+    /* INJEKSI TEKS "200MB per file • JPG, PNG" DI SEBELAH KANAN TOMBOL BROWSE (SEBELUM UPLOAD) */
+    [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"]::after {
+        content: "200MB per file • JPG, PNG" !important;
+        color: #737373 !important;
+        font-size: 13.5px !important;
+        font-weight: 400 !important;
+        display: inline-block !important;
+        margin-left: 2px !important;
+        white-space: nowrap !important;
+    }
+
+    /* JIKA FILE SUDAH DIUPLOAD, SEMBUNYIKAN TEKS 200MB TERSEBUT */
+    [data-testid="stFileUploader"]:has([data-testid="stFileUploaderFileName"]) section [data-testid="stUploadDropzone"]::after {
+        display: none !important;
+        content: "" !important;
+    }
+
+    /* HILANGKAN TOTAL TANDA TAMBAH (+) YANG MENGGANGGU DI SEBELAH KANAN */
+    [data-testid="stFileUploader"] section button + div,
+    [data-testid="stFileUploader"] button[id*="upload-button"] + div,
+    [data-testid="stFileUploader"] .stBaseButton-secondary,
+    [data-testid="stFileUploader"] svg {
         display: none !important;
     }
-    
-    /* Hilangkan petunjuk text internal seret/bawaan agar tidak tumpang tindih */
+
+    /* Hilangkan teks bawaan streamlit yang ter-collapsed agar bersih */
     [data-testid="stFileUploader"] section [data-testid="stUploadDropzone"] div {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] section svg {
         display: none !important;
     }
     
@@ -409,23 +406,6 @@ if "show_warning" not in st.session_state:
     st.session_state.show_warning = False
 
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
-
-# MANIPULASI ELEMENT TEKS 200MB VIA PYTHON AGAR AKURAT DI HP
-if uploaded_file is None:
-    st.markdown("""
-    <script>
-    var elements = window.parent.document.querySelectorAll('[data-testid="stFileUploader"] section');
-    elements.forEach(function(el) {
-        // Cek apakah custom label sudah ada agar tidak duplikat
-        if(!el.querySelector('.mobile-custom-text-hint')) {
-            var textSpan = window.parent.document.createElement('span');
-            textSpan.className = 'mobile-custom-text-hint';
-            textSpan.innerText = '200MB per file • JPG, PNG';
-            el.appendChild(textSpan);
-        }
-    });
-    </script>
-    """, unsafe_allow_html=True)
 
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
