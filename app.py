@@ -10,10 +10,9 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- CSS STYLING UTAMA ---
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -160,13 +159,11 @@ div.stButton > button {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 12px;
+    padding: 10px;
     border-radius: 15px;
-    font-size: 14px;
-    margin-bottom: 15px;
+    font-size: 13px;
+    margin-bottom: 10px;
     font-weight: 600;
-    text-align: center;
-    border: 1px solid #FFCCCC;
 }
 
 .page-wrapper {
@@ -294,12 +291,14 @@ div.stButton > button {
 </style>
 """, unsafe_allow_html=True)
 
-# --- LOAD MODEL & DATA PREPARATION ---
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
+    # =========================
+    # PATCH Dense
+    # =========================
     original_dense = Dense.from_config
     @classmethod
     def custom_dense(cls, config):
@@ -307,6 +306,9 @@ def load_my_model():
         return original_dense(config)
     Dense.from_config = custom_dense
 
+    # =========================
+    # PATCH InputLayer
+    # =========================
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
@@ -317,6 +319,9 @@ def load_my_model():
         return cls(**config)
     InputLayer.from_config = custom_input
 
+    # =========================
+    # PATCH Dropout
+    # =========================
     original_dropout = Dropout.from_config
     @classmethod
     def custom_dropout(cls, config):
@@ -324,6 +329,9 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
+    # =========================
+    # LOAD MODEL
+    # =========================
     model = keras_load_model("model_gonggong.h5", compile=False)
     return model
 
@@ -375,7 +383,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- INITIALIZE SESSION STATE FOR RESET DATA ---
+# --- INITIALIZE SESSION STATE FOR RESET VALUES ---
 if "predicted_class" not in st.session_state:
     st.session_state.predicted_class = "-"
 if "confidence_text" not in st.session_state:
@@ -383,14 +391,14 @@ if "confidence_text" not in st.session_state:
 if "warning_msg" not in st.session_state:
     st.session_state.warning_msg = ""
 
-# --- RENDER FILE UPLOADER UTAMA ---
+# --- FILE UPLOADER WIDGET ---
 uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
 # ==========================================================================
-# KONTROL CSS DINAMIS BERDASARKAN KONDISI STATE UPLOAD FILE
+# INJEKSI CSS STATE CONDITIONAL BERDASARKAN STATUS UPLOAD
 # ==========================================================================
 if uploaded_file is None:
-    # JIKA BELUM UPLOAD: Tampilkan teks kustom "200MB per file..." di mobile
+    # Saat Belum Upload: Tetap muncul teks "200MB..." di mobile secara default
     st.markdown("""
     <style>
     @media (max-width: 480px) {
@@ -405,18 +413,18 @@ if uploaded_file is None:
     </style>
     """, unsafe_allow_html=True)
     
-    # Otomatis reset teks output jika tombol silang (X) ditekan atau file kosong
+    # Reset state output ke awal jika file kosong / tombol silang ditekan
     st.session_state.predicted_class = "-"
     st.session_state.confidence_text = "-"
     st.session_state.warning_msg = ""
 else:
-    # JIKA SUDAH UPLOAD: Matikan tulisan "200MB..." dan hidupkan kembali list nama file & tombol silang (X)
+    # Saat Sudah Upload: Matikan tulisan "200MB..." dan nyalakan nama file + tombol (X) bawaan
     st.markdown("""
     <style>
-    /* Sembunyikan pseudo-element teks 200MB */
+    /* Hilangkan teks panduan 200MB */
     [data-testid="stFileUploader"] section::after { content: "" !important; display: none !important; }
     
-    /* Tampilkan kembali container nama file bawaan Streamlit secara rapi horizontal */
+    /* Atur kontainer teks nama file bawaan agar muat rapi di sebelah kanan tombol */
     [data-testid="stFileUploader"] section > input + div {
         display: flex !important;
         flex-direction: row !important;
@@ -426,20 +434,20 @@ else:
         color: #333333 !important;
         font-size: 14px !important;
     }
-    /* Pastikan tombol silang (X) bawaan berfungsi dan terlihat jelas */
+    /* Aktifkan visual tombol silang X reset bawaan */
     [data-testid="stFileUploader"] button[aria-label="Remove file"] {
         display: inline-flex !important;
         visibility: visible !important;
         opacity: 1 !important;
     }
-    /* Sembunyikan icon file bawaan yang mengganggu */
+    /* Sembunyikan ikon berkas svg bawaan agar ringkas */
     [data-testid="stFileUploader"] section > input + div svg {
         display: none !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- TAMPILAN PREVIEW GAMBAR ---
+# --- LOGIKA PRATINJAU GAMBAR ---
 if uploaded_file is not None:
     image = Image.open(uploaded_file).convert("RGB")
     buffered = BytesIO()
@@ -460,7 +468,7 @@ else:
 
 analyze_clicked = st.button("Analisis Gambar")
 
-# --- LOGIKA KLASIFIKASI & MEMPERKETAT DETEKSI ---
+# --- PROSES MODEL & PENGETATAN FILTER DETEKSI ---
 if analyze_clicked:
     if uploaded_file is not None:
         img_resized = image.resize((224, 224))
@@ -470,18 +478,18 @@ if analyze_clicked:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
-        # Penambahan filter rasio warna ekstrem (mendeteksi background putih mutlak / hitam pekat non-objek)
+        # Validasi tambahan: Cek rasio warna background ekstrem (bukan objek gonggong)
         img_np = np.array(image)
         pure_white = np.sum(np.all(img_np >= 248, axis=-1))
         pure_black = np.sum(np.all(img_np <= 8, axis=-1))
         total_pixels = img_np.shape[0] * img_np.shape[1]
         extreme_ratio = (pure_white + pure_black) / total_pixels
         
-        # Batasan diperketat: Jika confidence level di bawah 65% atau gambar dominan kosong latar belakangnya
+        # Pengetatan deteksi: threshold naik ke 0.65 atau jika gambar terlalu kosong/polos
         if max_conf < 0.65 or extreme_ratio > 0.25:
             st.session_state.warning_msg = "⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas."
-            st.session_state.predicted_class = ""
-            st.session_state.confidence_text = ""
+            st.session_state.predicted_class = "-"
+            st.session_state.confidence_text = "-"
         else:
             st.session_state.warning_msg = ""
             predicted_index = np.argmax(prediction)
@@ -490,7 +498,7 @@ if analyze_clicked:
     else:
         st.warning("Silakan upload gambar terlebih dahulu.")
 
-# Tampilkan pesan peringatan jika gambar tidak lolos validasi ketat
+# Render pesan peringatan jika gambar terfilter ketat
 if st.session_state.warning_msg:
     st.markdown(f"<div class='warning-box'>{st.session_state.warning_msg}</div>", unsafe_allow_html=True)
 
