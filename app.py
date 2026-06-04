@@ -291,7 +291,7 @@ div.stButton > button[key*="reset"] { background: #64748b !important; }
     .navbar-title { font-size: 14px; }
     .welcome-title { font-size: 32px; }
     .welcome-subtitle { font-size: 12px; }
-    .app-header { flex-direction: column; gap: 50px; text-align: center; margin-top: -10px; }
+    .app-header { flex-direction: column; gap: 10px; text-align: center; margin-top: -10px; }
     .app-logo-img { width: 195px; height: auto; }
     .app-title-main { font-size: 32px; }
     .img-preview-container { height: 160px; margin: 8px auto; }
