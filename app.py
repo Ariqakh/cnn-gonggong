@@ -141,7 +141,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     align-items: center;
     justify-content: center;
     gap: 40px;
-    margin: 60px 0 12px 0;
+    margin: 0px 0 12px 0;
     text-align: left;
     padding-top: 40px;
 }
