@@ -2,9 +2,10 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
-import cv2  
+import cv2
 import base64
 from io import BytesIO
+from rembg import remove  # Ditambahkan untuk penghapusan background berbasis AI
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -368,7 +369,7 @@ div.stButton > button:active {
         font-size: 15px;
     }
     .result-box-spacer {
-        height: 100px; /* Jarak disesuaikan agar lebih pendek di mobile HP */
+        height: 100px;
     }
     .page-wrapper { 
         margin-top: 15px; 
@@ -418,7 +419,6 @@ def load_my_model():
 
 model = load_my_model()
 
-# Disesuaikan dengan format class_names pada kode referensi model Anda
 classes = [
     'Canarium_Mutabile', 
     'Canarium_Urseus', 
@@ -552,22 +552,26 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# --- IMAGE PREVIEW ---
+# --- IMAGE PREVIEW PROCESSING ---
 if uploaded_file is not None:
-    image = Image.open(uploaded_file).convert("RGB")
+    image = Image.open(uploaded_file)
     
-    img_np = np.array(image)
-    gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-    background_mask = gray_np < 40 
-    segmented_np = img_np.copy()
-    segmented_np[background_mask] = [255, 255, 255]
-    processed_image = Image.fromarray(segmented_np)
+    # --- PROSES REMBG (AI) ---
+    # Fungsi pembungkus agar eksekusi rembg berjalan lancar di Streamlit
+    @st.cache_data
+    def process_rembg(img_input):
+        output_img = remove(img_input)
+        bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+        bg_white.paste(output_img, mask=output_img.split()[3])
+        return bg_white
+
+    processed_image = process_rembg(image)
 
     col1, col2 = st.columns(2)
     
     with col1:
         buffered1 = BytesIO()
-        image.save(buffered1, format="JPEG")
+        image.convert("RGB").save(buffered1, format="JPEG")
         img_str1 = base64.b64encode(buffered1.getvalue()).decode()
         st.markdown(f"""
         <div class='img-preview-container'>
@@ -619,28 +623,18 @@ if uploaded_file is not None:
         st.rerun()
 
     if analyze_clicked:
-        img_np = np.array(image)
-        gray_np = 0.2989 * img_np[:,:,0] + 0.5870 * img_np[:,:,1] + 0.1140 * img_np[:,:,2]
-        background_mask = gray_np < 40
-        segmented_np = img_np.copy()
-        segmented_np[background_mask] = [255, 255, 255]
-        
-        # --- PROSES PERJELAS GAMBAR (SHARPENING) ---
-        # Konversi ke BGR untuk OpenCV
-        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+        # Gunakan hasil olahan background putih rembg sebagai dasar array numpy
+        segmented_np = np.array(processed_image)
 
-        # Kernel untuk memperjelas tepi (sharpening) sesuai model kode referensi
+        # --- PROSES PERJELAS GAMBAR (SHARPENING) VIA OPENCV ---
+        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
         kernel = np.array([[0, -1, 0], 
                            [-1, 5,-1], 
                            [0, -1, 0]])
-
-        # Terapkan filter penajaman
         sharpened = cv2.filter2D(img_bgr, -1, kernel)
-
-        # Konversi balik ke RGB
         final_img_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
         
-        # Buat objek citra final PIL dari array hasil penajaman
+        # Konversi balik ke PIL objek
         final_processed = Image.fromarray(final_img_rgb)
 
         # --- PROSES RESIZE DAN PREDIKSI ---
@@ -651,10 +645,11 @@ if uploaded_file is not None:
         prediction = model.predict(img_array)
         max_conf = np.max(prediction)
         
+        # Deteksi piksel putih untuk validasi input kosong
         pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
         total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
         
-        if max_conf < 0.50 or (pure_white / total_pixels) > 0.85:
+        if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
             st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
             st.session_state.pred_class = "-"
             st.session_state.conf_text = "-"
