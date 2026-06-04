@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import base64
 from io import BytesIO
-from rembg import remove  # Pustaka penghapusan background berbasis AI
+from rembg import remove
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -51,6 +51,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     visibility: hidden; display: none !important; 
 }
 
+/* NAVBAR FIXED */
 .navbar {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -67,6 +68,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 600;
 }
 
+/* HEADER WITH ANIMATION ENTRY */
 .app-header {
     display: flex;
     align-items: center;
@@ -74,6 +76,12 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     gap: 40px;
     margin-bottom: 12px;
     text-align: left;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .app-logo-img {
@@ -100,6 +108,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     margin-top: 6px;
 }
 
+/* IMAGE PREVIEW WITH GLOW & TRANSITION EFFECT */
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
@@ -111,13 +120,26 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     justify-content: center;
     overflow: hidden;
     border: 1px solid #ddd;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
+.img-preview-container:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 20px rgba(11, 29, 58, 0.15);
+}
+
 .img-preview-container img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
     border-radius: 10px;
+    animation: fadeIn 0.5s ease-in-out;
 }
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
 .img-placeholder-text {
     font-size: 16px;
     color: #666;
@@ -129,9 +151,13 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     border: 1px solid #ccc !important;
     border-radius: 30px !important;
     padding: 15px !important;
+    transition: background 0.3s ease;
+}
+[data-testid="stFileUploader"] section:hover {
+    background-color: #EAEAEA !important;
 }
 
-/* ===== PERBAIKAN WARNA PERINGATAN STREAMLIT ===== */
+/* WARNING BOX */
 div[data-testid="stNotification"] {
     background-color: #f8d7da !important;
     border: 1px solid #f5c6cb !important;
@@ -142,11 +168,8 @@ div[data-testid="stNotification"] p {
     font-weight: 700 !important;
     font-size: 14px !important;
 }
-div[data-testid="stNotification"] svg {
-    fill: #721c24 !important;
-}
 
-/* ===== BUTTON STYLING (TANPA GRADASI) ===== */
+/* BUTTONS WITH SMOOTH HOVER EFFECT */
 .button-group {
     display: flex;
     flex-direction: row;
@@ -156,7 +179,6 @@ div[data-testid="stNotification"] svg {
     width: 100%;
 }
 
-/* Default semua tombol */
 div.stButton > button {
     color: white !important;
     font-size: 16px !important;
@@ -167,44 +189,32 @@ div.stButton > button {
     margin: 0 !important;
     display: block !important;
     width: 100%;
-    transition: all 0.2s ease !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
 }
 
-/* Tombol Hapus Latar Belakang diubah ke warna solid hijau tua */
-div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
-div.stButton > button[kind="secondary"] {
-    background: #0a3d3c !important;
+div.stButton > button:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25) !important;
+    opacity: 0.95 !important;
 }
 
-/* Fallback — tombol pertama hijau tua solid */
+div.stButton > button:active {
+    transform: translateY(-1px) !important;
+}
+
+/* Button Colors */
+div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
+div.stButton > button[kind="secondary"],
 div.stButton:nth-of-type(1) > button {
     background: #0a3d3c !important;
 }
-
-div.stButton > button#btn_remove_bg,
-div.stButton > button[key="btn_remove_bg"] {
-    background: #0a3d3c !important;
-}
-
-/* Tombol Analisis Gambar dengan warna hijau solid sedikit lebih terang */
 div.stButton > button#btn_analyze,
 div.stButton > button[key="btn_analyze"] {
     background: #115c5a !important;
 }
 
-div.stButton > button:hover {
-    opacity: 0.88 !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.22) !important;
-}
-
-div.stButton > button:active {
-    transform: translateY(0px) !important;
-    opacity: 1 !important;
-}
-
-/* ===== HASIL PREDIKSI ===== */
+/* RESULTS CARDS */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -214,7 +224,15 @@ div.stButton > button:active {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    animation: fadeInUp 0.6s ease-out both;
 }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .result-label {
     font-weight: 700;
     color: #0b1d3a;
@@ -231,156 +249,64 @@ div.stButton > button:active {
 .warning-box {
     background-color: #FFDADA;
     color: #CC0000;
-    padding: 10px;
+    padding: 15px;
     border-radius: 15px;
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 10px;
     font-weight: 600;
+    animation: shake 0.5s ease-in-out;
 }
 
-/* Jarak Tambahan Antara Hasil dan Footer */
-.result-box-spacer {
-    height: 100px;
-    width: 100%;
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
 }
 
-.page-wrapper {
-    display: flex !important;
-    flex-direction: column !important;
-    flex-grow: 1 !important;
-    min-height: 100% !important;
-    margin-bottom: 0px;
-    padding-bottom: 0px;
+/* CUSTOM SPINNER ANIMATION */
+.custom-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto;
 }
-
-/* STICKY FOOTER MENTOK BAWAH CANVAS */
-.white-footer-canvas {
-    position: relative !important;
-    margin-top: auto !important; 
-    padding: 20px 0px !important;
-    display: flex !important;
-    justify-content: center !important; 
-    align-items: center !important;
-    width: 100% !important;
+.spinner-ring {
+    border: 4px solid rgba(11, 29, 58, 0.1);
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border-left-color: #0b1d3a;
+    animation: spin 1s linear infinite;
 }
-
-.footer-text {
-    text-align: center;
-    color: #1a364a;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.spinner-text {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #0b1d3a;
     font-size: 14px;
-    font-weight: 500;
-    line-height: 1.5;
-    margin: 0 auto;
 }
 
-/* ===== RESPONSIVE MOBILE ===== */
+.result-box-spacer { height: 100px; width: 100%; }
+.page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; }
+.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
+.footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
+
 @media (max-width: 480px) {
-    .navbar {
-        padding: 15px 15px;
-        gap: 8px;
-    }
-    .navbar-title {
-        font-size: 14px;
-    }
-    .app-header {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-        margin-top: -10px; 
-        margin-bottom: 6px;
-    }
-    .app-logo-img { 
-        width: 195px; 
-        height: auto; 
-    }
-    .app-title-main { 
-        font-size: 32px; 
-    }
-    .app-subtitle-main {
-        font-size: 12px;
-    }
-    .img-preview-container { 
-        height: 160px; 
-        margin: 8px auto;
-    }
-    
-    .button-group {
-        flex-direction: column !important;
-        gap: 10px;
-        margin: 10px auto !important;
-    }
-
-    [data-testid="stFileUploader"] section {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 15px !important;
-        padding: 12px 20px !important;
-        background-color: #EAEAEA !important;
-        border: none !important;
-        border-radius: 40px !important;
-    }
-    [data-testid="stFileUploader"] section svg {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] section button {
-        background-color: #FFFFFF !important;
-        color: #333333 !important;
-        border: 1px solid #CCCCCC !important;
-        border-radius: 12px !important;
-        padding: 6px 16px !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        margin: 0 !important;
-        box-shadow: 0px 1px 3px rgba(0,0,0,0.1) !important;
-    }
-    [data-testid="stFileUploader"] section > input + div {
-        display: none !important;
-    }
-    [data-testid="stFileUploader"] section::after {
-        content: "200MB per file • JPG, PNG";
-        font-size: 14px;
-        color: #777777;
-        font-weight: 400;
-        display: inline-block;
-    }
-
-    div.stButton > button {
-        width: 100% !important;
-        font-size: 15px !important;
-        padding: 12px 20px !important;
-    }
-    
-    .result-box {
-        padding: 15px 20px;
-        margin-top: 12px;
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: flex-start !important;
-        align-items: center !important;
-    }
-    .result-label {
-        font-size: 15px;
-        min-width: 135px; 
-        margin-right: 0px;
-    }
-    .result-value {
-        font-size: 15px;
-    }
-    .result-box-spacer {
-        height: 100px;
-    }
-    .page-wrapper { 
-        margin-top: 15px; 
-    }
-    .white-footer-canvas { 
-        margin-top: auto !important; 
-        padding: 15px 0px !important;
-    }
-    .footer-text {
-        font-size: 11px;
-    }
+    .navbar { padding: 15px 15px; gap: 8px; }
+    .navbar-title { font-size: 14px; }
+    .app-header { flex-direction: column; gap: 10px; text-align: center; margin-top: -10px; }
+    .app-logo-img { width: 195px; height: auto; }
+    .app-title-main { font-size: 32px; }
+    .img-preview-container { height: 160px; margin: 8px auto; }
+    .button-group { flex-direction: column !important; gap: 10px; }
+    div.stButton > button { width: 100% !important; font-size: 15px; padding: 12px 20px !important; }
+    .result-box { padding: 15px 20px; display: flex !important; flex-direction: row !important; }
+    .result-label { font-size: 15px; min-width: 135px; }
+    .result-value { font-size: 15px; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -414,8 +340,7 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    model = keras_load_model("model_gonggong.h5", compile=False)
-    return model
+    return keras_load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
@@ -428,8 +353,7 @@ classes = [
 
 try:
     with open("logo_umrah.png", "rb") as f:
-        nav_logo_bytes = f.read()
-    encoded_nav_logo = base64.b64encode(nav_logo_bytes).decode()
+        encoded_nav_logo = base64.b64encode(f.read()).decode()
 except:
     encoded_nav_logo = ""
 
@@ -438,9 +362,8 @@ st.markdown(f"""
     <div class="navbar-logo">
         <img src="data:image/png;base64,{encoded_nav_logo}" width="32" height="32" style="object-fit:cover;">
     </div>
-    <span class="navbar-title">Universitas Maritime Raja Ali Haji</span>
+    <span class="navbar-title">Universitas Maritim Raja Ali Haji</span>
 </div>
-<div class="navbar-spacer"></div>
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
@@ -465,213 +388,147 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- SESSION STATE ---
-if "pred_class" not in st.session_state:
-    st.session_state.pred_class = "-"
-if "conf_text" not in st.session_state:
-    st.session_state.conf_text = "-"
-if "warn_box_html" not in st.session_state:
-    st.session_state.warn_box_html = ""
-if "is_bg_removed" not in st.session_state:
-    st.session_state.is_bg_removed = False
+@st.fragment
+def main_workspace():
+    # Inisialisasi state internal lokal fragment
+    if "bg_removed_image" not in st.session_state:
+        st.session_state.bg_removed_image = None
+    if "pred_class" not in st.session_state:
+        st.session_state.pred_class = "-"
+    if "conf_text" not in st.session_state:
+        st.session_state.conf_text = "-"
+    if "warn_html" not in st.session_state:
+        st.session_state.warn_html = ""
 
-# --- FILE UPLOADER ---
-uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
+    uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
-if uploaded_file is None:
-    st.session_state.pred_class = "-"
-    st.session_state.conf_text = "-"
-    st.session_state.warn_box_html = ""
-    st.session_state.is_bg_removed = False
-else:
-    st.markdown("""
-    <style>
-    [data-testid="stFileUploader"] section::after { 
-        content: "" !important; 
-        display: none !important; 
-    }
-
-    @media (max-width: 480px) {
-        [data-testid="stFileUploader"] section button {
-            display: none !important;
-        }
-
-        [data-testid="stFileUploader"] section {
-            display: flex !important;
-            flex-direction: row !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            padding: 12px 20px !important;
-            background-color: #EAEAEA !important;
-        }
-
-        [data-testid="stFileUploader"] section data,
-        [data-testid="stFileUploader"] section svg,
-        [data-testid="stFileUploader"] section span {
-            display: none !important;
-        }
-
-        [data-testid="stFileUploader"] section > input + div {
-            display: flex !important;
-            flex-direction: row !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            width: 100% !important;
-            margin: 0 !important;
-        }
-
-        [data-testid="stFileUploader"] button[aria-label="Remove file"],
-        [data-testid="stFileUploader"] button[data-testid="stFileUploaderDeleteBtn"] {
-            display: inline-block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            position: relative !important;
-            background-color: #DCDCDC !important;
-            color: #333333 !important;
-            border-radius: 50% !important;
-            width: 28px !important;
-            height: 28px !important;
-            border: none !important;
-            margin: 0 0 0 auto !important;
-            padding: 0 !important;
-            line-height: 26px !important;
-            text-align: center !important;
-            box-shadow: 0px 1px 2px rgba(0,0,0,0.15) !important;
-            z-index: 999 !important;
-        }
-
-        [data-testid="stFileUploader"] button[aria-label="Remove file"]::after {
-            content: "✕" !important;
-            font-size: 14px !important;
-            font-weight: 800 !important;
-            color: #222222 !important;
-            display: block !important;
-            text-align: center !important;
-        }
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-# --- IMAGE PREVIEW PROCESSING ---
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    
-    # --- PROSES REMBG (AI) ---
-    # Dekorator @st.cache_data dihapus di sini untuk mencegah UnhashableParamError
-    def process_rembg(img_input):
-        output_img = remove(img_input)
-        bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-        bg_white.paste(output_img, mask=output_img.split()[3])
-        return bg_white
-
-    processed_image = process_rembg(image)
-
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        buffered1 = BytesIO()
-        image.convert("RGB").save(buffered1, format="JPEG")
-        img_str1 = base64.b64encode(buffered1.getvalue()).decode()
-        st.markdown(f"""
-        <div class='img-preview-container'>
-            <img src="data:image/jpeg;base64,{img_str1}">
-        </div>
-        <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Gambar Asli</div>
-        """, unsafe_allow_html=True)
+    if uploaded_file is None:
+        st.session_state.bg_removed_image = None
+        st.session_state.pred_class = "-"
+        st.session_state.conf_text = "-"
+        st.session_state.warn_html = ""
         
-    with col2:
-        if st.session_state.is_bg_removed:
-            buffered2 = BytesIO()
-            processed_image.save(buffered2, format="JPEG")
-            img_str2 = base64.b64encode(buffered2.getvalue()).decode()
-            img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
-        else:
-            img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
-            
-        st.markdown(f"""
+        st.markdown("""
         <div class='img-preview-container'>
-            {img_html}
+            <span class='img-placeholder-text'>Silakan Upload Gambar Terlebih Dahulu</span>
         </div>
-        <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
         """, unsafe_allow_html=True)
-else:
-    st.markdown("""
-    <div class='img-preview-container'>
-        <span class='img-placeholder-text'>Gambar</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- TOMBOL (HANYA MUNCUL JIKA GAMBAR SUDAH DIUPLOAD) ---
-if uploaded_file is not None:
-    st.markdown("<div class='button-group'>", unsafe_allow_html=True)
-    
-    if not st.session_state.is_bg_removed:
-        bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
-        analyze_clicked = False
     else:
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            bg_clicked = st.button("Hapus Latar Belakang", key="btn_remove_bg")
-        with col_btn2:
-            analyze_clicked = st.button("Analisis Gambar", key="btn_analyze")
+        image = Image.open(uploaded_file)
+        
+        # Grid Tampilan Gambar
+        col1, col2 = st.columns(2)
+        with col1:
+            buf1 = BytesIO()
+            image.convert("RGB").save(buf1, format="JPEG")
+            img_str1 = base64.b64encode(buf1.getvalue()).decode()
+            st.markdown(f"""
+            <div class='img-preview-container'>
+                <img src="data:image/jpeg;base64,{img_str1}">
+            </div>
+            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Gambar Asli</div>
+            """, unsafe_allow_html=True)
             
-    st.markdown("</div>", unsafe_allow_html=True)
+        with col2:
+            if st.session_state.bg_removed_image is not None:
+                buf2 = BytesIO()
+                st.session_state.bg_removed_image.save(buf2, format="JPEG")
+                img_str2 = base64.b64encode(buf2.getvalue()).decode()
+                img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
+            else:
+                img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
+                
+            st.markdown(f"""
+            <div class='img-preview-container'>
+                {img_html}
+            </div>
+            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
+            """, unsafe_allow_html=True)
 
-    if bg_clicked:
-        st.session_state.is_bg_removed = True
-        st.rerun()
-
-    if analyze_clicked:
-        # Gunakan hasil olahan background putih rembg sebagai dasar array numpy
-        segmented_np = np.array(processed_image)
-
-        # --- PROSES PERJELAS GAMBAR (SHARPENING) VIA OPENCV ---
-        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-        kernel = np.array([[0, -1, 0], 
-                           [-1, 5,-1], 
-                           [0, -1, 0]])
-        sharpened = cv2.filter2D(img_bgr, -1, kernel)
-        final_img_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-        
-        # Konversi balik ke PIL objek
-        final_processed = Image.fromarray(final_img_rgb)
-
-        # --- PROSES RESIZE DAN PREDIKSI ---
-        img_resized = final_processed.resize((224, 224))
-        img_array = np.array(img_resized).astype("float32") / 255.0
-        img_array = np.expand_dims(img_array, axis=0)
-
-        prediction = model.predict(img_array)
-        max_conf = np.max(prediction)
-        
-        # Deteksi piksel putih untuk validasi input kosong
-        pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
-        total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
-        
-        if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
-            st.session_state.warn_box_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
-            st.session_state.pred_class = "-"
-            st.session_state.conf_text = "-"
+        # Kontrol Tombol Aksi
+        st.markdown("<div class='button-group'>", unsafe_allow_html=True)
+        if st.session_state.bg_removed_image is None:
+            if st.button("Hapus Latar Belakang", key="frag_btn_rm"):
+                st.markdown("""
+                <div class='custom-spinner'>
+                    <div class='spinner-ring'></div>
+                    <div class='spinner-text'>AI sedang menghapus background...</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Eksekusi pemrosesan AI rembg
+                output_img = remove(image)
+                bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                bg_white.paste(output_img, mask=output_img.split()[3])
+                
+                st.session_state.bg_removed_image = bg_white
+                st.rerun()
         else:
-            st.session_state.warn_box_html = ""
-            predicted_index = np.argmax(prediction)
-            st.session_state.pred_class = classes[predicted_index]
-            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+            c_b1, c_b2 = st.columns(2)
+            with c_b1:
+                if st.button("Proses Ulang Gambar", key="frag_btn_reset"):
+                    st.session_state.bg_removed_image = None
+                    st.session_state.pred_class = "-"
+                    st.session_state.conf_text = "-"
+                    st.session_state.warn_html = ""
+                    st.rerun()
+            with c_b2:
+                if st.button("Analisis Gambar", key="frag_btn_anlz"):
+                    st.markdown("""
+                    <div class='custom-spinner'>
+                        <div class='spinner-ring'></div>
+                        <div class='spinner-text'>Mengklasifikasikan jenis gonggong...</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    segmented_np = np.array(st.session_state.bg_removed_image)
+                    
+                    # Sharpening menggunakan OpenCV
+                    img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                    sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                    final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                    
+                    final_processed = Image.fromarray(final_rgb)
+                    img_resized = final_processed.resize((224, 224))
+                    img_array = np.array(img_resized).astype("float32") / 255.0
+                    img_array = np.expand_dims(img_array, axis=0)
+                    
+                    prediction = model.predict(img_array)
+                    max_conf = np.max(prediction)
+                    
+                    pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
+                    total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+                    
+                    if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
+                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang lebih jelas.</div>"
+                        st.session_state.pred_class = "-"
+                        st.session_state.conf_text = "-"
+                    else:
+                        st.session_state.warn_html = ""
+                        st.session_state.pred_class = classes[np.argmax(prediction)].replace("_", " ")
+                        st.session_value = np.max(prediction)
+                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                    st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-if st.session_state.warn_box_html:
-    st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
+    # Output Hasil Analisis
+    if st.session_state.warn_html:
+        st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
 
-st.markdown(f"""
-<div class='result-box'>
-    <span class='result-label'>Jenis Gonggong :</span>
-    <span class='result-value'>{st.session_state.pred_class}</span>
-</div>
-<div class='result-box'>
-    <span class='result-label'>Tingkat Akurasi :</span>
-    <span class='result-value'>{st.session_state.conf_text}</span>
-</div>
-<div class='result-box-spacer'></div>
-""", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class='result-box' style='animation-delay: 0.1s;'>
+        <span class='result-label'>Jenis Gonggong :</span>
+        <span class='result-value'>{st.session_state.pred_class}</span>
+    </div>
+    <div class='result-box' style='animation-delay: 0.2s;'>
+        <span class='result-label'>Tingkat Akurasi :</span>
+        <span class='result-value'>{st.session_state.conf_text}</span>
+    </div>
+    <div class='result-box-spacer'></div>
+    """, unsafe_allow_html=True)
+
+main_workspace()
 
 st.markdown("</div>", unsafe_allow_html=True) 
 
