@@ -2,6 +2,7 @@ import streamlit as st
 import tensorflow as tf
 from PIL import Image
 import numpy as np
+import cv2  
 import base64
 from io import BytesIO
 
@@ -417,11 +418,12 @@ def load_my_model():
 
 model = load_my_model()
 
+# Disesuaikan dengan format class_names pada kode referensi model Anda
 classes = [
-    "Canarium Mutabile",
-    "Canarium Urseus",
-    "Laevistrombus Turturella",
-    "Pugilina Coclidium"
+    'Canarium_Mutabile', 
+    'Canarium_Urseus', 
+    'Laevistrombus_Turturella', 
+    'Pugilina_Coclidium'
 ]
 
 try:
@@ -622,8 +624,26 @@ if uploaded_file is not None:
         background_mask = gray_np < 40
         segmented_np = img_np.copy()
         segmented_np[background_mask] = [255, 255, 255]
-        final_processed = Image.fromarray(segmented_np)
+        
+        # --- PROSES PERJELAS GAMBAR (SHARPENING) ---
+        # Konversi ke BGR untuk OpenCV
+        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
 
+        # Kernel untuk memperjelas tepi (sharpening) sesuai model kode referensi
+        kernel = np.array([[0, -1, 0], 
+                           [-1, 5,-1], 
+                           [0, -1, 0]])
+
+        # Terapkan filter penajaman
+        sharpened = cv2.filter2D(img_bgr, -1, kernel)
+
+        # Konversi balik ke RGB
+        final_img_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+        
+        # Buat objek citra final PIL dari array hasil penajaman
+        final_processed = Image.fromarray(final_img_rgb)
+
+        # --- PROSES RESIZE DAN PREDIKSI ---
         img_resized = final_processed.resize((224, 224))
         img_array = np.array(img_resized).astype("float32") / 255.0
         img_array = np.expand_dims(img_array, axis=0)
@@ -642,7 +662,7 @@ if uploaded_file is not None:
             st.session_state.warn_box_html = ""
             predicted_index = np.argmax(prediction)
             st.session_state.pred_class = classes[predicted_index]
-            st.session_state.conf_text = f"{max_conf * 100:.2f}%"
+            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
 
 if st.session_state.warn_box_html:
     st.markdown(st.session_state.warn_box_html, unsafe_allow_html=True)
