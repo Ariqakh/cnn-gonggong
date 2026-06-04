@@ -12,7 +12,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- STYLING & ANIMASI CSS ---
+# --- STYLING, WELCOME SECTION & ANIMASI LOADING MODERN ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -52,40 +52,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     visibility: hidden; display: none !important; 
 }
 
-/* ===== WELCOME OVERLAY SCREEN ===== */
-.welcome-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(9, 26, 54, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    text-align: center;
-    padding: 20px;
-    animation: fadeIn 0.6s ease-out;
-}
-.welcome-title {
-    font-size: 42px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #A7FFFF;
-    margin-bottom: 5px;
-    line-height: 1.2;
-}
-.welcome-subtitle {
-    font-size: 16px;
-    color: #D1FFFF;
-    margin-bottom: 30px;
-    font-weight: 400;
-    max-width: 500px;
-}
-
 /* NAVBAR FIXED */
 .navbar {
     position: fixed;
@@ -103,7 +69,31 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 600;
 }
 
-/* HEADER WITH ANIMATION ENTRY */
+/* WELCOME SECTION BANNER */
+.welcome-container {
+    background: rgba(9, 26, 54, 0.05);
+    border-left: 5px solid #091a36;
+    padding: 20px;
+    border-radius: 4px 16px 16px 4px;
+    margin-top: 30px;
+    margin-bottom: 25px;
+    animation: fadeInUp 0.8s ease-out;
+}
+.welcome-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #091a36;
+    margin: 0 0 5px 0;
+}
+.welcome-text {
+    font-size: 14px;
+    color: #33536b;
+    margin: 0;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* HEADER ANIMATION ENTRY */
 .app-header {
     display: flex;
     align-items: center;
@@ -111,12 +101,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     gap: 40px;
     margin-bottom: 12px;
     text-align: left;
-    animation: fadeInDown 0.8s ease-out;
-}
-
-@keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-20px); }
-    to { opacity: 1; transform: translateY(0); }
+    animation: fadeInUp 0.9s ease-out;
 }
 
 .app-logo-img {
@@ -143,7 +128,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     margin-top: 6px;
 }
 
-/* IMAGE PREVIEW WITH GLOW & TRANSITION EFFECT */
+/* IMAGE PREVIEW EFFECT */
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
@@ -154,13 +139,12 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    position: relative;
     border: 1px solid #ddd;
     transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 .img-preview-container:hover {
-    transform: scale(1.01);
-    box-shadow: 0 10px 20px rgba(11, 29, 58, 0.1);
+    transform: scale(1.02);
+    box-shadow: 0 10px 20px rgba(11, 29, 58, 0.15);
 }
 
 .img-preview-container img {
@@ -169,11 +153,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     object-fit: contain;
     border-radius: 10px;
     animation: fadeIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
 }
 
 .img-placeholder-text {
@@ -194,18 +173,18 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
 }
 
 /* WARNING BOX */
-div[data-testid="stNotification"] {
-    background-color: #f8d7da !important;
-    border: 1px solid #f5c6cb !important;
-    border-radius: 15px !important;
-}
-div[data-testid="stNotification"] p {
-    color: #721c24 !important;
-    font-weight: 700 !important;
-    font-size: 14px !important;
+.warning-box {
+    background-color: #FFDADA;
+    color: #CC0000;
+    padding: 15px;
+    border-radius: 15px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    animation: shake 0.5s ease-in-out;
 }
 
-/* BUTTONS WITH SMOOTH HOVER EFFECT */
+/* BUTTONS */
 .button-group {
     display: flex;
     flex-direction: row;
@@ -235,25 +214,11 @@ div.stButton > button:hover {
     opacity: 0.95 !important;
 }
 
-div.stButton > button:active {
-    transform: translateY(-1px) !important;
-}
-
-/* Button Colors */
 div[data-testid="stButton"]:has(button[kind="secondary"]) > button,
 div.stButton > button[kind="secondary"],
 div.stButton:nth-of-type(1) > button {
     background: #0a3d3c !important;
 }
-
-/* Tombol Masuk di Welcome Page */
-div[data-testid="stButton"]:has(button[key="welcome_enter_btn"]) > button,
-div.stButton > button[key="welcome_enter_btn"] {
-    background: #0a3d3c !important;
-    max-width: 200px !important;
-    margin: 0 auto !important;
-}
-
 div.stButton > button#btn_analyze,
 div.stButton > button[key="btn_analyze"] {
     background: #115c5a !important;
@@ -273,72 +238,69 @@ div.stButton > button[key="btn_analyze"] {
     animation: fadeInUp 0.6s ease-out both;
 }
 
+/* ===============================
+   ANIMASI LOADING BARU & RAPI (PREMIUM LOOK)
+   =============================== */
+.premium-loader-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(9, 26, 54, 0.08);
+    margin: 20px auto;
+    max-width: 450px;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.wave-loading-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.wave-loading-dots span {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #115c5a;
+    animation: wavePulse 1.2s infinite ease-in-out;
+}
+
+.wave-loading-dots span:nth-child(2) { animation-delay: 0.15s; background: #0a3d3c; }
+.wave-loading-dots span:nth-child(3) { animation-delay: 0.3s; background: #43647d; }
+.wave-loading-dots span:nth-child(4) { animation-delay: 0.45s; background: #87D4D4; }
+
+.loader-status-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0b1d3a;
+    margin: 5px 0;
+    letter-spacing: 0.3px;
+}
+
+.loader-sub-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: #728da1;
+}
+
+/* KEYFRAMES CORE */
+@keyframes wavePulse {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0.5; }
+    50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+}
 @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-.result-label {
-    font-weight: 700;
-    color: #0b1d3a;
-    font-size: 18px;
-    min-width: 180px; 
-    display: inline-block;
-}
-.result-value {
-    font-weight: 700;
-    color: #0b1d3a;
-    font-size: 18px;
-}
-
-.warning-box {
-    background-color: #FFDADA;
-    color: #CC0000;
-    padding: 15px;
-    border-radius: 15px;
-    font-size: 14px;
-    margin-bottom: 10px;
-    font-weight: 600;
-    animation: shake 0.5s ease-in-out;
-}
-
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-6px); }
     40%, 80% { transform: translateX(6px); }
-}
-
-/* ====== MINIMALIST & CLEAN LOADING OVERLAY ====== */
-.loading-overlay {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(232, 232, 232, 0.85);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    animation: fadeIn 0.3s ease;
-}
-.clean-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3.5px solid rgba(11, 29, 58, 0.15);
-    border-top: 3.5px solid #0b1d3a;
-    border-radius: 50%;
-    animation: spin 0.8s cubic-bezier(0.6, 0.2, 0.2, 0.8) infinite;
-}
-.loading-desc {
-    margin-top: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    color: #0b1d3a;
-    letter-spacing: 0.5px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 .result-box-spacer { height: 100px; width: 100%; }
@@ -346,13 +308,14 @@ div.stButton > button[key="btn_analyze"] {
 .white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
 .footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
 
-/* MOBILE STYLING */
+/* RESPONSIVE MOBILE */
 @media (max-width: 480px) {
-    .welcome-title { font-size: 28px; }
-    .welcome-subtitle { font-size: 13px; }
     .navbar { padding: 15px 15px; gap: 8px; }
     .navbar-title { font-size: 14px; }
-    .app-header { flex-direction: column; gap: 10px; text-align: center; margin-top: -10px; }
+    .welcome-container { margin-top: 15px; padding: 15px; }
+    .welcome-title { font-size: 18px; }
+    .welcome-text { font-size: 12px; }
+    .app-header { flex-direction: column; gap: 10px; text-align: center; }
     .app-logo-img { width: 195px; height: auto; }
     .app-title-main { font-size: 32px; }
     .img-preview-container { height: 160px; margin: 8px auto; }
@@ -364,23 +327,6 @@ div.stButton > button[key="btn_analyze"] {
 }
 </style>
 """, unsafe_allow_html=True)
-
-# --- SESSION STATE FOR WELCOME SCREEN ---
-if "welcome_dismissed" not in st.session_state:
-    st.session_state.welcome_dismissed = False
-
-# --- WELCOME SCREEN VIEW ---
-if not st.session_state.welcome_dismissed:
-    st.markdown("""
-    <div class="welcome-overlay">
-        <div class="welcome-title">Selamat Datang</div>
-        <div class="welcome-subtitle">Aplikasi Klasifikasi Jenis Siput Gonggong Kepulauan Riau Berbasis Deep Learning (MobileNet)</div>
-    """, unsafe_allow_html=True)
-    if st.button("Mulai Aplikasi", key="welcome_enter_btn"):
-        st.session_state.welcome_dismissed = True
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.stop()
 
 # --- MODEL LOADING ---
 @st.cache_resource
@@ -417,13 +363,13 @@ def load_my_model():
 model = load_my_model()
 
 classes = [
-    'Canarium Mutabile', 
-    'Canarium Urseus', 
-    'Laevistrombus Turturella', 
-    'Pugilina Coclidium'
+    'Canarium_Mutabile', 
+    'Canarium_Urseus', 
+    'Laevistrombus_Turturella', 
+    'Pugilina_Coclidium'
 ]
 
-# --- STATIC NAVBAR & HEADER ---
+# --- STATIC NAVBAR ---
 try:
     with open("logo_umrah.png", "rb") as f:
         encoded_nav_logo = base64.b64encode(f.read()).decode()
@@ -441,6 +387,17 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
+# --- NEW: WELCOME BANNER SECTION ---
+st.markdown("""
+<div class="welcome-container">
+    <div class="welcome-title">Selamat Datang di Portal Klasifikasi! 👋</div>
+    <div class="welcome-text">
+        Sistem cerdas berbasis kecerdasan buatan (AI) dirancang untuk mempermudah Anda mengidentifikasi spesies biota laut Gonggong khas Kepulauan Riau secara cepat, presisi, dan otomatis.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# --- MAIN HEADER ---
 logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
@@ -461,7 +418,7 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- ISOLATED APP WORKSPACE FRAGMENT ---
+# --- APPLICATION DESKTOP WORKSPACE (FRAGMENT) ---
 @st.fragment
 def main_workspace():
     if "bg_removed_image" not in st.session_state:
@@ -472,10 +429,6 @@ def main_workspace():
         st.session_state.conf_text = "-"
     if "warn_html" not in st.session_state:
         st.session_state.warn_html = ""
-    if "is_loading_bg" not in st.session_state:
-        st.session_state.is_loading_bg = False
-    if "is_loading_anlz" not in st.session_state:
-        st.session_state.is_loading_anlz = False
 
     uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -493,7 +446,7 @@ def main_workspace():
     else:
         image = Image.open(uploaded_file)
         
-        # Grid Tampilan Gambar Preview
+        # Grid Display Preview Gambar
         col1, col2 = st.columns(2)
         with col1:
             buf1 = BytesIO()
@@ -507,39 +460,42 @@ def main_workspace():
             """, unsafe_allow_html=True)
             
         with col2:
-            st.markdown("<div class='img-preview-container'>", unsafe_allow_html=True)
-            
-            # Tampilkan Animasi Spinner Rapi Di Dalam Box jika state loading aktif
-            if st.session_state.is_loading_bg:
-                st.markdown("""
-                <div class="loading-overlay">
-                    <div class="clean-spinner"></div>
-                    <div class="loading-desc">MEMPROSES BACKGROUND...</div>
-                </div>
-                """, unsafe_allow_html=True)
-            elif st.session_state.is_loading_anlz:
-                st.markdown("""
-                <div class="loading-overlay">
-                    <div class="clean-spinner"></div>
-                    <div class="loading-desc">MENGANALISIS CITRA...</div>
-                </div>
-                """, unsafe_allow_html=True)
-
             if st.session_state.bg_removed_image is not None:
                 buf2 = BytesIO()
                 st.session_state.bg_removed_image.save(buf2, format="JPEG")
                 img_str2 = base64.b64encode(buf2.getvalue()).decode()
-                st.markdown(f'<img src="data:image/jpeg;base64,{img_str2}">', unsafe_allow_html=True)
+                img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
             else:
-                st.markdown("<span class='img-placeholder-text'>Belum Diproses</span>", unsafe_allow_html=True)
+                img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
                 
-            st.markdown("</div><div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>", unsafe_allow_html=True)
+            st.markdown(f"""
+            <div class='img-preview-container'>
+                {img_html}
+            </div>
+            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
+            """, unsafe_allow_html=True)
 
-        # Kontrol Tombol Aksi Kanan-Kiri
+        # Kontrol Button Group
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
             if st.button("Hapus Latar Belakang", key="frag_btn_rm"):
-                st.session_state.is_loading_bg = True
+                # Menampilkan loader premium gelombang ombak
+                st.markdown("""
+                <div class="premium-loader-card">
+                    <div class="wave-loading-dots">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                    <div class="loader-status-text">AI Segmentasi Aktif</div>
+                    <div class="loader-sub-text">Mengekstraksi objek gonggong dari latar belakang...</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # Olah segmentasi AI rembg
+                output_img = remove(image)
+                bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                bg_white.paste(output_img, mask=output_img.split()[3])
+                
+                st.session_state.bg_removed_image = bg_white
                 st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
@@ -552,53 +508,48 @@ def main_workspace():
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="frag_btn_anlz"):
-                    st.session_state.is_loading_anlz = True
+                    # Menampilkan loader premium gelombang ombak untuk proses klasifikasi
+                    st.markdown("""
+                    <div class="premium-loader-card">
+                        <div class="wave-loading-dots">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="loader-status-text">Mengevaluasi Gambar</div>
+                        <div class="loader-sub-text">Menganalisis fitur morfologi cangkang gonggong...</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    segmented_np = np.array(st.session_state.bg_removed_image)
+                    
+                    # Sharpening via OpenCV
+                    img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                    sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                    final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                    
+                    final_processed = Image.fromarray(final_rgb)
+                    img_resized = final_processed.resize((224, 224))
+                    img_array = np.array(img_resized).astype("float32") / 255.0
+                    img_array = np.expand_dims(img_array, axis=0)
+                    
+                    prediction = model.predict(img_array)
+                    max_conf = np.max(prediction)
+                    
+                    pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
+                    total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+                    
+                    if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
+                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang lebih jelas.</div>"
+                        st.session_state.pred_class = "-"
+                        st.session_state.conf_text = "-"
+                    else:
+                        st.session_state.warn_html = ""
+                        st.session_state.pred_class = classes[np.argmax(prediction)].replace("_", " ")
+                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
                     st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # TRIGGER BACKEND WORKERS SETELAH LOADING STATE BERUBAH
-        if st.session_state.is_loading_bg:
-            output_img = remove(image)
-            bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-            bg_white.paste(output_img, mask=output_img.split()[3])
-            
-            st.session_state.bg_removed_image = bg_white
-            st.session_state.is_loading_bg = False
-            st.rerun()
-
-        if st.session_state.is_loading_anlz:
-            segmented_np = np.array(st.session_state.bg_removed_image)
-            
-            # Perbaikan Kualitas Gambar (Sharpening OpenCV)
-            img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-            kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-            sharpened = cv2.filter2D(img_bgr, -1, kernel)
-            final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-            
-            final_processed = Image.fromarray(final_rgb)
-            img_resized = final_processed.resize((224, 224))
-            img_array = np.array(img_resized).astype("float32") / 255.0
-            img_array = np.expand_dims(img_array, axis=0)
-            
-            prediction = model.predict(img_array)
-            max_conf = np.max(prediction)
-            
-            pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
-            total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
-            
-            if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
-                st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang lebih jelas.</div>"
-                st.session_state.pred_class = "-"
-                st.session_state.conf_text = "-"
-            else:
-                st.session_state.warn_html = ""
-                st.session_state.pred_class = classes[np.argmax(prediction)]
-                st.session_state.conf_text = f"{max_conf * 100:.2f} %"
-                
-            st.session_state.is_loading_anlz = False
-            st.rerun()
-
-    # Output Blok Hasil Analisis Klasifikasi
+    # Hasil Analisis Akhir
     if st.session_state.warn_html:
         st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
 
@@ -614,12 +565,11 @@ def main_workspace():
     <div class='result-box-spacer'></div>
     """, unsafe_allow_html=True)
 
-# Panggil fungsionalitas utama aplikasi
 main_workspace()
 
 st.markdown("</div>", unsafe_allow_html=True) 
 
-# --- FOOTER CANVAS ---
+# --- FOOTER ---
 st.markdown("""
 <div class='white-footer-canvas'>
     <div class='footer-text'>
