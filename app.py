@@ -78,21 +78,9 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     align-items: center;
     justify-content: center;
     text-align: center;
-    min-height: 85vh;
-    padding: 100px 20px 40px 20px;
+    min-height: 70vh;
+    padding: 60px 20px 20px 20px;
     animation: fadeIn 1s ease-out;
-}
-
-.welcome-badge {
-    background: rgba(11, 29, 58, 0.1);
-    color: #0b1d3a;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 20px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
 }
 
 .welcome-title {
@@ -136,7 +124,7 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     align-items: center;
     justify-content: center;
     gap: 40px;
-    margin: 0px 0 12px 0;
+    margin: 60px 0 12px 0;
     text-align: left;
     padding-top: 40px;
 }
@@ -375,7 +363,6 @@ st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
 st.markdown("""
 <div class="welcome-container">
-    <div class="welcome-badge">Deep Learning Project</div>
     <div class="welcome-title">Selamat Datang di<br>Sistem Klasifikasi Gonggong</div>
     <div class="welcome-subtitle">Identifikasi jenis siput Gonggong khas Kepulauan Riau secara instan dan akurat menggunakan teknologi Artificial Intelligence berbasis Convolutional Neural Network (MobileNet).</div>
     <a class="cta-scroll-button" href="#mulai-klasifikasi">Klasifikasi Sekarang</a>
