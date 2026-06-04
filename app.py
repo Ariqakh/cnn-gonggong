@@ -12,7 +12,6 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- SEMUA STYLING, ANIMASI & DESAIN COMBINATION ---
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -56,7 +55,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     visibility: hidden; display: none !important; 
 }
 
-/* NAVBAR FIXED */
 .navbar {
     position: fixed;
     top: 0; left: 0; right: 0;
@@ -74,7 +72,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     font-weight: 600;
 }
 
-/* WELCOME HERO SECTION (TAMPILAN ATAS BARU) */
 .welcome-container {
     display: flex;
     flex-direction: column;
@@ -116,7 +113,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     line-height: 1.6;
 }
 
-/* BUTTON JUMP TO CLASSIFICATION */
 .cta-scroll-button {
     background: #0a3d3c;
     color: white !important;
@@ -135,7 +131,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     background: #115c5a;
 }
 
-/* WORKSPACE HEADER */
 .app-header {
     display: flex;
     align-items: center;
@@ -168,7 +163,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     margin-top: 6px;
 }
 
-/* IMAGE PREVIEW CONTAINER */
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
@@ -202,7 +196,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     padding: 15px !important;
 }
 
-/* BUTTONS STYLING */
 .button-group {
     display: flex;
     flex-direction: row;
@@ -235,7 +228,6 @@ div.stButton:nth-of-type(1) > button { background: #0a3d3c !important; }
 div.stButton > button[key*="anlz"] { background: #115c5a !important; }
 div.stButton > button[key*="reset"] { background: #64748b !important; }
 
-/* REFINED LOADING ANIMATION */
 .premium-loader {
     display: flex;
     flex-direction: column;
@@ -263,7 +255,6 @@ div.stButton > button[key*="reset"] { background: #64748b !important; }
     color: #0b1d3a;
 }
 
-/* ===== 100% KOTAK HASIL TAMPILAN AWAL (KEMBALI KE ASLI) ===== */
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -298,18 +289,15 @@ div.stButton > button[key*="reset"] { background: #64748b !important; }
     font-weight: 600;
 }
 
-/* FOOTER STRUCTURE */
 .result-box-spacer { height: 100px; width: 100%; }
 .page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; }
 .white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
 .footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
 
-/* KEYFRAMES */
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-/* RESPONSIVE MOBILE */
 @media (max-width: 480px) {
     .navbar { padding: 15px 15px; gap: 8px; }
     .navbar-title { font-size: 14px; }
@@ -328,7 +316,6 @@ div.stButton > button[key*="reset"] { background: #64748b !important; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- MODEL LOADING (CACHED) ---
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
@@ -369,7 +356,6 @@ classes = [
     'Pugilina Coclidium'
 ]
 
-# --- NAVBAR ---
 try:
     with open("logo_umrah.png", "rb") as f:
         encoded_nav_logo = base64.b64encode(f.read()).decode()
@@ -387,7 +373,6 @@ st.markdown(f"""
 
 st.markdown("<div class='page-wrapper'>", unsafe_allow_html=True)
 
-# --- 1. WELCOME HERO SECTION (TAMPILAN BARU) ---
 st.markdown("""
 <div class="welcome-container">
     <div class="welcome-badge">Deep Learning Project</div>
@@ -398,7 +383,6 @@ st.markdown("""
 <div id="mulai-klasifikasi"></div>
 """, unsafe_allow_html=True)
 
-# --- 2. WORKSPACE HEADER ---
 logo_html = ""
 try:
     with open("logo_gonggong.png", "rb") as f:
@@ -419,7 +403,6 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-# --- 3. CORE FRAGMENT SYSTEM (ANTI-FLICKER) ---
 @st.fragment
 def application_core():
     if "bg_removed_image" not in st.session_state:
@@ -447,7 +430,6 @@ def application_core():
     else:
         image = Image.open(uploaded_file)
         
-        # Grid Tampilan Preview Gambar
         col1, col2 = st.columns(2)
         with col1:
             buf1 = BytesIO()
@@ -476,7 +458,6 @@ def application_core():
             <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
             """, unsafe_allow_html=True)
 
-        # Logika Tombol Kontrol Aksi
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
             if st.button("Hapus Latar Belakang", key="core_btn_rm"):
@@ -513,7 +494,6 @@ def application_core():
                     
                     segmented_np = np.array(st.session_state.bg_removed_image)
                     
-                    # Sharpening via OpenCV
                     img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
                     kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
                     sharpened = cv2.filter2D(img_bgr, -1, kernel)
@@ -541,7 +521,6 @@ def application_core():
                     st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tampilan Output Hasil Prediksi (Asli seperti awal)
     if st.session_state.warn_html:
         st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
 
@@ -557,12 +536,10 @@ def application_core():
     <div class='result-box-spacer'></div>
     """, unsafe_allow_html=True)
 
-# Panggil fragment inti sistem
 application_core()
 
 st.markdown("</div>", unsafe_allow_html=True) 
 
-# --- 4. STICKY FOOTER CANVAS ---
 st.markdown("""
 <div class='white-footer-canvas'>
     <div class='footer-text'>
