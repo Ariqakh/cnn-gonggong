@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import base64
 from io import BytesIO
-from rembg import remove  # Ditambahkan untuk penghapusan background berbasis AI
+from rembg import remove  # Pustaka penghapusan background berbasis AI
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -557,8 +557,7 @@ if uploaded_file is not None:
     image = Image.open(uploaded_file)
     
     # --- PROSES REMBG (AI) ---
-    # Fungsi pembungkus agar eksekusi rembg berjalan lancar di Streamlit
-    @st.cache_data
+    # Dekorator @st.cache_data dihapus di sini untuk mencegah UnhashableParamError
     def process_rembg(img_input):
         output_img = remove(img_input)
         bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
