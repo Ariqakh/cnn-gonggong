@@ -448,13 +448,7 @@ def application_core():
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
             if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-                st.markdown("""
-                <div class='premium-loader'>
-                    <div class='loader-spinner'></div>
-                    <div class='loader-text'>AI sedang menghapus background...</div>
-                </div>
-                """, unsafe_allow_html=True)
-                
+              
                 output_img = remove(image)
                 bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
                 bg_white.paste(output_img, mask=output_img.split()[3])
@@ -472,13 +466,7 @@ def application_core():
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
-                    st.markdown("""
-                    <div class='premium-loader'>
-                        <div class='loader-spinner'></div>
-                        <div class='loader-text'>Mengklasifikasikan jenis gonggong...</div>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
+                  
                     segmented_np = np.array(st.session_state.bg_removed_image)
                     
                     img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
