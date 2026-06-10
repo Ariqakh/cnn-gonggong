@@ -448,22 +448,22 @@ def application_core():
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
-                with st.spinner(""):
-            
-                    segmented_np = np.array(st.session_state.bg_removed_image)
-            
-                    img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-                    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                    sharpened = cv2.filter2D(img_bgr, -1, kernel)
-                    final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-            
-                    final_processed = Image.fromarray(final_rgb)
-                    img_resized = final_processed.resize((224, 224))
-                    img_array = np.array(img_resized).astype("float32") / 255.0
-                    img_array = np.expand_dims(img_array, axis=0)
-            
-                    prediction = model.predict(img_array)
-                    max_conf = np.max(prediction)
+                    with st.spinner(""):
+                
+                        segmented_np = np.array(st.session_state.bg_removed_image)
+                
+                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                
+                        final_processed = Image.fromarray(final_rgb)
+                        img_resized = final_processed.resize((224, 224))
+                        img_array = np.array(img_resized).astype("float32") / 255.0
+                        img_array = np.expand_dims(img_array, axis=0)
+                
+                        prediction = model.predict(img_array)
+                        max_conf = np.max(prediction)
                     
                     pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                     total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
