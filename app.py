@@ -286,35 +286,16 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout
-
-    original_dense = Dense.from_config
-    @classmethod
-    def custom_dense(cls, config):
-        config.pop("quantization_config", None)
-        return original_dense(config)
-    Dense.from_config = custom_dense
-
-    original_input = InputLayer.from_config
-    @classmethod
-    def custom_input(cls, config):
-        config.pop("batch_shape", None)
-        config.pop("optional", None)
-        if "batch_input_shape" not in config:
-            config["batch_input_shape"] = [None, 224, 224, 3]
-        return cls(**config)
-    InputLayer.from_config = custom_input
-
-    original_dropout = Dropout.from_config
-    @classmethod
-    def custom_dropout(cls, config):
-        config.pop("seed_generator", None)
-        return original_dropout(config)
-    Dropout.from_config = custom_dropout
-
-    return keras_load_model("model_gonggong.h5", compile=False)
+    
+    # Mengabaikan config bawaan yang corrupt tanpa merusak bobot (weights) MobileNet asli
+    custom_objects = {
+        "quantization_config": None
+    }
+    
+    return keras_load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
 
 model = load_my_model()
+
 
 classes = [
     'Canarium Mutabile', 
