@@ -215,13 +215,34 @@ div.stButton > button[kind="secondary"],
 div.stButton:nth-of-type(1) > button { background: #0a3d3c !important; }
 div.stButton > button[key*="anlz"] { background: #115c5a !important; }
 div.stButton > button[key*="reset"] { background: #64748b !important; }
-div[data-testid="stSpinner"] {
-    text-align: center !important;
+
+.premium-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    margin: 20px 0;
+    animation: fadeInUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 3px solid #e2e8f0;
+    border-top: 3px solid #0a3d3c;
+    border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.55, 0.055, 0.675, 0.19) infinite;
+}
+.loader-text {
+    margin-top: 15px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #0b1d3a;
 }
 
-div[data-testid="stSpinner"] > div {
-    border-top-color: #0a3d3c !important;
-}
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -427,15 +448,18 @@ def application_core():
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
             if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-                with st.spinner(""):
-            
-                    output_img = remove(image)
-            
-                    bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-                    bg_white.paste(output_img, mask=output_img.split()[3])
-            
-                    st.session_state.bg_removed_image = bg_white
-            
+                st.markdown("""
+                <div class='premium-loader'>
+                    <div class='loader-spinner'></div>
+                    <div class='loader-text'>AI sedang menghapus background...</div>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                output_img = remove(image)
+                bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                bg_white.paste(output_img, mask=output_img.split()[3])
+                
+                st.session_state.bg_removed_image = bg_white
                 st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
@@ -448,22 +472,27 @@ def application_core():
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
-                    with st.spinner(""):
-                
-                        segmented_np = np.array(st.session_state.bg_removed_image)
-                
-                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
-                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-                
-                        final_processed = Image.fromarray(final_rgb)
-                        img_resized = final_processed.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32") / 255.0
-                        img_array = np.expand_dims(img_array, axis=0)
-                
-                        prediction = model.predict(img_array)
-                        max_conf = np.max(prediction)
+                    st.markdown("""
+                    <div class='premium-loader'>
+                        <div class='loader-spinner'></div>
+                        <div class='loader-text'>Mengklasifikasikan jenis gonggong...</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    segmented_np = np.array(st.session_state.bg_removed_image)
+                    
+                    img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                    kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                    sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                    final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                    
+                    final_processed = Image.fromarray(final_rgb)
+                    img_resized = final_processed.resize((224, 224))
+                    img_array = np.array(img_resized).astype("float32") / 255.0
+                    img_array = np.expand_dims(img_array, axis=0)
+                    
+                    prediction = model.predict(img_array)
+                    max_conf = np.max(prediction)
                     
                     pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                     total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
