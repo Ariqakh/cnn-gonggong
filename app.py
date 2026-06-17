@@ -436,11 +436,14 @@ def application_core():
                 
                         final_processed = Image.fromarray(final_rgb)
                         img_resized = final_processed.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32") / 255.0
+                        # ... setelah img_resized = final_processed.resize((224, 224))
+                        img_array = np.array(img_resized).astype("float32")
                         img_array = np.expand_dims(img_array, axis=0)
-                
+                        
+                        # Gunakan preprocess_input yang diimport dari MobileNet
+                        img_array = preprocess_input(img_array)
+                        
                         prediction = model.predict(img_array)
-                        max_conf = np.max(prediction)
                     
                     pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                     total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
