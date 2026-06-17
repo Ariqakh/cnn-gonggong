@@ -1,9 +1,9 @@
 rembg
 streamlit
-tensorflow==2.16.1
+tensorflow==2.15.0
+keras==2.15.0
 numpy
 pillow
 h5py
-keras
 opencv-python-headless
 onnxruntime
