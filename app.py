@@ -287,34 +287,17 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout
-
-    original_dense = Dense.from_config
-    @classmethod
-    def custom_dense(cls, config):
-        config.pop("quantization_config", None)
-        return original_dense(config)
-    Dense.from_config = custom_dense
-
-    original_input = InputLayer.from_config
-    @classmethod
-    def custom_input(cls, config):
-        config.pop("batch_shape", None)
-        config.pop("optional", None)
-        if "batch_input_shape" not in config:
-            config["batch_input_shape"] = [None, 224, 224, 3]
-        return cls(**config)
-    InputLayer.from_config = custom_input
-
-    original_dropout = Dropout.from_config
-    @classmethod
-    def custom_dropout(cls, config):
-        config.pop("seed_generator", None)
-        return original_dropout(config)
-    Dropout.from_config = custom_dropout
-
-    return keras_load_model("model_gonggong.h5", compile=False)
+    from keras.models import load_model
+    
+    # Definisikan custom object jika memang ada layer unik
+    # Jika tidak ada layer custom (hanya layer standar), 
+    # cukup load_model biasa saja.
+    try:
+        model = load_model("model_gonggong.h5", compile=False)
+        return model
+    except Exception as e:
+        st.error(f"Gagal memuat model: {e}")
+        return None
 
 model = load_my_model()
 
