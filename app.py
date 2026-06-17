@@ -288,16 +288,8 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model
-    
-    # Definisikan custom object jika memang ada layer unik
-    # Jika tidak ada layer custom (hanya layer standar), 
-    # cukup load_model biasa saja.
-    try:
-        model = load_model("model_gonggong.h5", compile=False)
-        return model
-    except Exception as e:
-        st.error(f"Gagal memuat model: {e}")
-        return None
+    # Cukup ini saja setelah file model benar-benar terupload
+    return load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
