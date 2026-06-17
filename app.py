@@ -293,9 +293,13 @@ def load_my_model():
     
     model_path = "model_gonggong.h5"
     
-    # Download otomatis dari GitHub Releases jika file belum ada
+    # PERBAIKAN: Jika ukuran file di bawah 10 MB, berarti itu file korup/gagal download. Hapus dulu!
+    if os.path.exists(model_path) and os.path.getsize(model_path) < 10000000:
+        os.remove(model_path)
+    
+    # Download ulang secara bersih jika file belum ada atau setelah dihapus karena korup
     if not os.path.exists(model_path):
-        with st.spinner("Sedang mengunduh model biner dari GitHub Releases (mohon tunggu)..."):
+        with st.spinner("Sedang mengunduh ulang model biner secara bersih (mohon tunggu)..."):
             url = "https://github.com"
             urllib.request.urlretrieve(url, model_path)
 
@@ -330,6 +334,7 @@ def load_my_model():
             "preprocess_input": preprocess_input
         }
     )
+
 
 
 model = load_my_model()
