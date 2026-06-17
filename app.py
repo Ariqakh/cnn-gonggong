@@ -6,8 +6,6 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
-import os
-import urllib.request
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -288,20 +286,7 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout, Lambda
-    from tensorflow.keras.applications.mobilenet import preprocess_input
-    
-    model_path = "model_gonggong.h5"
-    
-    # PERBAIKAN: Jika ukuran file di bawah 10 MB, berarti itu file korup/gagal download. Hapus dulu!
-    if os.path.exists(model_path) and os.path.getsize(model_path) < 10000000:
-        os.remove(model_path)
-    
-    # Download ulang secara bersih jika file belum ada atau setelah dihapus karena korup
-    if not os.path.exists(model_path):
-        with st.spinner("Sedang mengunduh ulang model biner secara bersih (mohon tunggu)..."):
-            url = "https://github.com/Ariqakh/cnn-gonggong/releases/download/v1.0.0/model_gonggong.h5"
-            urllib.request.urlretrieve(url, model_path)
+    from keras.layers import Dense, InputLayer, Dropout
 
     original_dense = Dense.from_config
     @classmethod
@@ -313,38 +298,29 @@ def load_my_model():
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
-        if "batch_shape" in config and "shape" not in config:
-            config["shape"] = config["batch_shape"]
         config.pop("batch_shape", None)
         config.pop("optional", None)
-        return original_input(config)
+        if "batch_input_shape" not in config:
+            config["batch_input_shape"] = [None, 224, 224, 3]
+        return cls(**config)
     InputLayer.from_config = custom_input
 
     original_dropout = Dropout.from_config
     @classmethod
     def custom_dropout(cls, config):
+        config.pop("seed_generator", None)
         return original_dropout(config)
     Dropout.from_config = custom_dropout
-    
-    return keras_load_model(
-        model_path, 
-        compile=False, 
-        custom_objects={
-            "Lambda": Lambda,
-            "preprocess_input": preprocess_input
-        }
-    )
 
-
+    return keras_load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
 classes = [
-    'Canarium Mutabile',
-    'Laevistrombus Canarium',
-    'Strombus Aurisdianae',
-    'Strombus Luhuanus',
-    'Strombus Urceus'
+    'Canarium Mutabile', 
+    'Canarium Urseus', 
+    'Laevistrombus Turturella', 
+    'Pugilina Coclidium'
 ]
 
 try:
