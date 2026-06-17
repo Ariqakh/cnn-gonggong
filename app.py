@@ -288,7 +288,7 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout, Lambda
+    from keras.layers import Dense, InputLayer, Dropout
 
     model_path = "model_gonggong.h5"
     
@@ -321,12 +321,9 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
     
-    # SOLUSI FINAl: Daftarkan Lambda ke dalam custom_objects agar Keras v3 tidak memblokirnya
-    return keras_load_model(
-        model_path, 
-        compile=False, 
-        custom_objects={"Lambda": Lambda}
-    )
+    # PERBAIKAN DI SINI: Ditambahkan safe_mode=False untuk mengatasi TypeError Lambda Layer
+    return keras_load_model(model_path, compile=False, safe_mode=False)
+
 
 model = load_my_model()
 
