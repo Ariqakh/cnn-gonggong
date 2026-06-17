@@ -6,6 +6,8 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
+import os
+import urllib.request
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -288,6 +290,14 @@ def load_my_model():
     from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
 
+    model_path = "model_gonggong.h5"
+    
+    # Download otomatis dari GitHub Releases jika file belum ada di server Streamlit Cloud
+    if not os.path.exists(model_path):
+        with st.spinner("Sedang mengunduh model biner dari GitHub Releases (mohon tunggu)..."):
+            url = "https://github.com/Ariqakh/cnn-gonggong/releases/download/v1.0.0/model_gonggong.h5"
+            urllib.request.urlretrieve(url, model_path)
+
     original_dense = Dense.from_config
     @classmethod
     def custom_dense(cls, config):
@@ -300,27 +310,25 @@ def load_my_model():
     def custom_input(cls, config):
         config.pop("batch_shape", None)
         config.pop("optional", None)
-        if "batch_input_shape" not in config:
-            config["batch_input_shape"] = [None, 224, 224, 3]
-        return cls(**config)
+        return original_input(config)
     InputLayer.from_config = custom_input
 
     original_dropout = Dropout.from_config
     @classmethod
     def custom_dropout(cls, config):
-        config.pop("seed_generator", None)
         return original_dropout(config)
     Dropout.from_config = custom_dropout
-
-    return keras_load_model("model_gonggong.h5", compile=False)
+    
+    return keras_load_model(model_path, compile=False)
 
 model = load_my_model()
 
 classes = [
-    'Canarium Mutabile', 
-    'Canarium Urseus', 
-    'Laevistrombus Turturella', 
-    'Pugilina Coclidium'
+    'Canarium Mutabile',
+    'Laevistrombus Canarium',
+    'Strombus Aurisdianae',
+    'Strombus Luhuanus',
+    'Strombus Urceus'
 ]
 
 try:
