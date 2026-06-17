@@ -6,6 +6,8 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
+from tensorflow.keras.applications.mobilenet import preprocess_input
+
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
