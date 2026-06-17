@@ -292,10 +292,10 @@ def load_my_model():
 
     model_path = "model_gonggong.h5"
     
-    # Download otomatis dari GitHub Releases jika file belum ada di server Streamlit Cloud
+    # Download otomatis dari GitHub Releases jika file belum ada
     if not os.path.exists(model_path):
         with st.spinner("Sedang mengunduh model biner dari GitHub Releases (mohon tunggu)..."):
-            url = "https://github.com/Ariqakh/cnn-gonggong/releases/download/v1.0.0/model_gonggong.h5"
+            url = "https://github.com"
             urllib.request.urlretrieve(url, model_path)
 
     original_dense = Dense.from_config
@@ -305,9 +305,12 @@ def load_my_model():
         return original_dense(config)
     Dense.from_config = custom_dense
 
+    # PERBAIKAN DI SINI: Sesuaikan batch_shape ke shape untuk Keras terbaru
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
+        if "batch_shape" in config and "shape" not in config:
+            config["shape"] = config["batch_shape"]
         config.pop("batch_shape", None)
         config.pop("optional", None)
         return original_input(config)
