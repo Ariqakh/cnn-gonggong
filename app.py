@@ -305,7 +305,6 @@ def load_my_model():
         return original_dense(config)
     Dense.from_config = custom_dense
 
-    # PERBAIKAN DI SINI: Sesuaikan batch_shape ke shape untuk Keras terbaru
     original_input = InputLayer.from_config
     @classmethod
     def custom_input(cls, config):
@@ -322,7 +321,8 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
     
-    return keras_load_model(model_path, compile=False)
+    return keras_load_model(model_path, compile=False, safe_mode=False)
+
 
 model = load_my_model()
 
