@@ -288,14 +288,15 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout
-
+    from keras.layers import Dense, InputLayer, Dropout, Lambda
+    from tensorflow.keras.applications.mobilenet import preprocess_input
+    
     model_path = "model_gonggong.h5"
     
     # Download otomatis dari GitHub Releases jika file belum ada
     if not os.path.exists(model_path):
         with st.spinner("Sedang mengunduh model biner dari GitHub Releases (mohon tunggu)..."):
-            url = "https://github.com/Ariqakh/cnn-gonggong/releases/download/v1.0.0/model_gonggong.h5"
+            url = "https://github.com"
             urllib.request.urlretrieve(url, model_path)
 
     original_dense = Dense.from_config
@@ -321,8 +322,14 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
     
-    # PERBAIKAN DI SINI: Ditambahkan safe_mode=False untuk mengatasi TypeError Lambda Layer
-    return keras_load_model(model_path, compile=False, safe_mode=False)
+    return keras_load_model(
+        model_path, 
+        compile=False, 
+        custom_objects={
+            "Lambda": Lambda,
+            "preprocess_input": preprocess_input
+        }
+    )
 
 
 model = load_my_model()
