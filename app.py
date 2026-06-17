@@ -300,7 +300,7 @@ def load_my_model():
     # Download ulang secara bersih jika file belum ada atau setelah dihapus karena korup
     if not os.path.exists(model_path):
         with st.spinner("Sedang mengunduh ulang model biner secara bersih (mohon tunggu)..."):
-            url = "https://github.com"
+            url = "https://github.com/Ariqakh/cnn-gonggong/releases/download/v1.0.0/model_gonggong.h5"
             urllib.request.urlretrieve(url, model_path)
 
     original_dense = Dense.from_config
