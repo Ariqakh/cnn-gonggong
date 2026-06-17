@@ -6,7 +6,6 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
-from tensorflow.keras.applications.mobilenet import preprocess_input
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -286,12 +285,34 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    # Memperbaiki error dengan mendefinisikan custom_objects
-    return tf.keras.models.load_model(
-        "model_gonggong.h5", 
-        custom_objects={'preprocess_input': preprocess_input},
-        compile=False
-    )
+    from keras.models import load_model as keras_load_model
+    from keras.layers import Dense, InputLayer, Dropout
+
+    original_dense = Dense.from_config
+    @classmethod
+    def custom_dense(cls, config):
+        config.pop("quantization_config", None)
+        return original_dense(config)
+    Dense.from_config = custom_dense
+
+    original_input = InputLayer.from_config
+    @classmethod
+    def custom_input(cls, config):
+        config.pop("batch_shape", None)
+        config.pop("optional", None)
+        if "batch_input_shape" not in config:
+            config["batch_input_shape"] = [None, 224, 224, 3]
+        return cls(**config)
+    InputLayer.from_config = custom_input
+
+    original_dropout = Dropout.from_config
+    @classmethod
+    def custom_dropout(cls, config):
+        config.pop("seed_generator", None)
+        return original_dropout(config)
+    Dropout.from_config = custom_dropout
+
+    return keras_load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
@@ -407,10 +428,14 @@ def application_core():
         if st.session_state.bg_removed_image is None:
             if st.button("Hapus Latar Belakang", key="core_btn_rm"):
                 with st.spinner(""):
+            
                     output_img = remove(image)
+            
                     bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
                     bg_white.paste(output_img, mask=output_img.split()[3])
+            
                     st.session_state.bg_removed_image = bg_white
+            
                 st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
@@ -424,7 +449,9 @@ def application_core():
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
                     with st.spinner(""):
+                
                         segmented_np = np.array(st.session_state.bg_removed_image)
+                
                         img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
                         kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
                         sharpened = cv2.filter2D(img_bgr, -1, kernel)
@@ -432,7 +459,7 @@ def application_core():
                 
                         final_processed = Image.fromarray(final_rgb)
                         img_resized = final_processed.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32")
+                        img_array = np.array(img_resized).astype("float32") / 255.0
                         img_array = np.expand_dims(img_array, axis=0)
                 
                         prediction = model.predict(img_array)
