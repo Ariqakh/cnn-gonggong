@@ -1,6 +1,5 @@
 import streamlit as st
 import tensorflow as tf
-from tensorflow.keras.models import load_model as keras_load_model
 from PIL import Image
 import numpy as np
 import cv2
@@ -152,11 +151,6 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     margin-top: 6px;
 }
 
-.main-card {
-    width: 100%;
-    margin: 0 auto;
-}
-
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
@@ -221,14 +215,13 @@ div.stButton > button[kind="secondary"],
 div.stButton:nth-of-type(1) > button { background: #0a3d3c !important; }
 div.stButton > button[key*="anlz"] { background: #115c5a !important; }
 div.stButton > button[key*="reset"] { background: #64748b !important; }
-
 div[data-testid="stSpinner"] {
     text-align: center !important;
 }
+
 div[data-testid="stSpinner"] > div {
     border-top-color: #0a3d3c !important;
 }
-
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -253,9 +246,19 @@ div[data-testid="stSpinner"] > div {
     font-size: 18px;
 }
 
-.result-box-spacer { height: 60px; width: 100%; }
+.warning-box {
+    background-color: #FFDADA;
+    color: #CC0000;
+    padding: 10px;
+    border-radius: 15px;
+    font-size: 13px;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.result-box-spacer { height: 100px; width: 100%; }
 .page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; }
-.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 30px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; background: transparent; }
+.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
 .footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -282,8 +285,8 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
+    from keras.models import load_model as keras_load_model
     from keras.layers import Dense, InputLayer, Dropout
-    from tensorflow.keras.applications.mobilenet import preprocess_input
 
     original_dense = Dense.from_config
     @classmethod
@@ -309,10 +312,7 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    custom_objects = {
-        'preprocess_input': preprocess_input
-    }
-    return keras_load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
+    return keras_load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
@@ -377,6 +377,8 @@ def application_core():
         st.session_state.pred_class = "-"
     if "conf_text" not in st.session_state:
         st.session_state.conf_text = "-"
+    if "warn_html" not in st.session_state:
+        st.session_state.warn_html = ""
 
     uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -384,6 +386,7 @@ def application_core():
         st.session_state.bg_removed_image = None
         st.session_state.pred_class = "-"
         st.session_state.conf_text = "-"
+        st.session_state.warn_html = ""
         
         st.markdown("""
         <div class='img-preview-container'>
@@ -423,31 +426,17 @@ def application_core():
 
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
-            c_init1, c_init2 = st.columns(2)
-            with c_init1:
-                if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-                    with st.spinner(""):
-                        output_img = remove(image)
-                        bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-                        bg_white.paste(output_img, mask=output_img.split()[3])
-                        st.session_state.bg_removed_image = bg_white
-                    st.rerun()
-            with c_init2:
-                if st.button("Analisis Gambar Asli", key="core_btn_anlz_raw"):
-                    with st.spinner(""):
-                        img_raw_rgb = image.convert('RGB')
-                        img_resized = img_raw_rgb.resize((224, 224))
-                        
-                        img_array = np.array(img_resized).astype("float32") / 255.0
-                        img_tensor = np.expand_dims(img_array, axis=0)
-                
-                        prediction = model.predict(img_tensor, verbose=0)
-                        probabilities = prediction[0]
-                        max_conf = np.max(probabilities)
-                        
-                        st.session_state.pred_class = classes[np.argmax(probabilities)]
-                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
-                    st.rerun()
+            if st.button("Hapus Latar Belakang", key="core_btn_rm"):
+                with st.spinner(""):
+            
+                    output_img = remove(image)
+            
+                    bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                    bg_white.paste(output_img, mask=output_img.split()[3])
+            
+                    st.session_state.bg_removed_image = bg_white
+            
+                st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
             with c_b1:
@@ -455,26 +444,43 @@ def application_core():
                     st.session_state.bg_removed_image = None
                     st.session_state.pred_class = "-"
                     st.session_state.conf_text = "-"
+                    st.session_state.warn_html = ""
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
                     with st.spinner(""):
+                
                         segmented_np = np.array(st.session_state.bg_removed_image)
                 
-                        final_processed = Image.fromarray(segmented_np)
-                        img_resized = final_processed.resize((224, 224))
-                        
-                        img_array = np.array(img_resized).astype("float32") / 255.0
-                        img_tensor = np.expand_dims(img_array, axis=0)
+                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
                 
-                        prediction = model.predict(img_tensor, verbose=0)
-                        probabilities = prediction[0]
-                        max_conf = np.max(probabilities)
+                        final_processed = Image.fromarray(final_rgb)
+                        img_resized = final_processed.resize((224, 224))
+                        img_array = np.array(img_resized).astype("float32") / 255.0
+                        img_array = np.expand_dims(img_array, axis=0)
+                
+                        prediction = model.predict(img_array)
+                        max_conf = np.max(prediction)
                     
-                        st.session_state.pred_class = classes[np.argmax(probabilities)]
+                    pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
+                    total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+                    
+                    if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
+                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
+                        st.session_state.pred_class = "-"
+                        st.session_state.conf_text = "-"
+                    else:
+                        st.session_state.warn_html = ""
+                        st.session_state.pred_class = classes[np.argmax(prediction)]
                         st.session_state.conf_text = f"{max_conf * 100:.2f} %"
-                        st.rerun()
+                    st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
+
+    if st.session_state.warn_html:
+        st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class='result-box' style='animation-delay: 0.1s;'>
