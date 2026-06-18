@@ -75,12 +75,34 @@ div[data-testid="stSpinner"] > div { border-top-color: #0a3d3c !important; }
 # --- MODEL LOADING LOGIC ---
 @st.cache_resource
 def load_my_model():
-    import keras
-    @keras.saving.register_keras_serializable()
-    def custom_preprocess(x):
-        return preprocess_input(x)
-    custom_objects = {'preprocess_input': custom_preprocess}
-    return load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
+    from tensorflow.keras.models import load_model
+    import tensorflow as tf
+    
+    # 1. Pastikan tidak ada custom_objects yang memicu error serialisasi
+    # Kita load model secara mentah (raw)
+    try:
+        # Menghapus custom_objects sering kali menyelesaikan TypeError di operation.py
+        # Jika model butuh fungsi khusus, kita harus menggunakan alternatif lain
+        model = load_model("model_gonggong.h5", compile=False)
+        return model
+    except Exception as e:
+        st.error("Gagal memuat model secara standar. Mencoba teknik alternatif...")
+        
+        # 2. Teknik Alternatif: Jika load_model gagal, kita coba load bobot saja
+        # Ini mengasumsikan model Anda adalah arsitektur MobileNet standar
+        from tensorflow.keras.applications import MobileNet
+        from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+        from tensorflow.keras.models import Model
+        
+        base_model = MobileNet(weights=None, include_top=False, input_shape=(224, 224, 3))
+        x = base_model.output
+        x = GlobalAveragePooling2D()(x)
+        predictions = Dense(4, activation='softmax')(x)
+        model = Model(inputs=base_model.input, outputs=predictions)
+        
+        # Load bobot yang ada di file .h5
+        model.load_weights("model_gonggong.h5")
+        return model
 
 model = load_my_model()
 class_names = ['Canarium Mutabile', 'Canarium Urseus', 'Laevistrombus Turturella', 'Pugilina Coclidium']
