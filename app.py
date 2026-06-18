@@ -152,6 +152,11 @@ header, footer, [data-testid="stToolbar"], [data-testid="stDecoration"] {
     margin-top: 6px;
 }
 
+.main-card {
+    width: 100%;
+    margin: 0 auto;
+}
+
 .img-preview-container {
     background: #E8E8E8;
     border-radius: 20px;
@@ -216,13 +221,14 @@ div.stButton > button[kind="secondary"],
 div.stButton:nth-of-type(1) > button { background: #0a3d3c !important; }
 div.stButton > button[key*="anlz"] { background: #115c5a !important; }
 div.stButton > button[key*="reset"] { background: #64748b !important; }
+
 div[data-testid="stSpinner"] {
     text-align: center !important;
 }
-
 div[data-testid="stSpinner"] > div {
     border-top-color: #0a3d3c !important;
 }
+
 .result-box {
     background-color: #87D4D4;
     border-radius: 20px;
@@ -247,9 +253,9 @@ div[data-testid="stSpinner"] > div {
     font-size: 18px;
 }
 
-.result-box-spacer { height: 100px; width: 100%; }
+.result-box-spacer { height: 60px; width: 100%; }
 .page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; }
-.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
+.white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 30px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; background: transparent; }
 .footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
 
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -439,7 +445,6 @@ def application_core():
                         probabilities = prediction[0]
                         max_conf = np.max(probabilities)
                         
-                        # FORCE DISPLAY: Dipaksa menampilkan apa pun kelas dengan bobot tertinggi
                         st.session_state.pred_class = classes[np.argmax(probabilities)]
                         st.session_state.conf_text = f"{max_conf * 100:.2f} %"
                     st.rerun()
@@ -466,7 +471,6 @@ def application_core():
                         probabilities = prediction[0]
                         max_conf = np.max(probabilities)
                     
-                        # FORCE DISPLAY: Abaikan batasan akurasi minimum
                         st.session_state.pred_class = classes[np.argmax(probabilities)]
                         st.session_state.conf_text = f"{max_conf * 100:.2f} %"
                         st.rerun()
