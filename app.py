@@ -463,9 +463,11 @@ def application_core():
                         img_array = np.array(img_resized).astype("float32") / 255.0
                         img_array = np.expand_dims(img_array, axis=0)
                 
-                        prediction = model.predict(img_array)
-                        max_conf = np.max(prediction)
-                    
+                        prediction = model.predict(img_input)
+                        confidences = prediction[0]
+                        best_idx = np.argmax(confidences)
+                        max_conf = confidences[best_idx]
+                                            
                     pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                     total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
                     
