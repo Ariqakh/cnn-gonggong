@@ -1,13 +1,13 @@
 import streamlit as st
 import tensorflow as tf
+from tensorflow.keras.models import load_model as keras_load_model
+from tensorflow.keras.applications.mobilenet import preprocess_input
 from PIL import Image
 import numpy as np
 import cv2
 import base64
 from io import BytesIO
 from rembg import remove
-from tensorflow.keras.models import load_model
-from tensorflow.keras.applications.mobilenet import preprocess_input
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -287,21 +287,38 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    try:
-        return load_model("model_gonggong.h5", compile=False)
-    except Exception as e:
-        st.error(f"Error memuat model: {e}")
-        return None
+    from keras.layers import Dense, InputLayer, Dropout
 
-# Pastikan model dimuat ke session_state agar bisa diakses kapan saja
-if "model" not in st.session_state:
-    st.session_state.model = load_my_model()
+    original_dense = Dense.from_config
+    @classmethod
+    def custom_dense(cls, config):
+        config.pop("quantization_config", None)
+        return original_dense(config)
+    Dense.from_config = custom_dense
+
+    original_input = InputLayer.from_config
+    @classmethod
+    def custom_input(cls, config):
+        config.pop("batch_shape", None)
+        config.pop("optional", None)
+        if "batch_input_shape" not in config:
+            config["batch_input_shape"] = [None, 224, 224, 3]
+        return cls(**config)
+    InputLayer.from_config = custom_input
+
+    original_dropout = Dropout.from_config
+    @classmethod
+    def custom_dropout(cls, config):
+        config.pop("seed_generator", None)
+        return original_dropout(config)
+    Dropout.from_config = custom_dropout
+
+    # Integrasi Kunci Kesembuhan: Daftarkan preprocess_input ke custom_objects
+    custom_objects = {'preprocess_input': preprocess_input}
+    return keras_load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
 
 model = load_my_model()
-    
-if "model" not in st.session_state:
-    st.session_state.model = load_my_model()
-    
+
 classes = [
     'Canarium Mutabile', 
     'Canarium Urseus', 
@@ -355,14 +372,16 @@ st.markdown(f"""
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
-
 @st.fragment
 def application_core():
-    # Inisialisasi State
-    if "bg_removed_image" not in st.session_state: st.session_state.bg_removed_image = None
-    if "pred_class" not in st.session_state: st.session_state.pred_class = "-"
-    if "conf_text" not in st.session_state: st.session_state.conf_text = "-"
-    if "warn_html" not in st.session_state: st.session_state.warn_html = ""
+    if "bg_removed_image" not in st.session_state:
+        st.session_state.bg_removed_image = None
+    if "pred_class" not in st.session_state:
+        st.session_state.pred_class = "-"
+    if "conf_text" not in st.session_state:
+        st.session_state.conf_text = "-"
+    if "warn_html" not in st.session_state:
+        st.session_state.warn_html = ""
 
     uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -371,56 +390,119 @@ def application_core():
         st.session_state.pred_class = "-"
         st.session_state.conf_text = "-"
         st.session_state.warn_html = ""
+        
+        st.markdown("""
+        <div class='img-preview-container'>
+            <span class='img-placeholder-text'>Gambar</span>
+        </div>
+        """, unsafe_allow_html=True)
     else:
         image = Image.open(uploaded_file)
-        # Tampilkan Gambar (logika kolom Anda)
         
-        if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-            output_img = remove(image)
-            bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-            bg_white.paste(output_img, mask=output_img.split()[3])
-            st.session_state.bg_removed_image = bg_white
-            st.rerun()
+        col1, col2 = st.columns(2)
+        with col1:
+            buf1 = BytesIO()
+            image.convert("RGB").save(buf1, format="JPEG")
+            img_str1 = base64.b64encode(buf1.getvalue()).decode()
+            st.markdown(f"""
+            <div class='img-preview-container'>
+                <img src="data:image/jpeg;base64,{img_str1}">
+            </div>
+            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Gambar Asli</div>
+            """, unsafe_allow_html=True)
+            
+        with col2:
+            if st.session_state.bg_removed_image is not None:
+                buf2 = BytesIO()
+                st.session_state.bg_removed_image.save(buf2, format="JPEG")
+                img_str2 = base64.b64encode(buf2.getvalue()).decode()
+                img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
+            else:
+                img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
+                
+            st.markdown(f"""
+            <div class='img-preview-container'>
+                {img_html}
+            </div>
+            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
+            """, unsafe_allow_html=True)
 
-        if st.session_state.bg_removed_image is not None:
-            if st.button("Analisis Gambar", key="core_btn_anlz"):
-                # --- LOGIKA PREPROCESSING & PREDIKSI YANG DIPERBAIKI ---
-                segmented_np = np.array(st.session_state.bg_removed_image)
-                
-                # Preprocessing
-                img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-                kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                sharpened = cv2.filter2D(img_bgr, -1, kernel)
-                final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-                
-                img_resized = Image.fromarray(final_rgb).resize((224, 224))
-                img_array = np.array(img_resized).astype("float32")
-                # Gunakan preprocess_input bawaan MobileNet
-                img_input = preprocess_input(np.expand_dims(img_array, axis=0))
-                
-                # Prediksi menggunakan model dari session_state
-                if st.session_state.model is not None:
-                    prediction = st.session_state.model.predict(img_input)
-                    max_conf = np.max(prediction[0])
-                    best_idx = np.argmax(prediction[0])
-                    
-                    # Validasi
-                    if max_conf < 0.50:
-                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali.</div>"
-                        st.session_state.pred_class = "-"
-                        st.session_state.conf_text = "-"
-                    else:
-                        st.session_state.warn_html = ""
-                        st.session_state.pred_class = classes[best_idx]
-                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+        st.markdown("<div class='button-group'>", unsafe_allow_html=True)
+        if st.session_state.bg_removed_image is None:
+            if st.button("Hapus Latar Belakang", key="core_btn_rm"):
+                with st.spinner(""):
+            
+                    output_img = remove(image)
+            
+                    bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                    bg_white.paste(output_img, mask=output_img.split()[3])
+            
+                    st.session_state.bg_removed_image = bg_white
+            
                 st.rerun()
+        else:
+            c_b1, c_b2 = st.columns(2)
+            with c_b1:
+                if st.button("Proses Ulang Gambar", key="core_btn_reset"):
+                    st.session_state.bg_removed_image = None
+                    st.session_state.pred_class = "-"
+                    st.session_state.conf_text = "-"
+                    st.session_state.warn_html = ""
+                    st.rerun()
+            with c_b2:
+                if st.button("Analisis Gambar", key="core_btn_anlz"):
+                    with st.spinner(""):
+                
+                        segmented_np = np.array(st.session_state.bg_removed_image)
+                
+                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                
+                        final_processed = Image.fromarray(final_rgb)
+                        img_resized = final_processed.resize((224, 224))
+                        img_array = np.array(img_resized).astype("float32")
+                        
+                        # Menggunakan Preprocessing Manual MobileNet asli (Bukan / 255.0)
+                        img_preprocessed = preprocess_input(img_array)
+                        img_tensor = np.expand_dims(img_preprocessed, axis=0)
+                
+                        prediction = model.predict(img_tensor, verbose=0)
+                        probabilities = prediction[0]
+                        max_conf = np.max(probabilities)
+                    
+                        pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
+                        total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+                        
+                        if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
+                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
+                            st.session_state.pred_class = "-"
+                            st.session_state.conf_text = "-"
+                        else:
+                            st.session_state.warn_html = ""
+                            st.session_state.pred_class = classes[np.argmax(probabilities)]
+                            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                        st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tampilkan Hasil
-    if st.session_state.warn_html: st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
-    st.markdown(f"""<div class='result-box'><span class='result-label'>Jenis Gonggong :</span><span class='result-value'>{st.session_state.pred_class}</span></div>
-                    <div class='result-box'><span class='result-label'>Akurasi :</span><span class='result-value'>{st.session_state.conf_text}</span></div>""", unsafe_allow_html=True)
+    if st.session_state.warn_html:
+        st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
+
+    st.markdown(f"""
+    <div class='result-box' style='animation-delay: 0.1s;'>
+        <span class='result-label'>Jenis Gonggong :</span>
+        <span class='result-value'>{st.session_state.pred_class}</span>
+    </div>
+    <div class='result-box' style='animation-delay: 0.2s;'>
+        <span class='result-label'>Tingkat Akurasi :</span>
+        <span class='result-value'>{st.session_state.conf_text}</span>
+    </div>
+    <div class='result-box-spacer'></div>
+    """, unsafe_allow_html=True)
 
 application_core()
+
 st.markdown("</div>", unsafe_allow_html=True) 
 
 st.markdown("""
