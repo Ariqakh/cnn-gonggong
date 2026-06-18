@@ -289,15 +289,27 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.models import load_model
-    # Coba load langsung dengan compile=False
-    # Pastikan file model_gonggong.h5 ada di root folder aplikasi Anda
+    import keras
+    from tensorflow.keras.applications.mobilenet import preprocess_input
+
+    # 1. Daftarkan fungsi secara manual ke dalam registri Keras
+    # Ini memaksa Keras untuk mengenali 'preprocess_input'
+    @keras.saving.register_keras_serializable()
+    def custom_preprocess(x):
+        return preprocess_input(x)
+
+    # 2. Definisikan custom_objects dengan fungsi yang sudah terdaftar
+    custom_objects = {'preprocess_input': custom_preprocess}
+
+    # 3. Load model dengan menangani error agar lebih informatif
     try:
-        model = load_model("model_gonggong.h5", compile=False)
+        model = load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
         return model
     except Exception as e:
-        st.error(f"Error loading model: {e}")
-        return None
-    
+        st.error(f"Gagal memuat model: {e}")
+        # Tambahan: Jika error ini muncul, biasanya karena model disimpan dengan 
+        # versi Keras yang jauh berbeda. 
+        return None    
 
 model = load_my_model()
 
