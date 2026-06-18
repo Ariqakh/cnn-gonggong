@@ -286,7 +286,6 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from tensorflow.keras.applications.mobilenet import preprocess_input
     
     # 1. SETUP MODEL
     # Mendaftarkan preprocess_input ke dalam custom_objects
