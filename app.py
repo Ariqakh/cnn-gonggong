@@ -6,6 +6,7 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
+from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.mobilenet import preprocess_input
 
 st.set_page_config(
@@ -286,36 +287,17 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from tensorflow.keras.models import load_model
-    import tensorflow as tf
-    
-    # 1. Pastikan tidak ada custom_objects yang memicu error serialisasi
-    # Kita load model secara mentah (raw)
     try:
-        # Menghapus custom_objects sering kali menyelesaikan TypeError di operation.py
-        # Jika model butuh fungsi khusus, kita harus menggunakan alternatif lain
-        model = load_model("model_gonggong.h5", compile=False)
-        return model
+        return load_model("model_gonggong.h5", compile=False)
     except Exception as e:
-        st.error("Gagal memuat model secara standar. Mencoba teknik alternatif...")
-        
-        # 2. Teknik Alternatif: Jika load_model gagal, kita coba load bobot saja
-        # Ini mengasumsikan model Anda adalah arsitektur MobileNet standar
-        from tensorflow.keras.applications import MobileNet
-        from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
-        from tensorflow.keras.models import Model
-        
-        base_model = MobileNet(weights=None, include_top=False, input_shape=(224, 224, 3))
-        x = base_model.output
-        x = GlobalAveragePooling2D()(x)
-        predictions = Dense(4, activation='softmax')(x)
-        model = Model(inputs=base_model.input, outputs=predictions)
-        
-        # Load bobot yang ada di file .h5
-        model.load_weights("model_gonggong.h5")
-        return model
+        st.error(f"Error memuat model: {e}")
+        return None
 
-    model = load_my_model()
+# Pastikan model dimuat ke session_state agar bisa diakses kapan saja
+if "model" not in st.session_state:
+    st.session_state.model = load_my_model()
+
+model = load_my_model()
     
 if "model" not in st.session_state:
     st.session_state.model = load_my_model()
