@@ -286,12 +286,16 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from keras.models import load_model as keras_load_model
-        # Daftarkan preprocess_input ke custom_objects agar sinkron
-        custom_objs = {'preprocess_input': preprocess_input}
-        return keras_load_model("model_gonggong.h5", custom_objects=custom_objs, compile=False)
+    from tensorflow.keras.applications.mobilenet import preprocess_input
+    
+    # 1. SETUP MODEL
+    # Mendaftarkan preprocess_input ke dalam custom_objects
+    custom_objects = {'preprocess_input': preprocess_input}
+    
+    # Gunakan custom_objects saat memuat model
+    model = load_model('model_gonggong.h5', custom_objects=custom_objects, compile=False)
 
-    model = load_my_model()
+model = load_my_model()
 
 classes = [
     'Canarium Mutabile', 
