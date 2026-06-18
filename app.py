@@ -1,7 +1,6 @@
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.models import load_model as keras_load_model
-from tensorflow.keras.applications.mobilenet import preprocess_input
 from PIL import Image
 import numpy as np
 import cv2
@@ -313,9 +312,8 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    # Integrasi Kunci Kesembuhan: Daftarkan preprocess_input ke custom_objects
-    custom_objects = {'preprocess_input': preprocess_input}
-    return keras_load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
+    # Load model 64% dengan compile=False agar terhindar dari konflik optimizer error
+    return keras_load_model("model_gonggong.h5", compile=False)
 
 model = load_my_model()
 
@@ -429,7 +427,6 @@ def application_core():
 
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
-            # SOLUSI 2: Menyediakan dua tombol agar user bisa langsung menganalisis gambar asli jika rembg bermasalah
             c_init1, c_init2 = st.columns(2)
             with c_init1:
                 if st.button("Hapus Latar Belakang", key="core_btn_rm"):
@@ -442,20 +439,20 @@ def application_core():
             with c_init2:
                 if st.button("Analisis Gambar Asli", key="core_btn_anlz_raw"):
                     with st.spinner(""):
-                        # SOLUSI 1 & 2: Tanpa Filter Ketajaman OpenCV & Menggunakan Gambar Asli secara Utuh
+                        # Pemrosesan gambar murni tanpa merusak nilai piksel asli
                         img_raw_rgb = image.convert('RGB')
                         img_resized = img_raw_rgb.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32")
                         
-                        img_preprocessed = preprocess_input(img_array)
-                        img_tensor = np.expand_dims(img_preprocessed, axis=0)
+                        # Skala pembagian 255.0 murni untuk model dasar 64% Anda
+                        img_array = np.array(img_resized).astype("float32") / 255.0
+                        img_tensor = np.expand_dims(img_array, axis=0)
                 
                         prediction = model.predict(img_tensor, verbose=0)
                         probabilities = prediction[0]
                         max_conf = np.max(probabilities)
                         
-                        if max_conf < 0.50:
-                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
+                        if max_conf < 0.35: # Diturunkan ke 35% agar model 64% tidak terlalu ketat memblokir data gambar asli
+                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Objek kurang dikenali. Coba ganti sudut foto Gonggong yang lebih jelas.</div>"
                             st.session_state.pred_class = "-"
                             st.session_state.conf_text = "-"
                         else:
@@ -477,14 +474,13 @@ def application_core():
                     with st.spinner(""):
                         segmented_np = np.array(st.session_state.bg_removed_image)
                 
-                        # SOLUSI 1: Menghapus total modul kernel filter2D OpenCV yang mengacaukan ekstraksi fitur warna asli.
-                        # Gambar diambil langsung murni dari konversi RGB hasil rembg
+                        # Ekstraksi gambar murni hasil segmentasi rembg tanpa OpenCV sharpening
                         final_processed = Image.fromarray(segmented_np)
                         img_resized = final_processed.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32")
                         
-                        img_preprocessed = preprocess_input(img_array)
-                        img_tensor = np.expand_dims(img_preprocessed, axis=0)
+                        # Normalisasi piksel 0-1 agar sinkron dengan struktur model awal Anda
+                        img_array = np.array(img_resized).astype("float32") / 255.0
+                        img_tensor = np.expand_dims(img_array, axis=0)
                 
                         prediction = model.predict(img_tensor, verbose=0)
                         probabilities = prediction[0]
@@ -493,7 +489,7 @@ def application_core():
                         pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                         total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
                         
-                        if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
+                        if max_conf < 0.35 or (pure_white / total_pixels) > 0.98:
                             st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
                             st.session_state.pred_class = "-"
                             st.session_state.conf_text = "-"
