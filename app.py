@@ -247,17 +247,27 @@ div[data-testid="stSpinner"] > div {
     font-size: 18px;
 }
 
-.warning-box {
-    background-color: #FFDADA;
-    color: #CC0000;
-    padding: 10px;
-    border-radius: 15px;
-    font-size: 13px;
-    margin-bottom: 10px;
-    font-weight: 600;
+.diagnose-container {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px;
+    margin-top: 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+.diagnose-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0b1d3a;
+    margin-bottom: 12px;
+}
+.diagnose-item {
+    font-size: 14px;
+    color: #334155;
+    margin-bottom: 6px;
 }
 
-.result-box-spacer { height: 100px; width: 100%; }
+.result-box-spacer { height: 60px; width: 100%; }
 .page-wrapper { display: flex !important; flex-direction: column !important; flex-grow: 1 !important; min-height: 100% !important; }
 .white-footer-canvas { position: relative !important; margin-top: auto !important; padding: 20px 0px !important; display: flex !important; justify-content: center !important; align-items: center !important; width: 100% !important; }
 .footer-text { text-align: center; color: #1a364a; font-size: 14px; font-weight: 500; line-height: 1.5; margin: 0 auto; }
@@ -313,7 +323,6 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    # DAFTARKAN KEMBALI CUSTOM OBJECTS AGAR LAMBDA LAYER TIDAK ERROR TYPEERROR
     custom_objects = {
         'preprocess_input': preprocess_input
     }
@@ -382,8 +391,8 @@ def application_core():
         st.session_state.pred_class = "-"
     if "conf_text" not in st.session_state:
         st.session_state.conf_text = "-"
-    if "warn_html" not in st.session_state:
-        st.session_state.warn_html = ""
+    if "probabilities" not in st.session_state:
+        st.session_state.probabilities = None
 
     uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -391,7 +400,7 @@ def application_core():
         st.session_state.bg_removed_image = None
         st.session_state.pred_class = "-"
         st.session_state.conf_text = "-"
-        st.session_state.warn_html = ""
+        st.session_state.probabilities = None
         
         st.markdown("""
         <div class='img-preview-container'>
@@ -443,11 +452,9 @@ def application_core():
             with c_init2:
                 if st.button("Analisis Gambar Asli", key="core_btn_anlz_raw"):
                     with st.spinner(""):
-                        # Pemrosesan gambar murni tanpa merusak nilai piksel asli
                         img_raw_rgb = image.convert('RGB')
                         img_resized = img_raw_rgb.resize((224, 224))
                         
-                        # Skala pembagian 255.0 murni untuk model dasar 64% Anda
                         img_array = np.array(img_resized).astype("float32") / 255.0
                         img_tensor = np.expand_dims(img_array, axis=0)
                 
@@ -455,14 +462,10 @@ def application_core():
                         probabilities = prediction[0]
                         max_conf = np.max(probabilities)
                         
-                        if max_conf < 0.35: # Diturunkan ke 35% agar model 64% tidak terlalu ketat memblokir data gambar asli
-                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Objek kurang dikenali. Coba ganti sudut foto Gonggong yang lebih jelas.</div>"
-                            st.session_state.pred_class = "-"
-                            st.session_state.conf_text = "-"
-                        else:
-                            st.session_state.warn_html = ""
-                            st.session_state.pred_class = classes[np.argmax(probabilities)]
-                            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                        # PEMBATAS DIHAPUS TOTAL AGAR HASIL ASLI MODEL LANGSUNG KELUAR
+                        st.session_state.pred_class = classes[np.argmax(probabilities)]
+                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                        st.session_state.probabilities = probabilities.tolist()
                     st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
@@ -471,18 +474,15 @@ def application_core():
                     st.session_state.bg_removed_image = None
                     st.session_state.pred_class = "-"
                     st.session_state.conf_text = "-"
-                    st.session_state.warn_html = ""
+                    st.session_state.probabilities = None
                     st.rerun()
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
                     with st.spinner(""):
                         segmented_np = np.array(st.session_state.bg_removed_image)
-                
-                        # Ekstraksi gambar murni hasil segmentasi rembg tanpa OpenCV sharpening
                         final_processed = Image.fromarray(segmented_np)
                         img_resized = final_processed.resize((224, 224))
                         
-                        # Normalisasi piksel 0-1 agar sinkron dengan struktur model awal Anda
                         img_array = np.array(img_resized).astype("float32") / 255.0
                         img_tensor = np.expand_dims(img_array, axis=0)
                 
@@ -490,22 +490,12 @@ def application_core():
                         probabilities = prediction[0]
                         max_conf = np.max(probabilities)
                     
-                        pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
-                        total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
-                        
-                        if max_conf < 0.35 or (pure_white / total_pixels) > 0.98:
-                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
-                            st.session_state.pred_class = "-"
-                            st.session_state.conf_text = "-"
-                        else:
-                            st.session_state.warn_html = ""
-                            st.session_state.pred_class = classes[np.argmax(probabilities)]
-                            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                        # PEMBATAS DIHAPUS TOTAL
+                        st.session_state.pred_class = classes[np.argmax(probabilities)]
+                        st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                        st.session_state.probabilities = probabilities.tolist()
                         st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
-    if st.session_state.warn_html:
-        st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class='result-box' style='animation-delay: 0.1s;'>
@@ -516,8 +506,18 @@ def application_core():
         <span class='result-label'>Tingkat Akurasi :</span>
         <span class='result-value'>{st.session_state.conf_text}</span>
     </div>
-    <div class='result-box-spacer'></div>
     """, unsafe_allow_html=True)
+
+    # PANEL DIAGNOSA: Menampilkan isi seluruh tebakan kelas model di bawah kotak hasil utama
+    if st.session_state.probabilities is not None:
+        st.markdown("<div class='diagnose-container'>", unsafe_allow_html=True)
+        st.markdown("<div class='diagnose-title'>🔍 Distribusi Probabilitas Model Asli:</div>", unsafe_allow_html=True)
+        for idx, name in enumerate(classes):
+            val = st.session_state.probabilities[idx] * 100
+            st.markdown(f"<div class='diagnose-item'>• <b>{name}</b>: {val:.2f}%</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown("<div class='result-box-spacer'></div>", unsafe_allow_html=True)
 
 application_core()
 
