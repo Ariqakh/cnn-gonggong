@@ -287,6 +287,7 @@ div[data-testid="stSpinner"] > div {
 @st.cache_resource
 def load_my_model():
     from keras.layers import Dense, InputLayer, Dropout
+    from tensorflow.keras.applications.mobilenet import preprocess_input
 
     original_dense = Dense.from_config
     @classmethod
@@ -312,8 +313,11 @@ def load_my_model():
         return original_dropout(config)
     Dropout.from_config = custom_dropout
 
-    # Load model 64% dengan compile=False agar terhindar dari konflik optimizer error
-    return keras_load_model("model_gonggong.h5", compile=False)
+    # DAFTARKAN KEMBALI CUSTOM OBJECTS AGAR LAMBDA LAYER TIDAK ERROR TYPEERROR
+    custom_objects = {
+        'preprocess_input': preprocess_input
+    }
+    return keras_load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
 
 model = load_my_model()
 
