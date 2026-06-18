@@ -376,14 +376,11 @@ st.markdown("<div class='main-card'>", unsafe_allow_html=True)
 
 @st.fragment
 def application_core():
-    if "bg_removed_image" not in st.session_state:
-        st.session_state.bg_removed_image = None
-    if "pred_class" not in st.session_state:
-        st.session_state.pred_class = "-"
-    if "conf_text" not in st.session_state:
-        st.session_state.conf_text = "-"
-    if "warn_html" not in st.session_state:
-        st.session_state.warn_html = ""
+    # Inisialisasi State
+    if "bg_removed_image" not in st.session_state: st.session_state.bg_removed_image = None
+    if "pred_class" not in st.session_state: st.session_state.pred_class = "-"
+    if "conf_text" not in st.session_state: st.session_state.conf_text = "-"
+    if "warn_html" not in st.session_state: st.session_state.warn_html = ""
 
     uploaded_file = st.file_uploader("Upload", type=["jpg", "jpeg", "png"], label_visibility="collapsed")
 
@@ -392,132 +389,56 @@ def application_core():
         st.session_state.pred_class = "-"
         st.session_state.conf_text = "-"
         st.session_state.warn_html = ""
-        
-        st.markdown("""
-        <div class='img-preview-container'>
-            <span class='img-placeholder-text'>Gambar</span>
-        </div>
-        """, unsafe_allow_html=True)
     else:
         image = Image.open(uploaded_file)
+        # Tampilkan Gambar (logika kolom Anda)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            buf1 = BytesIO()
-            image.convert("RGB").save(buf1, format="JPEG")
-            img_str1 = base64.b64encode(buf1.getvalue()).decode()
-            st.markdown(f"""
-            <div class='img-preview-container'>
-                <img src="data:image/jpeg;base64,{img_str1}">
-            </div>
-            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Gambar Asli</div>
-            """, unsafe_allow_html=True)
-            
-        with col2:
-            if st.session_state.bg_removed_image is not None:
-                buf2 = BytesIO()
-                st.session_state.bg_removed_image.save(buf2, format="JPEG")
-                img_str2 = base64.b64encode(buf2.getvalue()).decode()
-                img_html = f'<img src="data:image/jpeg;base64,{img_str2}">'
-            else:
-                img_html = "<span class='img-placeholder-text'>Belum Diproses</span>"
-                
-            st.markdown(f"""
-            <div class='img-preview-container'>
-                {img_html}
-            </div>
-            <div style='text-align:center; font-weight:600; color:#0b1d3a; font-size:13px;'>Hasil Hapus Background</div>
-            """, unsafe_allow_html=True)
+        if st.button("Hapus Latar Belakang", key="core_btn_rm"):
+            output_img = remove(image)
+            bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+            bg_white.paste(output_img, mask=output_img.split()[3])
+            st.session_state.bg_removed_image = bg_white
+            st.rerun()
 
-        st.markdown("<div class='button-group'>", unsafe_allow_html=True)
-        if st.session_state.bg_removed_image is None:
-            if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-                with st.spinner(""):
-            
-                    output_img = remove(image)
-            
-                    bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-                    bg_white.paste(output_img, mask=output_img.split()[3])
-            
-                    st.session_state.bg_removed_image = bg_white
-            
-                st.rerun()
-        else:
-            c_b1, c_b2 = st.columns(2)
-            with c_b1:
-                if st.button("Proses Ulang Gambar", key="core_btn_reset"):
-                    st.session_state.bg_removed_image = None
-                    st.session_state.pred_class = "-"
-                    st.session_state.conf_text = "-"
-                    st.session_state.warn_html = ""
-                    st.rerun()
-            with c_b2:
-                if st.button("Analisis Gambar", key="core_btn_anlz"):
-                    with st.spinner(""):
+        if st.session_state.bg_removed_image is not None:
+            if st.button("Analisis Gambar", key="core_btn_anlz"):
+                # --- LOGIKA PREPROCESSING & PREDIKSI YANG DIPERBAIKI ---
+                segmented_np = np.array(st.session_state.bg_removed_image)
                 
-                        segmented_np = np.array(st.session_state.bg_removed_image)
+                # Preprocessing
+                img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
+                kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
+                sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
                 
-                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                        # Sebelum proses sharpening
-                        img_yuv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2YUV)
-                        img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0]) # Menyeimbangkan pencahayaan
-                        img_bgr_balanced = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
-                        
-                        # Lalu teruskan ke proses sharpening
-                        sharpened = cv2.filter2D(img_bgr_balanced, -1, kernel)
-                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
+                img_resized = Image.fromarray(final_rgb).resize((224, 224))
+                img_array = np.array(img_resized).astype("float32")
+                # Gunakan preprocess_input bawaan MobileNet
+                img_input = preprocess_input(np.expand_dims(img_array, axis=0))
                 
-                        final_processed = Image.fromarray(final_rgb)
-                        img_resized = final_processed.resize((224, 224))
-                        img_array = np.array(img_resized).astype("float32") / 255.0
-                        img_array = np.expand_dims(img_array, axis=0)
-                
-                        prediction = model.predict(img_input)
-                        confidences = prediction[0]
-                        best_idx = np.argmax(confidences)
-                        max_conf = confidences[best_idx]
-                        sorted_confs = np.sort(confidences)
-                        if (sorted_confs[-1] - sorted_confs[-2]) < 0.15: 
-                            st.warning("Model ragu-ragu antara dua jenis Gonggong. Coba atur pencahayaan atau sudut foto.")
-                        
-                        # Terapkan ambang batas yang lebih ketat
-                        if max_conf < 0.70: # Tingkatkan threshold
-                            st.session_state.pred_class = "Tidak dapat dipastikan"
-                        else:
-                            st.session_state.pred_class = class_names[best_idx]
-                                            
-                    pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
-                    total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
+                # Prediksi menggunakan model dari session_state
+                if st.session_state.model is not None:
+                    prediction = st.session_state.model.predict(img_input)
+                    max_conf = np.max(prediction[0])
+                    best_idx = np.argmax(prediction[0])
                     
-                    if max_conf < 0.50 or (pure_white / total_pixels) > 0.95:
-                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
+                    # Validasi
+                    if max_conf < 0.50:
+                        st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali.</div>"
                         st.session_state.pred_class = "-"
                         st.session_state.conf_text = "-"
                     else:
                         st.session_state.warn_html = ""
-                        st.session_state.pred_class = classes[np.argmax(prediction)]
+                        st.session_state.pred_class = classes[best_idx]
                         st.session_state.conf_text = f"{max_conf * 100:.2f} %"
-                    st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
+                st.rerun()
 
-    if st.session_state.warn_html:
-        st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
-
-    st.markdown(f"""
-    <div class='result-box' style='animation-delay: 0.1s;'>
-        <span class='result-label'>Jenis Gonggong :</span>
-        <span class='result-value'>{st.session_state.pred_class}</span>
-    </div>
-    <div class='result-box' style='animation-delay: 0.2s;'>
-        <span class='result-label'>Tingkat Akurasi :</span>
-        <span class='result-value'>{st.session_state.conf_text}</span>
-    </div>
-    <div class='result-box-spacer'></div>
-    """, unsafe_allow_html=True)
+    # Tampilkan Hasil
+    if st.session_state.warn_html: st.markdown(st.session_state.warn_html, unsafe_allow_html=True)
+    st.markdown(f"""<div class='result-box'><span class='result-label'>Jenis Gonggong :</span><span class='result-value'>{st.session_state.pred_class}</span></div>
+                    <div class='result-box'><span class='result-label'>Akurasi :</span><span class='result-value'>{st.session_state.conf_text}</span></div>""", unsafe_allow_html=True)
 
 application_core()
-
 st.markdown("</div>", unsafe_allow_html=True) 
 
 st.markdown("""
