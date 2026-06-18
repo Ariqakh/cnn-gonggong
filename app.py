@@ -285,34 +285,28 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from keras.models import load_model as keras_load_model
-    from keras.layers import Dense, InputLayer, Dropout
+    from keras.models import load_model
+    import keras
+    from tensorflow.keras.applications.mobilenet import preprocess_input
 
-    original_dense = Dense.from_config
-    @classmethod
-    def custom_dense(cls, config):
-        config.pop("quantization_config", None)
-        return original_dense(config)
-    Dense.from_config = custom_dense
+    # 1. Daftarkan fungsi secara manual ke dalam registri Keras
+    # Ini memaksa Keras untuk mengenali 'preprocess_input'
+    @keras.saving.register_keras_serializable()
+    def custom_preprocess(x):
+        return preprocess_input(x)
 
-    original_input = InputLayer.from_config
-    @classmethod
-    def custom_input(cls, config):
-        config.pop("batch_shape", None)
-        config.pop("optional", None)
-        if "batch_input_shape" not in config:
-            config["batch_input_shape"] = [None, 224, 224, 3]
-        return cls(**config)
-    InputLayer.from_config = custom_input
+    # 2. Definisikan custom_objects dengan fungsi yang sudah terdaftar
+    custom_objects = {'preprocess_input': custom_preprocess}
 
-    original_dropout = Dropout.from_config
-    @classmethod
-    def custom_dropout(cls, config):
-        config.pop("seed_generator", None)
-        return original_dropout(config)
-    Dropout.from_config = custom_dropout
-
-    return keras_load_model("model_gonggong.h5", compile=False)
+    # 3. Load model dengan menangani error agar lebih informatif
+    try:
+        model = load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
+        return model
+    except Exception as e:
+        st.error(f"Gagal memuat model: {e}")
+        # Tambahan: Jika error ini muncul, biasanya karena model disimpan dengan 
+        # versi Keras yang jauh berbeda. 
+        return None
 
 model = load_my_model()
 
