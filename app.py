@@ -288,8 +288,24 @@ div[data-testid="stSpinner"] > div {
 # LOAD MODEL DENGAN KONFIGURASI CUSTOM
 @st.cache_resource
 def load_my_model():
-    custom_objects = {'preprocess_input': preprocess_input}
-    return load_model('model_gonggong.h5', custom_objects=custom_objects, compile=False)
+    # 1. Import model MobileNet asli untuk membangun struktur
+    from tensorflow.keras.applications import MobileNet
+    from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+    from tensorflow.keras.models import Model
+
+    # 2. Bangun arsitektur yang SAMA PERSIS dengan saat training
+    # Asumsi: Anda menggunakan base MobileNet dengan tambahan layer di atasnya
+    base_model = MobileNet(weights=None, include_top=False, input_shape=(224, 224, 3))
+    x = base_model.output
+    x = GlobalAveragePooling2D()(x)
+    predictions = Dense(4, activation='softmax')(x) # 4 adalah jumlah kelas Anda
+    model = Model(inputs=base_model.input, outputs=predictions)
+
+    # 3. Load bobot (weights) saja, bukan seluruh model
+    # Jika model Anda disimpan sebagai .h5, gunakan load_weights
+    model.load_weights("model_gonggong.h5")
+    
+    return model
 
 model = load_my_model()
 
