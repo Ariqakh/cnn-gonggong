@@ -316,7 +316,10 @@ def load_my_model():
         return model
 
     model = load_my_model()
-
+    
+if "model" not in st.session_state:
+    st.session_state.model = load_my_model()
+    
 classes = [
     'Canarium Mutabile', 
     'Canarium Urseus', 
@@ -369,6 +372,7 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 st.markdown("<div class='main-card'>", unsafe_allow_html=True)
+
 
 @st.fragment
 def application_core():
