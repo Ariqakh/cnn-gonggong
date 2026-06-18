@@ -429,17 +429,40 @@ def application_core():
 
         st.markdown("<div class='button-group'>", unsafe_allow_html=True)
         if st.session_state.bg_removed_image is None:
-            if st.button("Hapus Latar Belakang", key="core_btn_rm"):
-                with st.spinner(""):
-            
-                    output_img = remove(image)
-            
-                    bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
-                    bg_white.paste(output_img, mask=output_img.split()[3])
-            
-                    st.session_state.bg_removed_image = bg_white
-            
-                st.rerun()
+            # SOLUSI 2: Menyediakan dua tombol agar user bisa langsung menganalisis gambar asli jika rembg bermasalah
+            c_init1, c_init2 = st.columns(2)
+            with c_init1:
+                if st.button("Hapus Latar Belakang", key="core_btn_rm"):
+                    with st.spinner(""):
+                        output_img = remove(image)
+                        bg_white = Image.new("RGB", output_img.size, (255, 255, 255))
+                        bg_white.paste(output_img, mask=output_img.split()[3])
+                        st.session_state.bg_removed_image = bg_white
+                    st.rerun()
+            with c_init2:
+                if st.button("Analisis Gambar Asli", key="core_btn_anlz_raw"):
+                    with st.spinner(""):
+                        # SOLUSI 1 & 2: Tanpa Filter Ketajaman OpenCV & Menggunakan Gambar Asli secara Utuh
+                        img_raw_rgb = image.convert('RGB')
+                        img_resized = img_raw_rgb.resize((224, 224))
+                        img_array = np.array(img_resized).astype("float32")
+                        
+                        img_preprocessed = preprocess_input(img_array)
+                        img_tensor = np.expand_dims(img_preprocessed, axis=0)
+                
+                        prediction = model.predict(img_tensor, verbose=0)
+                        probabilities = prediction[0]
+                        max_conf = np.max(probabilities)
+                        
+                        if max_conf < 0.50:
+                            st.session_state.warn_html = "<div class='warning-box'>⚠️ Gambar tidak dikenali sebagai Gonggong. Harap upload foto Gonggong yang jelas.</div>"
+                            st.session_state.pred_class = "-"
+                            st.session_state.conf_text = "-"
+                        else:
+                            st.session_state.warn_html = ""
+                            st.session_state.pred_class = classes[np.argmax(probabilities)]
+                            st.session_state.conf_text = f"{max_conf * 100:.2f} %"
+                    st.rerun()
         else:
             c_b1, c_b2 = st.columns(2)
             with c_b1:
@@ -452,19 +475,14 @@ def application_core():
             with c_b2:
                 if st.button("Analisis Gambar", key="core_btn_anlz"):
                     with st.spinner(""):
-                
                         segmented_np = np.array(st.session_state.bg_removed_image)
                 
-                        img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
-                        kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
-                        final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
-                
-                        final_processed = Image.fromarray(final_rgb)
+                        # SOLUSI 1: Menghapus total modul kernel filter2D OpenCV yang mengacaukan ekstraksi fitur warna asli.
+                        # Gambar diambil langsung murni dari konversi RGB hasil rembg
+                        final_processed = Image.fromarray(segmented_np)
                         img_resized = final_processed.resize((224, 224))
                         img_array = np.array(img_resized).astype("float32")
                         
-                        # Menggunakan Preprocessing Manual MobileNet asli (Bukan / 255.0)
                         img_preprocessed = preprocess_input(img_array)
                         img_tensor = np.expand_dims(img_preprocessed, axis=0)
                 
