@@ -455,7 +455,13 @@ def application_core():
                 
                         img_bgr = cv2.cvtColor(segmented_np, cv2.COLOR_RGB2BGR)
                         kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]])
-                        sharpened = cv2.filter2D(img_bgr, -1, kernel)
+                        # Sebelum proses sharpening
+                        img_yuv = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2YUV)
+                        img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0]) # Menyeimbangkan pencahayaan
+                        img_bgr_balanced = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+                        
+                        # Lalu teruskan ke proses sharpening
+                        sharpened = cv2.filter2D(img_bgr_balanced, -1, kernel)
                         final_rgb = cv2.cvtColor(sharpened, cv2.COLOR_BGR2RGB)
                 
                         final_processed = Image.fromarray(final_rgb)
@@ -467,6 +473,15 @@ def application_core():
                         confidences = prediction[0]
                         best_idx = np.argmax(confidences)
                         max_conf = confidences[best_idx]
+                        sorted_confs = np.sort(confidences)
+                        if (sorted_confs[-1] - sorted_confs[-2]) < 0.15: 
+                            st.warning("Model ragu-ragu antara dua jenis Gonggong. Coba atur pencahayaan atau sudut foto.")
+                        
+                        # Terapkan ambang batas yang lebih ketat
+                        if max_conf < 0.70: # Tingkatkan threshold
+                            st.session_state.pred_class = "Tidak dapat dipastikan"
+                        else:
+                            st.session_state.pred_class = class_names[best_idx]
                                             
                     pure_white = np.sum(np.all(segmented_np >= 245, axis=-1))
                     total_pixels = segmented_np.shape[0] * segmented_np.shape[1]
