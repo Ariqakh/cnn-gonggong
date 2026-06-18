@@ -6,6 +6,7 @@ import cv2
 import base64
 from io import BytesIO
 from rembg import remove
+from tensorflow.keras.applications.mobilenet import preprocess_input
 
 st.set_page_config(
     page_title="Klasifikasi Jenis Gonggong",
@@ -285,30 +286,12 @@ div[data-testid="stSpinner"] > div {
 
 @st.cache_resource
 def load_my_model():
-    from keras.models import load_model
-    import keras
-    from tensorflow.keras.applications.mobilenet import preprocess_input
+    from keras.models import load_model as keras_load_model
+        # Daftarkan preprocess_input ke custom_objects agar sinkron
+        custom_objs = {'preprocess_input': preprocess_input}
+        return keras_load_model("model_gonggong.h5", custom_objects=custom_objs, compile=False)
 
-    # 1. Daftarkan fungsi secara manual ke dalam registri Keras
-    # Ini memaksa Keras untuk mengenali 'preprocess_input'
-    @keras.saving.register_keras_serializable()
-    def custom_preprocess(x):
-        return preprocess_input(x)
-
-    # 2. Definisikan custom_objects dengan fungsi yang sudah terdaftar
-    custom_objects = {'preprocess_input': custom_preprocess}
-
-    # 3. Load model dengan menangani error agar lebih informatif
-    try:
-        model = load_model("model_gonggong.h5", custom_objects=custom_objects, compile=False)
-        return model
-    except Exception as e:
-        st.error(f"Gagal memuat model: {e}")
-        # Tambahan: Jika error ini muncul, biasanya karena model disimpan dengan 
-        # versi Keras yang jauh berbeda. 
-        return None
-
-model = load_my_model()
+    model = load_my_model()
 
 classes = [
     'Canarium Mutabile', 
